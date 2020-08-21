@@ -1,0 +1,7 @@
+#include <iostream>
+
+int main(){
+
+std::cout << "SUP NERDS\n";
+return 0;
+}
