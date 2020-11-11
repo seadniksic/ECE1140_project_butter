@@ -30,9 +30,10 @@ public class Track_Model_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                if(this_TMBGUI == null || !this_TMBGUI.builder_Stage.isShowing()) {
+                if(this_TMBGUI == null) {
                     this_TMBGUI = new Track_Model_Builder_GUI();
                 }
+                this_TMBGUI.swap_to_Start_Scene();
             }
         };
         paramButton.setOnAction(event);
