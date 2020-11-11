@@ -9,9 +9,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Track_Model_Builder_GUI {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
@@ -97,7 +99,7 @@ public class Track_Model_Builder_GUI {
                 int lineIndex = param_ArrayList.size() - 1;
                 this_TMBD.this_Track.add_Line(new Line(lineIndex)); //TODO: Might need to keep track of indices here
 
-                Button newest_Line_Button = new Button("Edit Line Here");
+                Button newest_Line_Button = new Button(this_TMBD.this_Track.line_ArrayList.get(this_TMBD.this_Track.line_ArrayList.size() - 1).name);
                 param_ArrayList.add(param_ArrayList.size() - 1,newest_Line_Button);
                 swap_To_New_Track_Scene(param_ArrayList);
             }
@@ -118,6 +120,7 @@ public class Track_Model_Builder_GUI {
         Menu file_Menu = new Menu("File");
         MenuItem new_Track_MI = new MenuItem("New Track");
         MenuItem open_Track_MI = new MenuItem(("Open Track"));
+        MenuItem save_Track_MI = new MenuItem(("Save Track"));
         new_Track_MI.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) { //TODO: Override missing
                 FileChooser this_fileChooser = new FileChooser();
@@ -132,12 +135,22 @@ public class Track_Model_Builder_GUI {
                 }
             }
         });
-        open_Track_MI.setOnAction(new EventHandler<ActionEvent>() {
+        open_Track_MI.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent actionEvent) {
-                System.out.println("Success!");
+                FileChooser this_fileChooser = new FileChooser();
+                this_fileChooser.setTitle("Open Track");
+                this_fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Documents", "*.txt"));
+                File chosen_File = this_fileChooser.showOpenDialog(null);
+                write_Text_File_To_Track_Data(chosen_File);
             }
         });
-        file_Menu.getItems().addAll(new_Track_MI, open_Track_MI);
+        save_Track_MI.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                write_Track_Data_To_Text_File();
+            }
+        });
+        file_Menu.getItems().addAll(new_Track_MI, open_Track_MI, save_Track_MI);
         param_MenuBar.getMenus().add(file_Menu);
     }
     private void saveTextToFile(String param_String, File param_File){
@@ -148,6 +161,65 @@ public class Track_Model_Builder_GUI {
         }catch(IOException e){
             System.out.println("Darn");
         }
+    }
+    private void write_Track_Data_To_Text_File(){
+        // If the track model data has been set
+        if(this_TMBD != null){
+            String output = "";
+
+            // Writing track lines to string
+            for(int i = 0; i < this_TMBD.this_Track.line_ArrayList.size(); i++){
+                output += "L: " + this_TMBD.this_Track.line_ArrayList.get(i).index;
+                output += (i != this_TMBD.this_Track.line_ArrayList.size() - 1 ? "\n" : "");
+            }
+
+            // Write string to text file
+            saveTextToFile(output, this_TMBD.this_File);
+        }
+    }
+    private void write_Text_File_To_Track_Data(File param_File){
+        // Start with a fresh data model
+        this_TMBD = new Track_Model_Builder_Data(param_File, param_File.getName()); //TODO: See if this is actually right
+
+        // Read information on file
+        try{
+            Scanner this_Scanner = new Scanner(param_File);
+
+            // First scan to write data
+            while(this_Scanner.hasNextLine()){
+                String next_Line = this_Scanner.nextLine();
+                if(next_Line.substring(0, 3).equals("L: ")){
+                    // Update lines
+                    System.out.println(next_Line);
+                    this_TMBD.this_Track.add_Line(new Line(Integer.parseInt(String.valueOf(next_Line.charAt(3)))));
+                    // TODO: Iterate though sub-text under line until next line is met
+
+                }
+            }
+
+            // Create buttons based off how many lines are now in the track
+            ArrayList<Button> line_Button_ArrayList = new ArrayList<Button>();
+
+            // Add the add line button first
+            Button add_Line_Button = new Button("Add Line");
+            line_Button_ArrayList.add(add_Line_Button);
+
+            // Add the line buttons while mapping both the new line button and add line button every time
+            for (Line line : this_TMBD.this_Track.line_ArrayList) {
+                Button line_Button = new Button(line.name);
+                line_Button_ArrayList.add(line_Button_ArrayList.size() - 1, line_Button);
+                map_Line_Button(line_Button, line.index);
+                map_Add_Line_Button(line_Button_ArrayList.get(line_Button_ArrayList.size() - 1), line_Button_ArrayList);
+                swap_To_New_Track_Scene(line_Button_ArrayList);
+            }
+
+        }catch (FileNotFoundException e){
+            System.out.println("ERROR! File Not Found!");
+        }
+
+
+        // Create and update objects from information on file
+        // Update GUI based on new objects in
     }
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
 
