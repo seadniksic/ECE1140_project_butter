@@ -9,6 +9,7 @@ public class Line {
     int num_Rows;
     int num_Columns;
     ArrayList<Integer> occupancies;
+    ArrayList<Integer> past_Occupancies;
     ArrayList<Double> distances;
     Block[][] block_Arr;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
@@ -17,6 +18,7 @@ public class Line {
         index = param_Index;
         name = "Line " + (index + 1);
         occupancies = new ArrayList<Integer>();
+        past_Occupancies = new ArrayList<Integer>();
         distances = new ArrayList<Double>();
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------

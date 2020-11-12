@@ -267,7 +267,7 @@ public class Track_Model_Builder_GUI {
                 for (Block[] blocks : line_Arr_List.get(i).block_Arr){
                     for (Block block : blocks) {
                         if(block.blockNumber != -1){
-                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.previous_Block_Number + ", " + block.isYard + "\n";
+                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.next_Block_Number_2 + ", " + block.previous_Block_Number + ", " + block.isYard + ", " + block.isSwitch + "\n";
                         }
                     }
                 }
@@ -362,8 +362,10 @@ public class Track_Model_Builder_GUI {
                     double extracted_Block_Length = Double.parseDouble(block_Line_Elements.get(3));
                     double extracted_Block_Grade = Double.parseDouble(block_Line_Elements.get(4));
                     int extracted_Next_Block_Number = Integer.parseInt(block_Line_Elements.get(5));
-                    int extracted_Previous_Block_Number = Integer.parseInt(block_Line_Elements.get(6));
-                    Boolean extracted_is_Yard = Boolean.parseBoolean(block_Line_Elements.get(7));
+                    int extracted_Next_Block_Number_2 = Integer.parseInt(block_Line_Elements.get(6));
+                    int extracted_Previous_Block_Number = Integer.parseInt(block_Line_Elements.get(7));
+                    Boolean extracted_is_Yard = Boolean.parseBoolean(block_Line_Elements.get(8));
+                    Boolean extracted_is_Switch = Boolean.parseBoolean(block_Line_Elements.get(9));
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
@@ -373,12 +375,17 @@ public class Track_Model_Builder_GUI {
                                 block.length = extracted_Block_Length;
                                 block.grade = extracted_Block_Grade;
                                 block.next_Block_Number = extracted_Next_Block_Number;
+                                block.next_Block_Number_2 = extracted_Next_Block_Number_2;
                                 block.previous_Block_Number = extracted_Previous_Block_Number;
                                 block.isYard = extracted_is_Yard;
+                                block.isSwitch = extracted_is_Switch;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
                                     block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
                                     if(block.isYard){
                                         block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Mustard"));
+                                    }
+                                    if(block.isSwitch){
+                                        block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Blue"));
                                     }
                                 }
                             }

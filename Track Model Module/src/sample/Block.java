@@ -19,6 +19,11 @@ public class Block {
     // Options for Yard Blocks Only
     Boolean isYard;
 
+    // Options for Switches only
+    Boolean isSwitch;
+    int next_Block_Number_2;
+    Boolean is_Switched;
+
     Block_GUI this_Block_GUI;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Block(int param_X, int param_Y){
@@ -35,6 +40,10 @@ public class Block {
         previous_Block_Number = -1;
 
         isYard = false;
+
+        isSwitch = false;
+        next_Block_Number_2 = -1;
+        is_Switched = false;
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
@@ -53,6 +62,9 @@ public class Block {
             this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
             if(isYard){
                 this_Block_GUI.changeColor(Block_GUI.color_Map.get("Mustard"));
+            }
+            if(isSwitch){
+                this_Block_GUI.changeColor(Block_GUI.color_Map.get("Blue"));
             }
         }
 

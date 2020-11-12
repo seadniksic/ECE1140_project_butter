@@ -36,8 +36,10 @@ public class Block_GUI {
     TextField grade_TF;
     TextField set_Next_TF;
     TextField set_Previous_TF;
+    TextField set_Next_2_TF;
 
     CheckBox is_Yard_CheckBox;
+    CheckBox is_Switch_CheckBox;
 
     Stage block_Stage;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
@@ -95,14 +97,21 @@ public class Block_GUI {
                 parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
                 parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
                 parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
+                parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
                 parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
                 parent_Block.isYard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
+                parent_Block.isSwitch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
 
+                //TODO: Only change color if the block number is not -1, (declared)
                 if(parent_Block.blockNumber != -1){
                     changeColor(color_Map.get("Green"));
-                }
-                if(parent_Block.isYard){
-                    changeColor(color_Map.get("Mustard"));
+
+                    if(parent_Block.isYard){
+                        changeColor(color_Map.get("Mustard"));
+                    }
+                    if(parent_Block.isSwitch){
+                        changeColor(color_Map.get("Blue"));
+                    }
                 }
                 block_Stage.close();
             }
@@ -117,15 +126,18 @@ public class Block_GUI {
         is_Yard_CheckBox = new CheckBox("Yard");
         is_Yard_CheckBox.setSelected(parent_Block.isYard);
 
+        is_Switch_CheckBox = new CheckBox("Switch");
+        is_Switch_CheckBox.setSelected(parent_Block.isSwitch);
+
         Button save_Button = new Button("Save and Close");
         map_Save_Button(save_Button);
 
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Next_HBox(), return_Set_Previous_HBox(), is_Yard_CheckBox, save_Button);
+        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Next_HBox(), return_Set_Next_2_HBox(), return_Set_Previous_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, save_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
-        return new Scene(this_VBox, 500, 400);
+        return new Scene(this_VBox, 500, 600);
     }
     private void summon_Block_Editor(){
         block_Stage.setScene(return_Block_Editor_Scene());
@@ -177,6 +189,15 @@ public class Block_GUI {
         set_Next_HBox.setAlignment(Pos.CENTER);
 
         return set_Next_HBox;
+    }
+    private HBox return_Set_Next_2_HBox(){
+        Label set_Next_2_Label = new Label("Next Block 2 (Switches Only): ");
+        set_Next_2_TF = new TextField(String.valueOf(parent_Block.next_Block_Number_2));
+        HBox set_Next_2_HBox = new HBox();
+        set_Next_2_HBox.getChildren().addAll(set_Next_2_Label, set_Next_2_TF);
+        set_Next_2_HBox.setAlignment(Pos.CENTER);
+
+        return set_Next_2_HBox;
     }
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous: ");
