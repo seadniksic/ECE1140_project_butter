@@ -10,7 +10,6 @@ public class Main extends Application {
         Track_Model_GUI this_Track_Model_GUI = new Track_Model_GUI();
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }

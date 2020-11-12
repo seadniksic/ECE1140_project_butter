@@ -48,6 +48,7 @@ public class Track_Model_GUI {
                 if(this_TMMGUI == null || !this_TMMGUI.murphy_Stage.isShowing()) {
                     this_TMMGUI = new Track_Model_Murphy_GUI();
                 }
+                this_TMMGUI.swap_to_Start_Scene();
             }
         };
         paramButton.setOnAction(event);

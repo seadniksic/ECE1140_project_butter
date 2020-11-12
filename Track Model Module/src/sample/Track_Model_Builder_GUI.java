@@ -143,7 +143,6 @@ public class Track_Model_Builder_GUI {
 
         return new Scene(this_VBox, 500, 200);
     }
-
     private void map_Add_Line_Button(Button param_Button, ArrayList param_ArrayList){
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
@@ -268,7 +267,7 @@ public class Track_Model_Builder_GUI {
                 for (Block[] blocks : line_Arr_List.get(i).block_Arr){
                     for (Block block : blocks) {
                         if(block.blockNumber != -1){
-                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + "\n";
+                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.previous_Block_Number + ", " + block.isYard + "\n";
                         }
                     }
                 }
@@ -360,14 +359,27 @@ public class Track_Model_Builder_GUI {
                     // Assign elements from text file to data
                     String extracted_Section = block_Line_Elements.get(1);
                     int extracted_Block_Num = Integer.parseInt(block_Line_Elements.get(2));
+                    double extracted_Block_Length = Double.parseDouble(block_Line_Elements.get(3));
+                    double extracted_Block_Grade = Double.parseDouble(block_Line_Elements.get(4));
+                    int extracted_Next_Block_Number = Integer.parseInt(block_Line_Elements.get(5));
+                    int extracted_Previous_Block_Number = Integer.parseInt(block_Line_Elements.get(6));
+                    Boolean extracted_is_Yard = Boolean.parseBoolean(block_Line_Elements.get(7));
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
                             if(block.x_Coord == Integer.parseInt(x_Coord_S) && block.y_Coord == Integer.parseInt(y_Coord_S)){
                                 block.section = extracted_Section;
                                 block.blockNumber = extracted_Block_Num;
+                                block.length = extracted_Block_Length;
+                                block.grade = extracted_Block_Grade;
+                                block.next_Block_Number = extracted_Next_Block_Number;
+                                block.previous_Block_Number = extracted_Previous_Block_Number;
+                                block.isYard = extracted_is_Yard;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
-                                    block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Red"));
+                                    block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
+                                    if(block.isYard){
+                                        block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Mustard"));
+                                    }
                                 }
                             }
                         }
