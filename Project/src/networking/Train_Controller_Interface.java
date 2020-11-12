@@ -21,4 +21,8 @@ public interface Train_Controller_Interface extends Remote{
     //public List get_Train_Controller_List() throws RemoteException;
 
     public void set_Commanded_Speed_Authority(int index, int speed, int auth) throws RemoteException, InterruptedException;
+
+    public void update_Time(double time);
+
+    public void update_E_Brake(int index, boolean b) throws RemoteException;
 }

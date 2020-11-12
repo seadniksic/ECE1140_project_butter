@@ -29,10 +29,12 @@ public class Network extends Train_Model_Catalogue {
 
             // (here we are exporting the remote object to the stub)
             Train_Model_Interface stub = (Train_Model_Interface) UnicastRemoteObject.exportObject(server_Object, 1400);
+            //Train_Model_Interface stub2 = (Train_Model_Interface) UnicastRemoteObject.exportObject(server_Object, 1399);
 
             // Binding the remote object (stub) in the registry
             Registry registry = LocateRegistry.createRegistry(1400);
             registry.rebind("Train_Model_Interface", stub);
+            //registry.rebind("Train_Model_Interface", stub2);
 
             System.err.println("Server ready");
             serving = true;

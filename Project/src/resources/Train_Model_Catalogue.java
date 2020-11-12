@@ -20,7 +20,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         Train_Model new_Model = new Train_Model(cars, train_Total);
         trains.add(new_Model);
         name_List.add("Train " + (train_Total));
-        //create_Controller(cars);
+        create_Controller(cars);
         train_Total += 1;
     }
 
@@ -44,7 +44,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     }
 
     public static void test_Send_Speed_Authority(int train_Num, int speed, int authority, double grade) throws RemoteException, InterruptedException {
-        //trains.get(train_Num).send_Speed_Authority(speed, authority);
+        trains.get(train_Num).send_Speed_Authority(speed, authority, grade);
     }
 
     //Meyers calls this function in a loop
@@ -73,7 +73,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         trains.get(train_Num).set_Brake_Status(state);
     }
 
-    public void set_Emergency_Brake_Status(int train_Num, boolean state) {
+    public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException {
         trains.get(train_Num).set_Emergency_Brake_Status(state);
     }
 
