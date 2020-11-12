@@ -14,6 +14,8 @@ public class Block {
     int next_Block_Number;
     int previous_Block_Number;
 
+    Boolean isOccupied = false;
+
     // Options for Yard Blocks Only
     Boolean isYard;
 
@@ -38,5 +40,21 @@ public class Block {
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
     public void set_Next(int param_Next_Block_Number){
         next_Block_Number = param_Next_Block_Number;
+    }
+
+    // Commands from Train Model
+
+    // Commands from Track Controller
+    public void set_Occupancy(Boolean param_Is_Occupied){
+        isOccupied = param_Is_Occupied;
+        if(isOccupied){
+            this_Block_GUI.changeColor(Block_GUI.color_Map.get("Red"));
+        }else{
+            this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
+            if(isYard){
+                this_Block_GUI.changeColor(Block_GUI.color_Map.get("Mustard"));
+            }
+        }
+
     }
 }

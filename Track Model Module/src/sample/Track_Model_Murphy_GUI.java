@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Track_Model_Murphy_GUI {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
@@ -75,7 +76,7 @@ public class Track_Model_Murphy_GUI {
         configureMenuBar(start_MenuBar);
 
         if(this_TMBD.this_File != null){
-            description_label = new Label("Editing Line: " + (this_TMBD.this_Track.get_Line_At_Index(param_Line_Index).index + 1));
+            description_label = new Label("Viewing Line: " + (this_TMBD.this_Track.get_Line_At_Index(param_Line_Index).index + 1));
         }
 
         System.out.println(param_GridPane.getColumnCount());
@@ -83,8 +84,7 @@ public class Track_Model_Murphy_GUI {
         // Update Gridpane
         param_GridPane = new GridPane();
         Block[][] line_Block_Arr = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr;
-//        System.out.println("Length: " + line_Block_Arr.length);
-//        System.out.println("Width: " + line_Block_Arr[0].length);
+
         for(int i = 0; i < line_Block_Arr.length; i++){
             for(int j = 0; j < line_Block_Arr[i].length; j++){
                 param_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
@@ -99,8 +99,11 @@ public class Track_Model_Murphy_GUI {
         Button return_To_Track_Button = new Button("Go Back");
         map_Return_To_Track_Button(return_To_Track_Button);
 
+        Button simulate_Button = new Button("Simulate");
+        map_Simulate_Button(simulate_Button, canvas_GP);
+
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP);
+        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP, simulate_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -124,6 +127,38 @@ public class Track_Model_Murphy_GUI {
         };
         param_Button.setOnAction(event);
     }
+    private void map_Simulate_Button(Button param_Button, GridPane param_GridPane){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                // The simulation will run here when clicked
+                System.out.println("Simulation");
+                System.out.println("Spawning Train...");
+                spawn_Train_In_Yard(0,1);
+
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                swap_To_Line_Scene(0, param_GridPane);
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Updating Occupancy");
+                update_Occupancy(0, 0, 20.0);
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                swap_To_Line_Scene(0, param_GridPane);
+            }
+        };
+        param_Button.setOnAction(event);
+    }
 
     private void configureMenuBar(MenuBar param_MenuBar){
         Menu file_Menu = new Menu("File");
@@ -141,15 +176,6 @@ public class Track_Model_Murphy_GUI {
 
         file_Menu.getItems().addAll(open_Track_MI);
         param_MenuBar.getMenus().add(file_Menu);
-    }
-    private void saveTextToFile(String param_String, File param_File){
-        try{
-            PrintWriter this_printWriter = new PrintWriter(param_File);
-            this_printWriter.println(param_String);
-            this_printWriter.close();
-        }catch(IOException e){
-            System.out.println("Darn");
-        }
     }
     private void write_Text_File_To_Track_Data(File param_File){
         // Start with a fresh data model
@@ -280,28 +306,68 @@ public class Track_Model_Murphy_GUI {
     }
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
 
-    //*******************************************************************************************************************************************************
-    // Opens the first scene of the stage                                                                                                                   *
-    //*******************************************************************************************************************************************************
     public void swap_to_Start_Scene(){
         murphy_Stage.setScene(return_Start_Scene());
         murphy_Stage.show();
     }
-    //*******************************************************************************************************************************************************
-    // Changes the scene when a new track is created                                                                                                        *
-    //*******************************************************************************************************************************************************
     public void swap_To_New_Track_Scene(ArrayList<Button> param_Line_Button_ArrayList){
         if(this_TMBD.this_File != null){
             murphy_Stage.setScene(return_New_Track_Scene(param_Line_Button_ArrayList));
             murphy_Stage.show();
         }
     }
-    //*******************************************************************************************************************************************************
-    // Changes the scene when a line is selected                                                                                                            *
-    //*******************************************************************************************************************************************************
     public void swap_To_Line_Scene(int param_Line_Index, GridPane param_GridPane){
         murphy_Stage.setScene(return_Line_Scene(param_Line_Index, param_GridPane));
         murphy_Stage.show();
+    }
+    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number){
+        Line working_Line = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index);
+        // Find the block in the coordinate plane and turn its occupancy on
+        for (Block[] blocks : working_Line.block_Arr) {
+            for (Block block : blocks) {
+                if(block.blockNumber == param_Block_Number && block.isYard){
+                    block.set_Occupancy(true);
+                    //TODO: The arrays below need to be in tandem
+                    working_Line.occupancies.add(block.blockNumber);
+                    working_Line.distances.add(0.0);
+                }
+            }
+        }
+    }
+    public void update_Occupancy(int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
+        // Search through coordinates for block under specified occupancy
+        this_TMBD.this_Track.line_ArrayList.get(param_Line_Index);
+        for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
+            for (Block block : blocks) {
+                if(block.blockNumber == this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.get(param_Occupancy_Index)){
+                    // Add the distance given in the tick to matching distances
+                    double temp = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.get(param_Occupancy_Index);
+                    temp += param_Distance_Traveled_In_Tick;
+
+                    // Compare the distance in the distance array with the length of the corresponding block in the occupancy array
+                    if(temp >= this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.get(param_Occupancy_Index)){
+                        // Replace distance in distance array
+                        temp -= this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.get(param_Occupancy_Index);
+                        this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.set(param_Occupancy_Index, temp);
+                        // Increment occupancy
+                        this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.set(param_Occupancy_Index, block.next_Block_Number);
+                        // Set occupancy
+                        for (Block[] blocks1 : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
+                            for (Block block1 : blocks1) {
+                                if(block.next_Block_Number == block1.blockNumber){
+                                    block1.set_Occupancy(true);
+                                    block.set_Occupancy(false);
+                                }
+                            }
+                        }
+                    }
+                    else{// If smaller, just add and replace
+                        this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.set(param_Occupancy_Index, temp);
+                    }
+                }
+            }
+        }
+
     }
 
 

@@ -1,18 +1,23 @@
 package sample;
 
+import java.util.ArrayList;
+
 public class Line {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
     String name;
     int index;
     int num_Rows;
     int num_Columns;
-
+    ArrayList<Integer> occupancies;
+    ArrayList<Double> distances;
     Block[][] block_Arr;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Line(int param_Index){
         block_Arr = new Block[0][0]; //TODO: Might need to change
         index = param_Index;
         name = "Line " + (index + 1);
+        occupancies = new ArrayList<Integer>();
+        distances = new ArrayList<Double>();
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
