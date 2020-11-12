@@ -304,7 +304,7 @@ public class GUI extends Application {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            failure.setText("Signal Failure");
+            failure.setText("!Signal Failure");
             failure.setVisible(true);
         });
         brake_failure.setOnAction(event -> {
@@ -313,7 +313,7 @@ public class GUI extends Application {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            failure.setText("Brake Failure");
+            failure.setText("!Brake Failure");
             failure.setVisible(true);
         });
         engine_failure.setOnAction(event -> {
@@ -322,7 +322,7 @@ public class GUI extends Application {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            failure.setText("Engine Failure");
+            failure.setText("!Engine Failure");
             failure.setVisible(true);
         });
 
@@ -351,14 +351,39 @@ public class GUI extends Application {
         try {
             Image temp = new Image(new FileInputStream(asset_Location + "trans_model_1_real.png"));
             ImageView image = new ImageView(temp);
-            center.getChildren().addAll(failure, title, main_Table, image);
+            center.getChildren().addAll(title, main_Table, image, failure);
             center.setAlignment(Pos.CENTER);
         }catch (Exception e) {
             System.out.println("File Not Found");
             center.getChildren().addAll(failure, title, main_Table);
         }
 
-        center.setAlignment(Pos.CENTER);
+
+
+        center.setTranslateX(-160);
+        TranslateTransition centerTranslation = new TranslateTransition(Duration.millis(500), center);
+        centerTranslation.setFromX(-160);
+        centerTranslation.setToX(200);
+
+        advanced_info.setOnMouseClicked(evt -> {
+            if (advanced_menu_isopen.get() == false) {
+                menuTranslation.setRate(1);
+                centerTranslation.setRate(1);
+                menuTranslation.play();
+                centerTranslation.play();
+
+                advanced_menu_isopen.set(true);
+
+            } else {
+                menuTranslation.setRate(-1);
+                centerTranslation.setRate(-1);
+                menuTranslation.play();
+                centerTranslation.play();
+                advanced_menu_isopen.set(false);
+            }
+        });
+
+        //center.setAlignment(Pos.CENTER);
         center.setPadding(new Insets(0,200,0,0));
 
         layout.setTop(top);

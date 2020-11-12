@@ -179,10 +179,12 @@ public class Train_Model {
         double new_Distance = current_Velocity * (double) cycle_Time + distance;
         System.out.println("New Position: " + new_Distance);
         time = System.currentTimeMillis();
+        //Network.tm_interface.send_Distance(new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity;
         System.out.println("Train " + id + " Power: " + power);
         System.out.println("Train " + id + " Velocity: " + velocity);
+
 
         DecimalFormat df = new DecimalFormat("0.00");
         if (GUI.current_index == id) {
@@ -190,6 +192,7 @@ public class Train_Model {
             GUI.power_Prop.setValue(df.format(power));
             GUI.main_Table.refresh();
         }
+
         return velocity;
 
         }
