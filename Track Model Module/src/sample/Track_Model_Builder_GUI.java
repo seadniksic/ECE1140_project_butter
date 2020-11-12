@@ -5,6 +5,8 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -73,9 +75,9 @@ public class Track_Model_Builder_GUI {
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
-        return new Scene(this_VBox, 500, 200);
+        return new Scene(this_VBox, 500, 500);
     }
-    private Scene return_Line_Scene(int param_Line_Index){
+    private Scene return_Line_Scene(int param_Line_Index, GridPane param_GridPane){
         MenuBar start_MenuBar = new MenuBar();
         configureMenuBar(start_MenuBar);
 
@@ -83,8 +85,59 @@ public class Track_Model_Builder_GUI {
             description_label = new Label("Editing Line: " + (this_TMBD.this_Track.get_Line_At_Index(param_Line_Index).index + 1));
         }
 
+        System.out.println(param_GridPane.getColumnCount());
+
+        // Update Gridpane
+        param_GridPane = new GridPane();
+        Block[][] line_Block_Arr = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr;
+//        System.out.println("Length: " + line_Block_Arr.length);
+//        System.out.println("Width: " + line_Block_Arr[0].length);
+        for(int i = 0; i < line_Block_Arr.length; i++){
+            for(int j = 0; j < line_Block_Arr[i].length; j++){
+                param_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
+            }
+        }
+
+        GridPane canvas_GP = param_GridPane;
+        canvas_GP.setAlignment(Pos.CENTER);
+        canvas_GP.setHgap(3);
+        canvas_GP.setVgap(3);
+
+        Button return_To_Track_Button = new Button("Save and Go Back");
+        map_Return_To_Track_Button(return_To_Track_Button);
+
+        Button set_Canvas_Button = new Button("Set Canvas");
+        map_Canvas_Button(set_Canvas_Button, this_TMBD.this_Track.line_ArrayList.get(param_Line_Index), canvas_GP);
+
+
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(start_MenuBar, description_label);
+        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, set_Canvas_Button, canvas_GP);
+        this_VBox.setAlignment(Pos.TOP_CENTER);
+        this_VBox.setSpacing(20);
+
+        return new Scene(this_VBox, 500, 500);
+    }
+    private Scene return_set_Canvas_Scene(int param_Line_Index, GridPane param_GridPane){
+        MenuBar start_MenuBar = new MenuBar();
+        configureMenuBar(start_MenuBar);
+
+        description_label = new Label("Set the X and Y dimensions of your line canvas");
+
+        Label x_Label = new Label("X:");
+        TextField x_TextField = new TextField();
+        Label y_Label = new Label("Y:");
+        TextField y_TextField = new TextField();
+
+        HBox this_Hbox = new HBox();
+        this_Hbox.getChildren().addAll(x_Label, x_TextField, y_Label, y_TextField);
+        this_Hbox.setAlignment(Pos.CENTER);
+        this_Hbox.setSpacing(20);
+
+        Button after_Set_Canvas_Button = new Button("Save and Go Back");
+        map_After_Set_Canvas_Button(after_Set_Canvas_Button, param_Line_Index, x_TextField, y_TextField, param_GridPane);
+
+        VBox this_VBox = new VBox();
+        this_VBox.getChildren().addAll(start_MenuBar, description_label, this_Hbox, after_Set_Canvas_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -97,11 +150,13 @@ public class Track_Model_Builder_GUI {
             public void handle(ActionEvent actionEvent) {
                 // Keeping track of the index of the line
                 int lineIndex = param_ArrayList.size() - 1;
-                this_TMBD.this_Track.add_Line(new Line(lineIndex)); //TODO: Might need to keep track of indices here
+                this_TMBD.this_Track.add_Line(new Line(lineIndex));
 
                 Button newest_Line_Button = new Button(this_TMBD.this_Track.line_ArrayList.get(this_TMBD.this_Track.line_ArrayList.size() - 1).name);
-                param_ArrayList.add(param_ArrayList.size() - 1,newest_Line_Button);
-                swap_To_New_Track_Scene(param_ArrayList);
+                param_ArrayList.add(param_ArrayList.size() - 1, newest_Line_Button);
+
+                write_Track_Data_To_Text_File();
+                write_Text_File_To_Track_Data(this_TMBD.this_File);
             }
         };
         param_Button.setOnAction(event);
@@ -110,7 +165,41 @@ public class Track_Model_Builder_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                swap_To_Line_Scene(param_Line_Index);
+                swap_To_Line_Scene(param_Line_Index, new GridPane());
+            }
+        };
+        param_Button.setOnAction(event);
+    }
+    private void map_Canvas_Button(Button param_Button, Line param_Line, GridPane param_GridPane){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                swap_To_Set_Canvas_Scene(param_Line.index, param_GridPane);
+            }
+        };
+        param_Button.setOnAction(event);
+    }
+    private void map_After_Set_Canvas_Button(Button param_Button, int param_Line_Index, TextField param_X_TextField, TextField param_Y_TextField, GridPane param_GridPane){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                //TODO: Error Checking for not numbers
+                this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).set_Canvas(Integer.parseInt(param_X_TextField.getText()), Integer.parseInt(param_Y_TextField.getText()));
+
+                write_Track_Data_To_Text_File();
+                write_Text_File_To_Track_Data(this_TMBD.this_File);
+
+                swap_To_Line_Scene(param_Line_Index, param_GridPane);
+            }
+        };
+        param_Button.setOnAction(event);
+    }
+    private void map_Return_To_Track_Button(Button param_Button){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                write_Track_Data_To_Text_File();
+                write_Text_File_To_Track_Data(this_TMBD.this_File);
             }
         };
         param_Button.setOnAction(event);
@@ -168,8 +257,22 @@ public class Track_Model_Builder_GUI {
             String output = "";
 
             // Writing track lines to string
-            for(int i = 0; i < this_TMBD.this_Track.line_ArrayList.size(); i++){
-                output += "L: " + this_TMBD.this_Track.line_ArrayList.get(i).index;
+
+            ArrayList<Line> line_Arr_List = this_TMBD.this_Track.line_ArrayList;
+
+            for(int i = 0; i < line_Arr_List.size(); i++){
+                output += "L: " + line_Arr_List.get(i).index + "\n";
+                output += "C: " + line_Arr_List.get(i).num_Rows + "x" + line_Arr_List.get(i).num_Columns + "\n";
+
+                // Include any modified blocks
+                for (Block[] blocks : line_Arr_List.get(i).block_Arr){
+                    for (Block block : blocks) {
+                        if(block.blockNumber != -1){
+                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + "\n";
+                        }
+                    }
+                }
+                output = output.substring(0, output.length() - 1); // Remove extra new line
                 output += (i != this_TMBD.this_Track.line_ArrayList.size() - 1 ? "\n" : "");
             }
 
@@ -184,16 +287,91 @@ public class Track_Model_Builder_GUI {
         // Read information on file
         try{
             Scanner this_Scanner = new Scanner(param_File);
+            int current_Line_index = -1;
 
             // First scan to write data
             while(this_Scanner.hasNextLine()){
                 String next_Line = this_Scanner.nextLine();
+
+                // Creating lines
                 if(next_Line.substring(0, 3).equals("L: ")){
                     // Update lines
                     System.out.println(next_Line);
-                    this_TMBD.this_Track.add_Line(new Line(Integer.parseInt(String.valueOf(next_Line.charAt(3)))));
-                    // TODO: Iterate though sub-text under line until next line is met
+                    current_Line_index = Integer.parseInt(String.valueOf(next_Line.charAt(3)));
+                    this_TMBD.this_Track.add_Line(new Line(current_Line_index));
+                }
 
+                // Setting canvases to lines
+                if(next_Line.substring(0, 3).equals("C: ")){
+                    // Update lines
+                    System.out.println(next_Line);
+                    // Iterate through line to get dimensions
+                    String x_String = "", y_String = "";
+                    Boolean collect_X = false, collect_Y = false;
+                    for(int i = 0; i < next_Line.length(); i++){
+                        x_String += (collect_X ? next_Line.substring(i, i+1) : "");
+                        y_String += (collect_Y ? next_Line.substring(i, i+1) : "");
+                        collect_X = (next_Line.substring(i, i+1).equals(" ")? true : collect_X);
+                        collect_X = (next_Line.substring(i, i+1).equals("x")? false : collect_X);
+                        x_String = (next_Line.substring(i, i+1).equals("x")? x_String.substring(0, x_String.length() - 1) : x_String);
+                        collect_Y = (next_Line.substring(i, i+1).equals("x")? true : collect_Y);
+                        collect_Y = (next_Line.substring(i, i+1).equals("\n")? false : collect_Y);
+
+                    }
+                    this_TMBD.this_Track.line_ArrayList.get(current_Line_index).set_Canvas(Integer.parseInt(x_String),Integer.parseInt(y_String));
+                }
+
+                // Updating canvases with blocks
+                if(next_Line.substring(0, 3).equals("B: ")){
+                    // Iterate through line to get properties of block
+                    ArrayList<String> block_Line_Elements = new ArrayList<String>();
+                    String build = "";
+                    for(int i = 2; i < next_Line.length(); i++){
+                        System.out.println("Substring atm: " + next_Line.substring(i, i+1));
+                        if(!next_Line.substring(i, i+1).equals(",")){
+                            if(!next_Line.substring(i, i+1).equals(" ")){
+                                build += next_Line.substring(i, i+1);
+                                System.out.println("Build: " + build);
+                            }
+                        }else{
+                            block_Line_Elements.add(build);
+                            build = "";
+                        }
+                        if(i == next_Line.length() - 1){
+                            block_Line_Elements.add(build);
+                        }
+                    }
+
+                    // Extract the coordinates from the block
+                    String x_Coord_S = "", y_Coord_S = "";
+                    Boolean collect_X = true, collect_Y = false;
+                    String coord_String = block_Line_Elements.get(0);
+                    for(int i = 0; i < coord_String.length(); i++){
+                        x_Coord_S += (collect_X ? coord_String.substring(i, i+1) : "");
+                        y_Coord_S += (collect_Y ? coord_String.substring(i, i+1) : "");
+                        collect_X = (coord_String.substring(i, i+1).equals("x")? false : collect_X);
+                        x_Coord_S = (coord_String.substring(i, i+1).equals("x")? x_Coord_S.substring(0, x_Coord_S.length() - 1) : x_Coord_S);
+                        collect_Y = (coord_String.substring(i, i+1).equals("x")? true : collect_Y);
+
+                        System.out.println("x_Coord_S: " + x_Coord_S);
+                        System.out.println("y_Coord_S: " + y_Coord_S);
+                    }
+
+                    // Assign elements from text file to data
+                    String extracted_Section = block_Line_Elements.get(1);
+                    int extracted_Block_Num = Integer.parseInt(block_Line_Elements.get(2));
+
+                    for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
+                        for (Block block : blocks) {
+                            if(block.x_Coord == Integer.parseInt(x_Coord_S) && block.y_Coord == Integer.parseInt(y_Coord_S)){
+                                block.section = extracted_Section;
+                                block.blockNumber = extracted_Block_Num;
+                                if(block.blockNumber != -1){//TODO: May need to revise this
+                                    block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Red"));
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -242,8 +420,15 @@ public class Track_Model_Builder_GUI {
     //*******************************************************************************************************************************************************
     // Changes the scene when a line is selected                                                                                                            *
     //*******************************************************************************************************************************************************
-    public void swap_To_Line_Scene(int param_Line_Index){
-        builder_Stage.setScene(return_Line_Scene(param_Line_Index));
+    public void swap_To_Line_Scene(int param_Line_Index, GridPane param_GridPane){
+        builder_Stage.setScene(return_Line_Scene(param_Line_Index, param_GridPane));
+        builder_Stage.show();
+    }
+    //*******************************************************************************************************************************************************
+    // Changes the scene when the user selects to set their canvas                                                                                          *
+    //*******************************************************************************************************************************************************
+    public void swap_To_Set_Canvas_Scene(int param_Line_Index, GridPane param_GridPane){
+        builder_Stage.setScene(return_set_Canvas_Scene(param_Line_Index, param_GridPane));
         builder_Stage.show();
     }
 
@@ -257,3 +442,16 @@ public class Track_Model_Builder_GUI {
 //        if(description_label != null){
 //                description_label.setText("Editing: " + param_File.getName());
 //            }
+
+//    String x_Coord_S = "", y_Coord_S = "";
+//    Boolean collect_X = false, collect_Y = false;
+//          x_Coord_S += (collect_X ? next_Line.substring(i, i+1) : "");
+//        y_Coord_S += (collect_Y ? next_Line.substring(i, i+1) : "");
+//        collect_X = (next_Line.substring(i, i+1).equals(" ")? true : collect_X);
+//        collect_X = (next_Line.substring(i, i+1).equals("x")? false : collect_X);
+//        x_Coord_S = (next_Line.substring(i, i+1).equals("x")? x_Coord_S.substring(0, x_Coord_S.length() - 1) : x_Coord_S);
+//        collect_Y = (next_Line.substring(i, i+1).equals("x")? true : collect_Y);
+//        collect_Y = (next_Line.substring(i, i+1).equals(",")? false : collect_Y);
+//        if(next_Line.substring(i, i+1).equals(",")){
+//        break;
+//        }
