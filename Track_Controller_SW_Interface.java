@@ -1,30 +1,37 @@
 package networking;
 
+import java.io.FileNotFoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface Track_Controller_SW_Interface extends Remote {
 
-    public void make_Controllers(String[] lines, int[][] blocks) throws RemoteException;
+    //Track Model calls these methods
+    void make_Controllers(String[] lines, int[][] blocks) throws RemoteException;
 
-    public void create_Train(int cars) throws RemoteException; // (CTC -> track controller ->) track model -> train model
+    void train_Moved(int trainNum, int blockNum) throws RemoteException, FileNotFoundException; //Track Model -> Track Controller -> CTC
+    //Track Model calls these methods
 
-    public void send_Speed_Authority(int train_Num, int speed, int authority) throws RemoteException; // (CTC -> track controller ->) track model -> train model
+    //CTC calls these methods
+    void create_Train(int cars, String line, int block) throws RemoteException; // CTC -> track controller -> track model -> train model
 
-    public void train_Moved(int trainNum, int blockNum) throws RemoteException; //Track Model -> Track Controller -> CTC
+    void send_Speed_Authority(int train_Num, double speed, int authority) throws RemoteException; // CTC -> track controller -> track model -> train model
 
-    public boolean get_Block_State() throws RemoteException;
+    boolean set_Switch_Manual(String trackLine, int blockNum) throws RemoteException;
 
-    public boolean get_Switch() throws RemoteException;
+    //static void add_Ticket(int trainNum) throws RemoteException;
 
-    public boolean get_XBar_State() throws  RemoteException;
+    void close_Block(String trackLine, int blockNum) throws RemoteException;
 
-    public boolean get_Lights() throws RemoteException;
+    void open_Block(String trackLine, int blockNum) throws RemoteException, FileNotFoundException;
+    //CTC calls these methods
 
-    public void set_Switch_Manual(int trackLine, int blockNum, boolean prevSwitchPos) throws RemoteException;
+    //Hardware calls these methods
+    void get_Block_Array(int start) throws RemoteException;
+    //Hardware calls these methods
 
-    public void set_XBar_State() throws RemoteException;
+    //public void send_Block_State(int blockNum, boolean state) throws RemoteException;
+    //Hardware calls these methods
 
-    public void set_Lights() throws RemoteException;
-
+    void update_Time(double time) throws RemoteException;
 }
