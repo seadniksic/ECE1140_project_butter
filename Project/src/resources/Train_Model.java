@@ -7,8 +7,15 @@ import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 
 public class Train_Model {
-    static int car_Length = 30; // meters
-    static int car_Mass = 1000; //kg
+    static double car_Length = 32.2; // meters
+    static int car_Mass = 40900; //kg
+    static double static_friction_coefficient = 0.65;  // steel on steel (clean and dry conditions)
+    static double kinetic_friction_coefficient = 0.42; // steel on steel (clean and dry conditions)
+    static double average_Person_Mass = 70; //kg
+    double static_friction; //N
+    double kinetic_friction; //N
+    static double brake_acc = 1.2;
+    static double e_brake_acc = 2.7;
     public int id;
     private boolean int_Lights;
     private boolean ext_Lights;
@@ -25,22 +32,26 @@ public class Train_Model {
     private long time;
     private boolean advertisements;
     private double grade;
-    private int passengers;
+    private int passengers = 0;
+    private int crew = 0;
     private String failure = "None";
-    private static double friction = 10;
-    private static double brake_acc = 1.2;
-    private static double e_brake_acc = 2.7;
+    private String next_Stop;
 
     public Train_Model(int cars, int new_id) {
-        id = new_id;
-        num_Cars = cars;
-        velocity = 0;
-        set_Int_Lights(false);
+        this.id = new_id;
+        this.num_Cars = cars;
+        this.velocity = 0;
+        crew = 3;
+        static_friction = static_friction_coefficient * (crew * average_Person_Mass * num_Cars * car_Mass * 9.81); // Mu * Normal Force
+        kinetic_friction = kinetic_friction_coefficient * (crew * average_Person_Mass * num_Cars * car_Mass * 9.81);  // Mu * Normal Force
+        set_Int_Lights(true);
     }
 
-    public void set_Passengers(int number) { this.passengers = number;}
+    public void add_Passengers(int number) { this.passengers += number; }
 
-    public void set_Grade(double number) { this.grade = number;}
+    public void set_Grade(double number) { this.grade = number; }
+
+    public void set_Next_Stop(String next_Stop) { this.next_Stop = next_Stop; }
 
     public void set_Int_Lights(boolean state) {
         this.int_Lights = state;
@@ -67,7 +78,7 @@ public class Train_Model {
         Network.tc_Interface.update_E_Brake(id, true);
     }
 
-    public void set_Advertisements(boolean state) {this.advertisements = state;}
+    public void set_Advertisements(boolean state) { this.advertisements = state;}
 
     public void set_Failure(String type) throws RemoteException {
         //Take appropriate action on failure
@@ -80,13 +91,10 @@ public class Train_Model {
         }
     }
 
-    public String get_Failure() {
-        //Take appropriate action on failure
-        return failure;
-    }
-    public double get_Grade() { return this.grade;}
+    public String get_Failure() { return failure; }
+    public double get_Grade() { return this.grade; }
 
-    public int get_Num_Cars() {return this.num_Cars;}
+    public int get_Num_Cars() { return this.num_Cars; }
 
     public int get_Passengers() { return this.passengers; }
 
@@ -139,31 +147,19 @@ public class Train_Model {
         double current_Velocity = (double) velocity; //meters / second
         double current_power = (double) power; //watts
 
-        if (current_Velocity == 0) {
-            current_Velocity = .001;
-        }
-
-
         double force = power / current_Velocity; // Newtons
-        force = force > 10000 ? 10000 : force;
-        System.out.println("Force before physics: "+ force);
+
+        force = force > 10000 ? 10000 : force; //force limiter
+
         //Force of gravity in meters
         double F_g = (num_Cars * car_Mass) * 9.81;
         double F_g_x = F_g * Math.sin(this.grade * (2*3.14159)/360);
-        System.out.println("F_g_x" + F_g_x);
-        force -= (F_g_x + friction);
+        force -= (F_g_x);
 
         System.out.println("Power: "+ power);
         System.out.println("Force: "+ force);
         double acc;
-        if (brake_Status == true) {
-            acc = (force / (num_Cars * car_Mass)) - brake_acc;
-        }
-        else if (emergency_Brake_Status ==true) {
-            acc = (force / (num_Cars * car_Mass)) - e_brake_acc;
-        } else {
             acc = (force / (num_Cars * car_Mass));
-        }
 
         if ( acc < 0 && velocity <= 0) {
             current_Velocity = 0;
@@ -198,14 +194,14 @@ public class Train_Model {
         }
 
     public int update_Temperature(double power) {
-        return this.temperature;
         //Write pid loop here
+        return temperature;
     }
 
 
     public void send_Speed_Authority(int speed, int authority, double grade_in) throws RemoteException, InterruptedException {
         Network.tc_Interface.set_Commanded_Speed_Authority(id, speed, authority);
-        grade = grade_in;
+        set_Grade(grade_in);
     }
 
 }

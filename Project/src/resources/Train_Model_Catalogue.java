@@ -1,10 +1,7 @@
 package resources;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import networking.Network;
@@ -27,6 +24,8 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public static void remove_Train(int index) {
         trains.remove(index);
     }
+
+    public void set_Next_Stop(int train_Num, String next_Stop)  { trains.get(train_Num).set_Next_Stop(next_Stop); }
 
     public static void create_Controller(int cars) throws RemoteException {
         //Call Alex's create controller method
@@ -76,6 +75,10 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException {
         trains.get(train_Num).set_Emergency_Brake_Status(state);
     }
+
+    public void add_Passengers(int train_Num, int passengers) throws RemoteException { trains.get(train_Num).add_Passengers(passengers);};
+
+    public void send_Next_STop(int train_Num, String next_Stop) {  }
 
     public void set_Advertisements(int train_Num, boolean state) {
         trains.get(train_Num).set_Advertisements(state);

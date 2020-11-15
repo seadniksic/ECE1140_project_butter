@@ -11,7 +11,7 @@ public class Network extends Train_Model_Catalogue {
     public static boolean connected_Module_1; // Track Model
     public static boolean connected_Module_2; // Train Controller
     public static boolean serving = false;
-    public static String module_1_IP = "69.80.136.151"; // Adnan IP
+    public static String module_1_IP = "73.154.133.183"; // Adnan IP
     public static String module_2_IP = "67.171.70.64"; // Meyers IP
     public static int module_1_Port = 1300; // Adnan Port
     public static int module_2_Port = 1500; // Meyers Port
@@ -49,11 +49,7 @@ public class Network extends Train_Model_Catalogue {
 //        if (!connected_Module_1) {
 //            try {
 //                Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
-//                System.out.println("1");
 //                tm_Interface = (Track_Model_Interface) registry.lookup("Track_Model_Interface");
-//                System.out.println("2");
-//                tm_Interface.appendToHolder("titties");
-//                System.out.println("3");
 //                connected_Module_1 = true;
 //            } catch (Exception e) {
 //                System.err.println("Client exception: " + e.toString());

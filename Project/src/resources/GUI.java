@@ -195,11 +195,14 @@ public class GUI extends Application {
         HBox top_Bottom = new HBox();
 
         TextField textField = new TextField("");
+        TextField space = new TextField("");
+        space.setVisible(false);
+        space.setMinWidth(1300);
         Button new_Speed = new Button("Submit Speed");
         Text speed = new Text("Speed: "+ train.get_Velocity());
         Text num_Cars = new Text("Number of Cars: "+ train.num_Cars);
         Text power = new Text("Engine Power: "+ train.get_Engine_Power());
-        Text title = new Text("Train Model");
+        Text title = new Text("Train Model " + train.id);
         title.setFont(f2);
 
         Text failure = new Text("Giblets");
@@ -214,6 +217,8 @@ public class GUI extends Application {
         Button back_button = new Button("Back");
         Button advanced_info = new Button("Advanced Information");
         Button ebrake = new Button("Emergency brake");
+        ebrake.setLayoutX(500);
+        ebrake.setLayoutY(500);
 
         MenuItem singal_failure = new MenuItem("Signal Failure");
         MenuItem brake_failure = new MenuItem("Brake Failure");
@@ -332,7 +337,7 @@ public class GUI extends Application {
             }
         });
 
-        top_Top.getChildren().add(back_button);
+        top_Top.getChildren().addAll(back_button, space, ebrake);
         top_Top.setAlignment(Pos.CENTER_LEFT);
 
         top_Bottom.getChildren().addAll(main_Table);
@@ -390,7 +395,6 @@ public class GUI extends Application {
         layout.setCenter(center);
         layout.setBottom(bottom);
         layout.setLeft(menu);
-        layout.setRight(ebrake);
 
         return new Scene(layout, TS_SCALE_FACTOR_X * screen_X, TS_SCALE_FACTOR_Y * screen_Y);
     }
