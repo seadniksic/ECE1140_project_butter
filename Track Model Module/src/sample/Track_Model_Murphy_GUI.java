@@ -131,13 +131,17 @@ public class Track_Model_Murphy_GUI {
             public void handle(ActionEvent actionEvent) {
                 // The simulation will run here when clicked
                 System.out.println("Spawning Train...");
+
                 spawn_Train_In_Yard(param_Line_Index,1);
                 swap_To_Line_Scene(param_Line_Index, param_GridPane);
 
-                set_Switch_At_Block(param_Line_Index, 2, false);
-                update_Occupancy(param_Line_Index, 0, 50.0);
-                update_Occupancy(param_Line_Index, 0, 50.0);
-                //update_Occupancy(param_Line_Index, 0, 50.0);
+                // Track Controller will be invoking this function
+                set_Switch_At_Block(param_Line_Index,2, true);
+
+                //TODO: CHANGE THIS FOR THE DEMONSTRATION
+                for(int i = 0; i < 7; i++){
+                    update_Occupancy(param_Line_Index, 0, 10.0);
+                }
 
                 swap_To_Line_Scene(param_Line_Index, param_GridPane);
             }
@@ -487,7 +491,6 @@ public class Track_Model_Murphy_GUI {
             }
         }
     }
-
 
 }
 
