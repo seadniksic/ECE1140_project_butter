@@ -19,6 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -55,7 +56,7 @@ public class GUI extends Application {
     static Property brake_Prop;
     static Property door_Prop;
     static int current_index;
-    static TableView<Property> main_Table;
+    static TableView<Property> current_State;
 
 
 
@@ -85,6 +86,20 @@ public class GUI extends Application {
         }
         //Set scene and show
         set_Scene(get_Catalogue_Scene(), "Train Catalogue");
+    }
+
+    public static void refresh_Table(int id) {
+        Train_Model train = Train_Model_Catalogue.trains.get(id);
+        main_data.removeAll();
+        ObservableList<Property> temp = FXCollections.observableArrayList(
+                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Power", train.get_Engine_Power(), "watts"),
+                new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
+                new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
+                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", "")
+        );
+        FXCollections.copy(main_data, temp);
+        System.out.println("---------Update Ran-----------");
     }
 
     public static void set_Scene(Scene scene, String title){
@@ -160,15 +175,12 @@ public class GUI extends Application {
         Train_Model train = tc.trains.get(index);
         current_index = index;
 
-        speed_Prop = new Property("Speed", train.get_Velocity(), "m/s");
-        power_Prop = new Property("Power", train.get_Engine_Power(), "watts");
-        brake_Prop = new Property("Brake", !train.get_Brake_Status() ? "off" : "on", "");
-        door_Prop = new Property("Doors", !train.get_Door_Status() ? "closed" : "open", "");
         main_data = FXCollections.observableArrayList(
-            speed_Prop,
-            power_Prop,
-            brake_Prop,
-            door_Prop
+                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Power", train.get_Engine_Power(), "watts"),
+                new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
+                new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
+                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", "")
         );
 
         advanced_data = FXCollections.observableArrayList(
@@ -193,6 +205,7 @@ public class GUI extends Application {
         HBox top_Top = new HBox();
         HBox top_Middle = new HBox();
         HBox top_Bottom = new HBox();
+        HBox center_bottom = new HBox();
 
         TextField textField = new TextField("");
         TextField space = new TextField("");
@@ -225,13 +238,16 @@ public class GUI extends Application {
         MenuItem engine_failure = new MenuItem("Engine Failure");
         MenuButton destruction_Mode = new MenuButton("Destruction", null, singal_failure, brake_failure, engine_failure);
 
-        main_Table = new TableView();
+        //Creating tables for data
+        current_State = new TableView();
         TableView advanced_table = new TableView();
-        main_Table.setMaxSize(365, 200);
-        main_Table.setFixedCellSize(40);
+        TableView attributes = new TableView();
+        current_State.setMaxSize(365, 200);
+        current_State.setFixedCellSize(40);
         advanced_table.setFixedCellSize(80);
         advanced_table.setMinHeight(900);
 
+        //Creating tables for displaying data
         TableColumn name_col = new TableColumn("Name");
         TableColumn value_col = new TableColumn("Value");
         TableColumn unit_col = new TableColumn("Unit");
@@ -252,12 +268,35 @@ public class GUI extends Application {
         value_col2.prefWidthProperty().setValue(120);
         unit_col2.prefWidthProperty().setValue(120);
 
-        main_Table.setItems(main_data);
-        main_Table.getColumns().addAll(name_col, value_col, unit_col);
+        TableColumn name_col3 = new TableColumn("Name");
+        TableColumn value_col3 = new TableColumn("Value");
+        TableColumn unit_col3 = new TableColumn("Unit");
+        name_col3.setCellValueFactory(new PropertyValueFactory<Property, String>("name"));
+        value_col3.setCellValueFactory(new PropertyValueFactory<Property, String>("value"));
+        unit_col3.setCellValueFactory(new PropertyValueFactory<Property, String>("unit"));
+        name_col3.prefWidthProperty().setValue(120);
+        value_col3.prefWidthProperty().setValue(120);
+        unit_col3.prefWidthProperty().setValue(120);
+
+        //Labeling Tables
+        Label current_state_label = new Label("Current State");
+        Label attributes_label = new Label("Attributes");
+        VBox current_State_Label_Contatiner = new VBox();
+        VBox attributes_Label_Contatiner = new VBox();
+
+        current_State.setItems(main_data);
+        current_State.getColumns().addAll(name_col, value_col, unit_col);
+
+        //attributes.setItems();
 
         advanced_table.setItems(advanced_data);
         advanced_table.getColumns().addAll(name_col2, value_col2, unit_col2);
 
+        current_State_Label_Contatiner.getChildren().addAll(current_state_label, current_State);
+        attributes_Label_Contatiner.getChildren().addAll(attributes_label);
+
+
+        center_bottom.getChildren().addAll(current_State);
         VBox menu = new VBox();
         //menu.prefHeightProperty().bind(layout.heightProperty());
         menu.setPrefWidth(360);
@@ -340,7 +379,7 @@ public class GUI extends Application {
         top_Top.getChildren().addAll(back_button, space, ebrake);
         top_Top.setAlignment(Pos.CENTER_LEFT);
 
-        top_Bottom.getChildren().addAll(main_Table);
+        //top_Bottom.getChildren().addAll(main_Table);
         top_Bottom.setAlignment(Pos.CENTER);
 
         bottom_Top.getChildren().addAll(destruction_Mode);
@@ -356,19 +395,19 @@ public class GUI extends Application {
         try {
             Image temp = new Image(new FileInputStream(asset_Location + "trans_model_1_real.png"));
             ImageView image = new ImageView(temp);
-            center.getChildren().addAll(title, main_Table, image, failure);
+            center.getChildren().addAll(title, image, center_bottom, failure);
             center.setAlignment(Pos.CENTER);
         }catch (Exception e) {
             System.out.println("File Not Found");
-            center.getChildren().addAll(failure, title, main_Table);
+            center.getChildren().addAll(failure, title, center_bottom);
         }
 
 
 
-        center.setTranslateX(-160);
+        center.setTranslateX(-250);
         TranslateTransition centerTranslation = new TranslateTransition(Duration.millis(500), center);
-        centerTranslation.setFromX(-160);
-        centerTranslation.setToX(200);
+        centerTranslation.setFromX(-250);
+        centerTranslation.setToX(110);
 
         advanced_info.setOnMouseClicked(evt -> {
             if (advanced_menu_isopen.get() == false) {
@@ -391,12 +430,23 @@ public class GUI extends Application {
         //center.setAlignment(Pos.CENTER);
         center.setPadding(new Insets(0,200,0,0));
 
+        Pane p = new Pane();
+
         layout.setTop(top);
         layout.setCenter(center);
         layout.setBottom(bottom);
         layout.setLeft(menu);
 
-        return new Scene(layout, TS_SCALE_FACTOR_X * screen_X, TS_SCALE_FACTOR_Y * screen_Y);
+        try {
+            Image background = new Image(new FileInputStream(asset_Location + "test_background.png"));
+            ImageView image = new ImageView(background);
+            p.getChildren().addAll(image, layout);
+        }catch (Exception e) {
+            System.out.println("File Not Found");
+            p.getChildren().add(layout);
+        }
+
+        return new Scene(p, TS_SCALE_FACTOR_X * screen_X, TS_SCALE_FACTOR_Y * screen_Y);
     }
 
     public static class Property {
