@@ -27,8 +27,8 @@ public class test {
 
     @Test
     void set_Door_Status() {
-        Train_Model_Catalogue.trains.get(0).set_Door_Status(true);
-        assertTrue(Train_Model_Catalogue.trains.get(0).get_Door_Status());
+        Train_Model_Catalogue.trains.get(0).set_Left_Door_Status(true);
+        assertTrue(Train_Model_Catalogue.trains.get(0).get_Left_Door_Status());
     }
 
 }

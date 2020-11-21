@@ -19,7 +19,8 @@ public class Train_Model {
     public int id;
     private boolean int_Lights;
     private boolean ext_Lights;
-    private boolean door_Status;
+    private boolean left_Door_Status;
+    private boolean right_Door_Status;
     private int temperature;
     private int wheel_Slippage;
     private int power_Consumption;
@@ -31,27 +32,34 @@ public class Train_Model {
     private double distance;
     private long time;
     private boolean advertisements;
+    private String announcements;
     private double grade;
     private int passengers = 0;
-    private int crew = 0;
+    private int crew = 3;
     private String failure = "None";
-    private String next_Stop;
 
     public Train_Model(int cars, int new_id) {
         this.id = new_id;
         this.num_Cars = cars;
         this.velocity = 0;
         crew = 3;
-        static_friction = static_friction_coefficient * (crew * average_Person_Mass * num_Cars * car_Mass * 9.81); // Mu * Normal Force
-        kinetic_friction = kinetic_friction_coefficient * (crew * average_Person_Mass * num_Cars * car_Mass * 9.81);  // Mu * Normal Force
+        static_friction = static_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) / 10 * 9.81); // Mu * Normal Force (the 10 is to account for the hitches in between trains greatly reducing the static friciton
+        kinetic_friction = kinetic_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) / 10 * 9.81);  // Mu * Normal Force
         set_Int_Lights(true);
     }
 
     public void add_Passengers(int number) { this.passengers += number; }
 
+    public void add_Crew(int number) { this.crew += number; }
+
     public void set_Grade(double number) { this.grade = number; }
 
-    public void set_Next_Stop(String next_Stop) { this.next_Stop = next_Stop; }
+    public void send_Beacon_Information (String next_Stop, boolean door_Side) {  // 0 - left, 1 - right
+//        Network.tc_Interface.send_Beacon_Information(next_Stop, door_Side);
+//        Network.tc_Interface.send_Num_Passengers()
+    }
+
+    public void set_Announcements(String announcements) { this.announcements = announcements; }
 
     public void set_Int_Lights(boolean state) {
         this.int_Lights = state;
@@ -61,15 +69,18 @@ public class Train_Model {
         this.ext_Lights = state;
     }
 
-    public void set_Door_Status(boolean state) {
-        this.door_Status = state;
+    public void set_Left_Door_Status(boolean state) {
+        this.left_Door_Status = state;
+    }
+
+    public void set_Right_Door_Status(boolean state) {
+        this.right_Door_Status = state;
     }
 
     public void set_Brake_Status(boolean state) {
         this.brake_Status = state;
         if (GUI.current_index == id) {
             GUI.brake_Prop.setValue(brake_Status);
-            GUI.main_Table.refresh();
         }
     }
 
@@ -106,8 +117,12 @@ public class Train_Model {
         return this.ext_Lights;
     }
 
-    public boolean get_Door_Status() {
-        return this.door_Status;
+    public boolean get_Left_Door_Status() {
+        return this.left_Door_Status;
+    }
+
+    public boolean get_Right_Door_Status() {
+        return this.right_Door_Status;
     }
 
     public int get_Temperature() {
@@ -149,24 +164,25 @@ public class Train_Model {
 
         double force = power / current_Velocity; // Newtons
 
-        force = force > 10000 ? 10000 : force; //force limiter
-
+        force = force > 74207 ? 74207 : force; //force limiter
+        System.out.println("Force: "+ force);
+        System.out.println("Static Friction: " + static_friction);
+        System.out.println("Kinetic Friction: " + kinetic_friction);
         //Force of gravity in meters
         double F_g = (num_Cars * car_Mass) * 9.81;
         double F_g_x = F_g * Math.sin(this.grade * (2*3.14159)/360);
-        force -= (F_g_x);
+
+        if (current_Velocity < .01) {
+            force -= (F_g_x + static_friction);
+        } else {
+            force -= (F_g_x + kinetic_friction);
+        }
 
         System.out.println("Power: "+ power);
-        System.out.println("Force: "+ force);
-        double acc;
-            acc = (force / (num_Cars * car_Mass));
+        //System.out.println("Force: "+ force);
+        double acc = (force / (num_Cars * car_Mass));
 
-        if ( acc < 0 && velocity <= 0) {
-            current_Velocity = 0;
-            acc = 0;
-        } else {
-            current_Velocity += (acc * (double) cycle_Time);
-        }
+        current_Velocity += (acc * (double) cycle_Time);
 
         System.out.println("Acceleration: " + acc);
 
@@ -177,16 +193,18 @@ public class Train_Model {
         time = System.currentTimeMillis();
         //Network.tm_interface.send_Distance(new_Distance - distance);
         distance = new_Distance;
-        velocity = current_Velocity;
+        velocity = current_Velocity < 0 ? 0: current_Velocity;
+
         System.out.println("Train " + id + " Power: " + power);
         System.out.println("Train " + id + " Velocity: " + velocity);
 
 
         DecimalFormat df = new DecimalFormat("0.00");
         if (GUI.current_index == id) {
-            GUI.speed_Prop.setValue(df.format(velocity));
-            GUI.power_Prop.setValue(df.format(power));
-            GUI.main_Table.refresh();
+//            GUI.speed_Prop.setValue(df.format(velocity));
+//            GUI.power_Prop.setValue(df.format(power));
+            System.out.println("--------------Refresh Call-----------------");
+            GUI.refresh_Table(id);
         }
 
         return velocity;
