@@ -2,6 +2,8 @@ package networking;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
+
 
 public interface Train_Controller_Interface extends Remote{
     public void set_Defaults(int kp_Passed, int ki_Passed, int cars) throws RemoteException;
@@ -22,7 +24,7 @@ public interface Train_Controller_Interface extends Remote{
 
     public void set_Commanded_Speed_Authority(int index, int speed, int auth) throws RemoteException, InterruptedException;
 
-    public void update_Time(double time);
+    public void update_Time(double time) throws RemoteException;
 
     public void update_E_Brake(int index, boolean b) throws RemoteException;
 }

@@ -3,6 +3,7 @@ package resources;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -14,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -33,6 +35,7 @@ import networking.Network;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,16 +50,18 @@ public class GUI extends Application {
     final static double TS_SCALE_FACTOR_Y = 0.7;
     final static double CS_SCALE_FACTOR_X = 0.2;
     final static double CS_SCALE_FACTOR_Y = 0.4;
-    final static String asset_Location = "C:\\Users\\sayba\\Documents\\University\\Fall 2020 T5\\ECE 1140\\ECE1140_project_butter\\Project\\src\\assets\\";
+    final static String asset_Location = "C:\\Users\\sayba\\Documents\\University\\Fall 2020 T5\\ECE 1140\\ECE1140_project_butter\\Train_Model\\src\\assets\\";
     static Font font1;
     static ObservableList<Property> main_data;
     static ObservableList<Property> advanced_data;
+    static ObservableList<Property> non_vital_data;
+    static ObservableList<Property> attributes_data;
     static Property speed_Prop;
     static Property power_Prop;
     static Property brake_Prop;
     static Property door_Prop;
     static int current_index;
-    static TableView<Property> current_State;
+    //static TableView<Property> current_State;
 
 
 
@@ -91,14 +96,42 @@ public class GUI extends Application {
     public static void refresh_Table(int id) {
         Train_Model train = Train_Model_Catalogue.trains.get(id);
         main_data.removeAll();
+        DecimalFormat df = new DecimalFormat("0.0000");
         ObservableList<Property> temp = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Speed", train.get_Velocity() * 2.237, "mph"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
+                new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
+        );
+
+        ObservableList<Property> temp2 = FXCollections.observableArrayList(
+                new Property("Grade", train.get_Grade(), "degrees"),
+                new Property("Positive_Force", train.get_Force().get(1), "Newtons"),
+                new Property("Negative Force", train.get_Force().get(2), "Newtons"),
+                new Property("Effective Force", train.get_Force().get(0), "Newtons"),
+                new Property("Max Force", train.get_Force().get(3), "Newtons")
+        );
+
+        ObservableList<Property> temp3 = FXCollections.observableArrayList(
                 new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
-                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", "")
+                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
+                new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
+                new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
+                new Property("Cabin Temperature", train.get_Temperature(), "F")
+        );
+
+        ObservableList<Property> temp4 = FXCollections.observableArrayList(
+                new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
+                new Property("Engine Power Limit", 120, "kilowatts"),
+                new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
+                new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
+                new Property("Cars", train.get_Num_Cars(), "cars")
+
         );
         FXCollections.copy(main_data, temp);
+        FXCollections.copy(advanced_data, temp2);
+        FXCollections.copy(non_vital_data, temp3);
+        FXCollections.copy(attributes_data, temp4);
         System.out.println("---------Update Ran-----------");
     }
 
@@ -176,21 +209,35 @@ public class GUI extends Application {
         current_index = index;
 
         main_data = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Speed", train.get_Velocity() * 2.237, "mph"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
-                new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
-                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", "")
+                new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
         );
 
         advanced_data = FXCollections.observableArrayList(
-                new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
                 new Property("Grade", train.get_Grade(), "degrees"),
-                new Property("Cabin Temperature", train.get_Temperature(), "F"),
-                new Property("Engine Power Limit", 100000, "watts"),
+                new Property("Positive_Force", train.get_Force().get(1), "Newtons"),
+                new Property("Negative Force", train.get_Force().get(2), "Newtons"),
+                new Property("Effective Force", train.get_Force().get(0), "Newtons"),
+                new Property("Max Force", train.get_Force().get(3), "Newtons")
+        );
+
+        non_vital_data = FXCollections.observableArrayList(
+                new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
+                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
+                new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
+                new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
+                new Property("Cabin Temperature", train.get_Temperature(), "F")
+        );
+
+        attributes_data = FXCollections.observableArrayList(
+                new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
+                new Property("Engine Power Limit", 120, "kilowatts"),
                 new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
-                new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "watts"),
+                new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
                 new Property("Cars", train.get_Num_Cars(), "cars")
+
         );
 
         //Overarching layout
@@ -216,7 +263,8 @@ public class GUI extends Application {
         Text num_Cars = new Text("Number of Cars: "+ train.num_Cars);
         Text power = new Text("Engine Power: "+ train.get_Engine_Power());
         Text title = new Text("Train Model " + train.id);
-        title.setFont(f2);
+        //title.setFont(f2);
+        title.setStyle("-fx-font: 40 arial");
 
         Text failure = new Text("Giblets");
         failure.setFill(Color.RED);
@@ -239,13 +287,18 @@ public class GUI extends Application {
         MenuButton destruction_Mode = new MenuButton("Destruction", null, singal_failure, brake_failure, engine_failure);
 
         //Creating tables for data
-        current_State = new TableView();
-        TableView advanced_table = new TableView();
-        TableView attributes = new TableView();
-        current_State.setMaxSize(365, 200);
-        current_State.setFixedCellSize(40);
+        TableView<Property> main_table = new TableView();
+        TableView<Property> advanced_table = new TableView();
+        TableView<Property> attributes_table = new TableView();
+        TableView<Property> non_vital_table = new TableView();
+        main_table.setMaxSize(365, 200);
+        main_table.setFixedCellSize(40);
         advanced_table.setFixedCellSize(80);
-        advanced_table.setMinHeight(900);
+        advanced_table.setMaxSize(365, 200);
+        non_vital_table.setMaxSize(365, 200);
+        non_vital_table.setFixedCellSize(30);
+        attributes_table.setMaxSize(365, 200);
+        attributes_table.setFixedCellSize(30);
 
         //Creating tables for displaying data
         TableColumn name_col = new TableColumn("Name");
@@ -278,25 +331,59 @@ public class GUI extends Application {
         value_col3.prefWidthProperty().setValue(120);
         unit_col3.prefWidthProperty().setValue(120);
 
+        TableColumn name_col4 = new TableColumn("Name");
+        TableColumn value_col4 = new TableColumn("Value");
+        TableColumn unit_col4 = new TableColumn("Unit");
+        name_col4.setCellValueFactory(new PropertyValueFactory<Property, String>("name"));
+        value_col4.setCellValueFactory(new PropertyValueFactory<Property, String>("value"));
+        unit_col4.setCellValueFactory(new PropertyValueFactory<Property, String>("unit"));
+        name_col4.prefWidthProperty().setValue(120);
+        value_col4.prefWidthProperty().setValue(120);
+        unit_col4.prefWidthProperty().setValue(120);
+
         //Labeling Tables
-        Label current_state_label = new Label("Current State");
-        Label attributes_label = new Label("Attributes");
-        VBox current_State_Label_Contatiner = new VBox();
+        Text main_label = new Text("Vital");
+        Text attributes_label = new Text("Attributes");
+        Text non_vital_label = new Text("Non-Vital");
+
+        main_label.setStyle("-fx-font: 28 arial;");
+        attributes_label.setStyle("-fx-font: 28 arial;");
+        non_vital_label.setStyle("-fx-font: 28 arial;");
+
+//        main_label.setPrefSize(120,0);
+//        attributes_label.setPrefSize(120,0);
+//        non_vital_label.setPrefSize(120,0);
+
+        VBox main_Label_Contatiner = new VBox();
+        main_Label_Contatiner.setPadding(new Insets(10, 10, 10, 10));
         VBox attributes_Label_Contatiner = new VBox();
+        attributes_Label_Contatiner.setPadding(new Insets(10, 10, 10, 70));
+        VBox non_Vital_Label_Container = new VBox();
+        non_Vital_Label_Container.setPadding(new Insets(10, 10, 10, 70));
 
-        current_State.setItems(main_data);
-        current_State.getColumns().addAll(name_col, value_col, unit_col);
-
-        //attributes.setItems();
+        main_table.setItems(main_data);
+        main_table.getColumns().addAll(name_col, value_col, unit_col);
 
         advanced_table.setItems(advanced_data);
         advanced_table.getColumns().addAll(name_col2, value_col2, unit_col2);
 
-        current_State_Label_Contatiner.getChildren().addAll(current_state_label, current_State);
-        attributes_Label_Contatiner.getChildren().addAll(attributes_label);
+        attributes_table.setItems(attributes_data);
+        attributes_table.getColumns().addAll(name_col3, value_col3, unit_col3);
+
+        non_vital_table.setItems(non_vital_data);
+        non_vital_table.getColumns().addAll(name_col4, value_col4, unit_col4);
+
+        main_Label_Contatiner.getChildren().addAll(main_label, main_table);
+        attributes_Label_Contatiner.getChildren().addAll(attributes_label, attributes_table);
+        non_Vital_Label_Container.getChildren().addAll(non_vital_label, non_vital_table);
+
+        main_Label_Contatiner.setAlignment(Pos.CENTER);
+        attributes_Label_Contatiner.setAlignment(Pos.CENTER);
+        non_Vital_Label_Container.setAlignment(Pos.CENTER);
 
 
-        center_bottom.getChildren().addAll(current_State);
+
+        center_bottom.getChildren().addAll(main_Label_Contatiner, attributes_Label_Contatiner,non_Vital_Label_Container);
         VBox menu = new VBox();
         //menu.prefHeightProperty().bind(layout.heightProperty());
         menu.setPrefWidth(360);
@@ -310,18 +397,6 @@ public class GUI extends Application {
 
 
         //Event handlers
-        advanced_info.setOnMouseClicked(evt -> {
-            if (advanced_menu_isopen.get() == false) {
-                menuTranslation.setRate(1);
-                menuTranslation.play();
-                advanced_menu_isopen.set(true);
-            } else {
-                menuTranslation.setRate(-1);
-                menuTranslation.play();
-                advanced_menu_isopen.set(false);
-            }
-        });
-
         ebrake.setOnMouseClicked(evt -> {
             try {
                 train.set_Emergency_Brake_Status(true);
@@ -408,10 +483,16 @@ public class GUI extends Application {
         TranslateTransition centerTranslation = new TranslateTransition(Duration.millis(500), center);
         centerTranslation.setFromX(-250);
         centerTranslation.setToX(110);
-
+        Pane p = new Pane();
+        ImageView image = null;
+        ImageView finalImage = image;
         advanced_info.setOnMouseClicked(evt -> {
             if (advanced_menu_isopen.get() == false) {
                 menuTranslation.setRate(1);
+                center.setEffect(new GaussianBlur(6));
+                if (finalImage != null) {
+                    finalImage.setEffect(new GaussianBlur());
+                }
                 centerTranslation.setRate(1);
                 menuTranslation.play();
                 centerTranslation.play();
@@ -420,6 +501,8 @@ public class GUI extends Application {
 
             } else {
                 menuTranslation.setRate(-1);
+                center.setEffect(null);
+                //bottom.setEffect(null);
                 centerTranslation.setRate(-1);
                 menuTranslation.play();
                 centerTranslation.play();
@@ -429,9 +512,6 @@ public class GUI extends Application {
 
         //center.setAlignment(Pos.CENTER);
         center.setPadding(new Insets(0,200,0,0));
-
-        Pane p = new Pane();
-
         layout.setTop(top);
         layout.setCenter(center);
         layout.setBottom(bottom);
@@ -439,7 +519,7 @@ public class GUI extends Application {
 
         try {
             Image background = new Image(new FileInputStream(asset_Location + "test_background.png"));
-            ImageView image = new ImageView(background);
+            image = new ImageView(background);
             p.getChildren().addAll(image, layout);
         }catch (Exception e) {
             System.out.println("File Not Found");
@@ -477,6 +557,14 @@ public class GUI extends Application {
 
         }
 
+    }
+    public void tableHeightHelper(TableView<Property> table, int rowHeight, int headerHeight, int margin) {
+        table.prefHeightProperty().bind(Bindings.max(2, Bindings.size(table.getItems()))
+                .multiply(rowHeight)
+                .add(headerHeight)
+                .add(margin));
+        table.minHeightProperty().bind(table.prefHeightProperty());
+        table.maxHeightProperty().bind(table.prefHeightProperty());
     }
 
 }

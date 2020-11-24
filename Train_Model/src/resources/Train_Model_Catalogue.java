@@ -25,8 +25,6 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         trains.remove(index);
     }
 
-    public void set_Next_Stop(int train_Num, String next_Stop)  { trains.get(train_Num).set_Next_Stop(next_Stop); }
-
     public static void create_Controller(int cars) throws RemoteException {
         //Call Alex's create controller method
         Network.tc_Interface.add_Train_Controller(cars);
@@ -94,6 +92,8 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public void set_Advertisements(int train_Num, boolean state) {
         trains.get(train_Num).set_Advertisements(state);
     }
+
+    //public double get_Force(int train_Num) { trains.get(train_Num).get_Force(); }
 
     public boolean get_Int_Lights(int train_Num) {
         return trains.get(train_Num).get_Int_Lights();

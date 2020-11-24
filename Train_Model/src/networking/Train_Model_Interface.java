@@ -21,7 +21,6 @@ public interface Train_Model_Interface extends Remote {
     public void set_Advertisements(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void add_Passengers(int train_Num, int passengers) throws RemoteException;
     public void add_Crew(int train_Num, int number) throws RemoteException;
-    public void set_Next_Stop(int train_Num, String next_Stop) throws RemoteException;
     public boolean get_Int_Lights(int train_Num) throws RemoteException;
     public boolean get_Ext_Lights(int train_Num) throws RemoteException;
     public boolean get_Left_Door_Status(int train_Num) throws RemoteException;
