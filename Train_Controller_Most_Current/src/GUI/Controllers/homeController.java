@@ -50,6 +50,7 @@ public class homeController {
     }
 
     public void onClickEvent(MouseEvent mouseEvent) {
+
         System.out.println("Anchor button has been clicked");
     }
 

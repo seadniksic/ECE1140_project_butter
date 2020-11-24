@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseDragOver="#updateTheStuff" onMouseEntered="#updateTheStuff" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
   <tabs>
     <Tab text="Vital">
       <content>
@@ -82,11 +82,11 @@
                   <RadioButton fx:id="brakeButtonNV" layoutX="50.0" layoutY="320.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBrakeNV" text="Brake" />
                   <RadioButton fx:id="eBrakeButtonNV" layoutX="445.0" layoutY="320.0" mnemonicParsing="false" onMouseClicked="#onMouseClickEBrakeNV" text="Emergency Brake" />
                   <Button fx:id="backButtonNV" layoutX="506.0" layoutY="27.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBack" text="Back" />
-                  <RadioButton fx:id="doorsRB" layoutX="76.0" layoutY="44.0" mnemonicParsing="false" text="Open Doors" />
-                  <RadioButton fx:id="inLightsRB" layoutX="257.0" layoutY="44.0" mnemonicParsing="false" text="Turn on Internal Lights" />
-                  <RadioButton fx:id="extLightsRB" layoutX="76.0" layoutY="124.0" mnemonicParsing="false" text="Turn on External Lights" />
-                  <RadioButton fx:id="advertismentsRB" layoutX="257.0" layoutY="124.0" mnemonicParsing="false" text="Advertisements" />
-                  <RadioButton fx:id="announcementsRB" layoutX="76.0" layoutY="197.0" mnemonicParsing="false" text="Announcements" />
+                  <RadioButton fx:id="doorsLeftRB" layoutX="76.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#doorsLeftClicked" text="Open Doors(Left)" />
+                  <RadioButton fx:id="inLightsRB" layoutX="352.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#intLightsOn" text="Turn on Internal Lights" />
+                  <RadioButton fx:id="extLightsRB" layoutX="76.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#extLightsOn" text="Turn on External Lights" />
+                  <RadioButton fx:id="advertismentsRB" layoutX="257.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#advertisementsOn" text="Advertisements" />
+                  <RadioButton fx:id="announcementsRB" layoutX="76.0" layoutY="197.0" mnemonicParsing="false" onMouseClicked="#announcementsOn" text="Announcements" />
                   <GridPane layoutX="257.0" layoutY="191.0">
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -114,6 +114,7 @@
                      </children>
                   </GridPane>
                   <TextField fx:id="tempIn" layoutX="371.0" layoutY="273.0" promptText="Enter Temp" />
+                  <RadioButton fx:id="doorsRightRB" layoutX="207.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#doorsRightClicked" text="Open Doors(Right)" />
                </children></AnchorPane>
       </content>
     </Tab>

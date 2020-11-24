@@ -31,12 +31,12 @@
       </CheckBox>
       <TextField fx:id="kpTextField" layoutX="275.0" layoutY="117.0" onKeyPressed="#onKeyPressedTB1" />
       <TextField fx:id="kiTextField" layoutX="275.0" layoutY="175.0" onKeyPressed="#onKeyPressedTB2" />
-      <Button layoutX="279.0" layoutY="347.0" mnemonicParsing="false" onMouseClicked="#onMouseClickButton" text="Ok">
+      <Button fx:id="okButton" layoutX="279.0" layoutY="347.0" mnemonicParsing="false" onMouseClicked="#onMouseClickButton" text="Ok">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <Button layoutX="506.0" layoutY="19.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBack" text="Back" />
+      <Button fx:id="backButton" layoutX="506.0" layoutY="19.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBack" text="Back" />
       <Label fx:id="carLabel" layoutX="233.0" layoutY="14.0" text="car">
          <font>
             <Font size="24.0" />

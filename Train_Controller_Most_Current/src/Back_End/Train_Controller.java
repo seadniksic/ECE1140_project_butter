@@ -21,6 +21,15 @@ public class Train_Controller {
     private double current_Speed;
     private Date setpointUpdate;
     private Boolean loopStarted = false;
+    private boolean announcements;
+    private boolean advertisements;
+    private boolean open_Doors_Left;
+    private boolean open_Doors_Right;
+    private boolean internal_Lights;
+    private boolean external_Lights;
+    // need to implement the temperature control
+
+
 
 
     public Train_Controller() {
@@ -35,6 +44,7 @@ public class Train_Controller {
         authority = 0;
         commanded_Speed = 0;
         setpointUpdate = java.util.Calendar.getInstance().getTime();
+
     }
 
     public Train_Controller(int cars, int id_Num) {
@@ -146,13 +156,106 @@ public class Train_Controller {
         return authority;
     }
 
-    public void set_Commanded_Speed(int sp) throws RemoteException, InterruptedException {
+    public void set_Announcements(boolean b){
+        // Sead needs an announcements function in his interface
+    }
+
+    public boolean get_Announcements(){
+        return announcements;
+    }
+
+    public void set_Advertisements(boolean ads){
+        try {
+            Network.tm_Interface.set_Advertisements(ID, ads);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        advertisements = ads;
+    }
+
+    public boolean get_Advertisements(){
+        return advertisements;
+    }
+
+    //public void set_Left_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
+    //public void set_Right_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
+    public void set_Open_Doors_Left(boolean doors){
+        // we need a differentiation between left and right doors
+        try {
+            Network.tm_Interface.set_Left_Door_Status(ID, doors); // opens doors VIA Train Model
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        open_Doors_Left = doors; // sets state in the Train Controller module
+    }
+
+    public void set_Open_Doors_Right(boolean doors){
+        // we need a differentiation between left and right doors
+        try {
+            Network.tm_Interface.set_Right_Door_Status(ID, doors); // opens doors VIA Train Model
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        open_Doors_Right = doors; // sets state in the Train Controller module
+    }
+
+    /*public boolean get_Open_Doors(){
+        return open_Doors;
+    }*/
+
+    public void set_Internal_Lights(boolean intLight){
+        try {
+            Network.tm_Interface.set_Int_Lights(ID, intLight);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        internal_Lights = intLight;
+    }
+
+    public boolean get_Internal_Lights(){
+        return internal_Lights;
+    }
+
+    public void set_External_Lights(boolean extLight){
+        try {
+            Network.tm_Interface.set_Ext_Lights(ID, extLight);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        external_Lights = extLight;
+    }
+
+    /*public void set_Commanded_Speed(int sp) throws RemoteException, InterruptedException {
 
         commanded_Speed = sp;
         setpointUpdate = java.util.Calendar.getInstance().getTime();
         //check the kp and ki values before starting the loop
         //launch train engineer ui when kp and ki are both 0, then return to the power command
         if(loopStarted == false){ calculate_Power_Command(); }
+
+    }*/
+    // modified set_Commanded_Speed
+    public void set_Commanded_Speed(int sp) throws RemoteException, InterruptedException {
+        commanded_Speed = sp;
+        setpointUpdate = java.util.Calendar.getInstance().getTime();
+
+        if (loopStarted == false){
+            Power_Loop object = new Power_Loop();
+            object.start();
+        }
+    }
+    // Power_Loop for subthread
+    class Power_Loop extends Thread {
+        public void run() {
+            try {
+                // Displaying the thread that is running
+                calculate_Power_Command();
+
+            } catch (Exception e) {
+                // Throwing an exception
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -161,6 +264,7 @@ public class Train_Controller {
     }
 
     public void set_Current_Speed(double d){
+
         current_Speed = d;
     }
 
@@ -198,6 +302,8 @@ public class Train_Controller {
             // handles for breaking
             while(brakes_On == true || e_Brake_On == true){
                 currV = Network.tm_Interface.update_Speed(ID, 0);
+                // need to keep updating the current speed
+                set_Current_Speed(currV);
                 Thread.sleep(dt);
             }
             //Handling for whether we are in manual mode or automatic mode
@@ -213,11 +319,14 @@ public class Train_Controller {
                 System.out.println(ID + " currV: " + currV + "\n" + "error: " + error + "\n");
                 integral = integral + (error * (dt/1000));
                 double output_Power = (Kp * error) + (Ki * integral);
+
+                //limits the power to always being positive
                 if (output_Power < 0) {
                     output_Power = 0;
                 }
-                else if (output_Power > 10000){
-                    output_Power = 10000;
+                //limits the power output to 120 Kilowatts
+                else if (output_Power > 120000){
+                    output_Power = 120000;
                 }
                 System.out.println("power: " + output_Power);
                 currV = Network.tm_Interface.update_Speed(ID, output_Power);

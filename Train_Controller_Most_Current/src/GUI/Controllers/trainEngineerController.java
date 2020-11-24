@@ -3,11 +3,10 @@ package GUI.Controllers;
 import GUI.Main_GUI;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 import networking.*;
 import Back_End.*;
 import Back_End.Network;
@@ -18,6 +17,8 @@ public class trainEngineerController{
     public TextField kiTextField;
     public Label carLabel;
     public CheckBox defaultBox;
+    public Button backButton;
+    public Button okButton;
 
     //index for UI
     public int trainEngIndex;
@@ -27,15 +28,15 @@ public class trainEngineerController{
     }*/
 
     public void onMouseClickDefault(MouseEvent mouseEvent) {
-        System.out.println("The Defaults have been selected");
+        //System.out.println("The Defaults have been selected");
     }
 
     public void onKeyPressedTB1(KeyEvent keyEvent) {
-        System.out.println("Text has been entered for Kp");
+        //System.out.println("Text has been entered for Kp");
     }
 
     public void onKeyPressedTB2(KeyEvent keyEvent) {
-        System.out.println("Text has been entered for Ki");
+        //System.out.println("Text has been entered for Ki");
     }
 
     public void onMouseClickButton(MouseEvent mouseEvent) {
@@ -48,6 +49,17 @@ public class trainEngineerController{
             try {
                 //Main_GUI.train_Cat_1.set_Defaults(Integer.valueOf(kpTextField.getText()), Integer.valueOf(kiTextField.getText()), (Integer.valueOf(carLabel.getText())));
                 Main_GUI.train_Cat_1.set_Defaults(Integer.valueOf(kpTextField.getText()), Integer.valueOf(kiTextField.getText()), (Integer.valueOf(Main_GUI.train_Cat_1.get_Train_Controller(trainEngIndex).get_Number_Of_Cars())));
+
+                // alert for comfirmation of values
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Kp and Ki values");
+                alert.setContentText("These values will be set as Defaults for Kp and Ki" + "\n" + "Kp: " + Integer.valueOf(kpTextField.getText()) + "\n" + "Ki: " + Integer.valueOf(kiTextField.getText()));
+                alert.showAndWait();
+
+                //close stage after values are confirmed
+                Stage stage = (Stage) okButton.getScene().getWindow();
+                stage.close();
+
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -57,13 +69,27 @@ public class trainEngineerController{
             Main_GUI.train_Cat_1.get_Train_Controller(trainEngIndex).set_Ki(Integer.valueOf(kiTextField.getText()));
             //Main_GUI.train_Cat_1.get_Train_Controller(trainEngIndex).set_Number_Of_Cars(Integer.valueOf(carLabel.getText()));
             Main_GUI.train_Cat_1.get_Train_Controller(trainEngIndex).set_Number_Of_Cars(Integer.valueOf(Main_GUI.train_Cat_1.get_Train_Controller(trainEngIndex).get_Number_Of_Cars()));
+
+            // alert for confirmation of values
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Kp and Ki values");
+            alert.setContentText("These values will be set for Kp and Ki" + "\n" + "Kp: " + Integer.valueOf(kpTextField.getText()) + "\n" + "Ki: " + Integer.valueOf(kiTextField.getText()));
+            alert.showAndWait();
+
+            //close stage after values are confirmed
+            Stage stage = (Stage) okButton.getScene().getWindow();
+            stage.close();
+
         } else {
             System.out.println("Please enter values for Kp and Ki.");
         }
     }
 
     public void onMouseClickBack(MouseEvent mouseEvent) {
+
         System.out.println("Back button has been pressed");
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        stage.close();
     }
 
     public void set_Car_Label(int cars){

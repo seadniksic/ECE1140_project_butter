@@ -1,5 +1,6 @@
 package GUI.Controllers;
 
+import Back_End.Network;
 import Back_End.Train_Controller_Catalogue;
 //import Main
 import GUI.Main_GUI;
@@ -31,6 +32,14 @@ public class driverController {
     public Label currTempLabel;
     public TextField tempIn;
     public Button setSpeedButton;
+    public Button backButton;
+    public RadioButton doorsLeftRB;
+    public RadioButton doorsRightRB;
+    public RadioButton inLightsRB;
+    public RadioButton extLightsRB;
+    public RadioButton advertisementsRB;
+    public RadioButton announcementsRB;
+
 
     public int indexDriver;
 
@@ -83,7 +92,9 @@ public class driverController {
     }
 
     public void onMouseClickBack(MouseEvent mouseEvent) {
-        System.out.println("Back button has been selected");
+        //System.out.println("Back button has been selected");
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        stage.close();
     }
 
     public void onMouseClickBrakeNV(MouseEvent mouseEvent) {
@@ -100,9 +111,41 @@ public class driverController {
         System.out.println("manual speed set");
     }
 
+    public void updateTheStuff(MouseEvent mouseEvent){
+        update_Labels();
+    }
+
+    public void doorsLeftClicked(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Open_Doors_Left(doorsLeftRB.isSelected());
+
+    }
+
+    public void doorsRightClicked(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Open_Doors_Right(doorsRightRB.isSelected());
+
+    }
+
+    public void intLightsOn(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Internal_Lights(inLightsRB.isSelected());
+    }
+
+    public void extLightsOn(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_External_Lights(extLightsRB.isSelected());
+
+    }
+
+    public void advertisementsOn(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Advertisements(advertisementsRB.isSelected());
+    }
+
+    public void announcementsOn(MouseEvent mouseEvent){
+        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Announcements(announcementsRB.isSelected());
+
+    }
+
     public void set_Index_Driver(int i){
         indexDriver = i;
-        System.out.println("Driver index set");
+        System.out.println("Driver index set as " + indexDriver);
     }
 
     public int get_Index_Driver(){
@@ -127,5 +170,7 @@ public class driverController {
      }
 
      // currSpeed from Sead
-     // 
+     //
+
+
 }
