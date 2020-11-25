@@ -10,8 +10,8 @@ import java.util.ArrayList;
 public class Train_Model {
     static double car_Length = 32.2; // meters
     static int car_Mass = 40900; //kg
-    static double static_friction_coefficient = 0.65;  // steel on steel (clean and dry conditions)
-    static double kinetic_friction_coefficient = 0.42; // steel on steel (clean and dry conditions)
+    static double static_friction_coefficient = 0.05;  // steel on steel (clean and dry conditions)
+    static double kinetic_friction_coefficient = 0.01; // steel on steel (clean and dry conditions)
     static int average_Person_Mass = 70; //kg
     double static_friction; //N
     double kinetic_friction; //N
@@ -38,12 +38,15 @@ public class Train_Model {
     private int passengers = 0;
     private int crew = 3;
     private String failure = "None";
-    private int weight;
+    private int mass;
+    private double acc;
     private double force;
     private double total_Force;
     private double positive_Force;
     private double neg_Force;
     private double max_Force;
+    private double e_Brake_Force = 140413;
+    private double brake_Force = 61720;
 
 
     public Train_Model(int cars, int new_id) {
@@ -51,20 +54,20 @@ public class Train_Model {
         this.num_Cars = cars;
         this.velocity = 0;
         crew = 3;
-        update_Weight();
-        static_friction = static_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) / 10 * 9.81); // Mu * Normal Force (the 10 is to account for the hitches in between trains greatly reducing the static friciton
-        kinetic_friction = kinetic_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) / 10 * 9.81);  // Mu * Normal Force
+        update_Mass();
+        static_friction = static_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) * 9.81); // Mu * Normal Force (the 10 is to account for the hitches in between trains greatly reducing the static friciton
+        kinetic_friction = kinetic_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) * 9.81);  // Mu * Normal Force
         set_Int_Lights(true);
     }
 
     public void add_Passengers(int number) {
         this.passengers += number;
-        update_Weight();
+        update_Mass();
     }
 
     public void add_Crew(int number) {
         this.crew += number;
-        update_Weight();
+        update_Mass();
     }
 
     public void set_Grade(double number) { this.grade = number; }
@@ -94,14 +97,11 @@ public class Train_Model {
 
     public void set_Brake_Status(boolean state) {
         this.brake_Status = state;
-        if (GUI.current_index == id) {
-            GUI.brake_Prop.setValue(brake_Status);
-        }
     }
 
     public void set_Emergency_Brake_Status(boolean state) throws RemoteException {
         this.emergency_Brake_Status = state;
-        Network.tc_Interface.update_E_Brake(id, true);
+        Network.tc_Interface.update_E_Brake(id, state);
     }
 
     public void set_Advertisements(boolean state) { this.advertisements = state;}
@@ -187,64 +187,76 @@ public class Train_Model {
         this.engine_Power = power;
 
         System.out.println("----------------------------");
-        System.out.println("Cycle Time: " + cycle_Time);
-
         double current_Velocity = (double) velocity; //meters / second
         double current_power = (double) this.engine_Power; //watts
 
-        force = power / current_Velocity; // Newtons
-
+        if (power == 0 && current_Velocity == 0) {
+            force = 0;
+        } else {
+            force = power / current_Velocity; // Newtons
+        }
+        System.out.println("Initial Power: " + power);
+        System.out.println("Initial Current Velocity: " + current_Velocity);
+        System.out.println("Force Initial: " + force);
         max_Force = ((num_Cars * car_Mass) + (passengers + crew) * average_Person_Mass) * 2.7;
 
         force = Math.min(force, max_Force); //force limiter
+
+        System.out.println("Force After mins/maxes: " + force);
+
         positive_Force = force;
-        System.out.println("Force: "+ force);
-        System.out.println("Static Friction: " + static_friction);
-        System.out.println("Kinetic Friction: " + kinetic_friction);
+
         //Force of gravity in meters
         double F_g = (num_Cars * car_Mass) * 9.81;
         double F_g_x = F_g * Math.sin(this.grade * (2*3.14159)/360);
 
         if (current_Velocity < .01) {
-            force -= (F_g_x + static_friction);
-            neg_Force = (F_g_x + static_friction);
-        } else {
-            force -= (F_g_x + kinetic_friction);
-            neg_Force = (F_g_x + static_friction);
+            if (force != 0) {
+                neg_Force = (F_g_x + static_friction);
+                if (emergency_Brake_Status) {
+                    force -= (F_g_x + static_friction + (e_Brake_Force)); //assuming each car contributes the same amount of braking force
+                } else if (brake_Status) {
+                    force -= (F_g_x + static_friction + (brake_Force));
+                } else {
+                    force -= (F_g_x + static_friction);
+                }
+            }
+        } else if (current_Velocity >=.01) {
+            neg_Force = (F_g_x + kinetic_friction);
+            if (emergency_Brake_Status) {
+                force -= (F_g_x + e_Brake_Force);
+            } else if (brake_Status) {
+                force -= (F_g_x + brake_Force);
+            } else {
+                force -= (F_g_x + kinetic_friction);
+            }
         }
 
+        System.out.println("Force After friction and grade: " + force);
 
+        acc = force / mass;
 
-
-        System.out.println("Power: "+ power);
-        //System.out.println("Force: "+ force);
-        double acc;
-        if (emergency_Brake_Status) {
-            acc = (force / (num_Cars * car_Mass)) - e_brake_acc;
-        } else if (brake_Status) {
-            acc = (force / (num_Cars * car_Mass)) - brake_acc;
-        } else {
-            acc = (force / (num_Cars * car_Mass));
-        }
+        System.out.println("Acc: "+ acc);
 
         current_Velocity += (acc * (double) cycle_Time);
 
-        System.out.println("Acceleration: " + acc);
+//        System.out.println("F_g: " + F_g);
+//        System.out.println("F_g_x: " + F_g_x);
+//        System.out.println("Cycle Time: " + cycle_Time);
+//        System.out.println("Power:" + power);
+//        System.out.println("current_v");
+//        System.out.println("Force: " + force);
+//        System.out.println("acceleration: " + acc);
 
-        System.out.println("Old distance: "+ distance);
         //Update position
         double new_Distance = current_Velocity * (double) cycle_Time + distance;
-        System.out.println("New Position: " + new_Distance);
+
         time = System.currentTimeMillis();
         //Network.tm_interface.send_Distance(new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 
-        System.out.println("Train " + id + " Power: " + this.engine_Power);
-        System.out.println("Train " + id + " Velocity: " + velocity);
-
         if (GUI.current_index == id) {
-            System.out.println("--------------Refresh Call-----------------");
             GUI.refresh_Table(id);
         }
 
@@ -257,8 +269,8 @@ public class Train_Model {
         return temperature;
     }
 
-    public void update_Weight() {
-        this.weight = (crew + passengers) * average_Person_Mass + (num_Cars * car_Mass);
+    public void update_Mass() {
+        this.mass = (crew + passengers) * average_Person_Mass + (num_Cars * car_Mass);
     }
 
     public void send_Speed_Authority(int speed, int authority, double grade_in) throws RemoteException, InterruptedException {

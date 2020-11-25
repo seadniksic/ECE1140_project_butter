@@ -98,7 +98,7 @@ public class GUI extends Application {
         main_data.removeAll();
         DecimalFormat df = new DecimalFormat("0.0000");
         ObservableList<Property> temp = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity() * 2.237, "mph"),
+                new Property("Speed", train.get_Velocity(), "m/s"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
                 new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
@@ -117,7 +117,8 @@ public class GUI extends Application {
                 new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
                 new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
                 new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
-                new Property("Cabin Temperature", train.get_Temperature(), "F")
+                new Property("Cabin Temperature", train.get_Temperature(), "F"),
+                new Property("Advertisements", train.get_Advertisements(), "")
         );
 
         ObservableList<Property> temp4 = FXCollections.observableArrayList(
@@ -209,7 +210,7 @@ public class GUI extends Application {
         current_index = index;
 
         main_data = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity() * 2.237, "mph"),
+                new Property("Speed", train.get_Velocity(), "m/s"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
                 new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
@@ -228,7 +229,8 @@ public class GUI extends Application {
                 new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
                 new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
                 new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
-                new Property("Cabin Temperature", train.get_Temperature(), "F")
+                new Property("Cabin Temperature", train.get_Temperature(), "F"),
+                new Property("Advertisements", train.get_Advertisements(), "")
         );
 
         attributes_data = FXCollections.observableArrayList(
@@ -294,7 +296,7 @@ public class GUI extends Application {
         main_table.setMaxSize(365, 200);
         main_table.setFixedCellSize(40);
         advanced_table.setFixedCellSize(80);
-        advanced_table.setMaxSize(365, 200);
+        advanced_table.setMaxSize(300, 200);
         non_vital_table.setMaxSize(365, 200);
         non_vital_table.setFixedCellSize(30);
         attributes_table.setMaxSize(365, 200);
