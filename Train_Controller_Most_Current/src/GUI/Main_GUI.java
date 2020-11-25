@@ -18,9 +18,13 @@ public class Main_GUI extends Application {
     }
     @Override
     public void start(Stage primaryStage) throws Exception{
+        // starts the server and connects to the modules I should connect with
+        //In my case, I only connect to the train model's module
         Network.start_Server();
         Network.connect_To_Modules();
 
+        // These are just commented out manual tests
+        //REMOVE THIS BLOCK OF CODE BEFORE SUBMISSION
         /*train_Cat_1.add_Train_Controller(4);
         train_Cat_1.set_Commanded_Speed_Authority(0, 50, 10000);
         train_Cat_1.add_Train_Controller(3);
@@ -29,22 +33,14 @@ public class Main_GUI extends Application {
         train_Cat_1.set_Commanded_Speed_Authority(2, 35, 250000);*/
 
 
-
+        //loads the Train Catalogue UI
+        // Other UI's load in the Controllers for each respective UI. I.E. The Home Controller will load Driver/Train Engineer UI's
         Parent root = FXMLLoader.load(getClass().getResource("/GUI/FXML/Train_Catalogue.FXML"));
         primaryStage.setTitle("Train Controller Catalogue");
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        /*Parent root = FXMLLoader.load(getClass().getResource("/GUI/FXML/home.FXML"));
-        primaryStage.setTitle("Train Controller Home");
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show();*/
-        //new homeController(0);
-
-        //This line is throwing an error
-        //Controller.set_my_Module_Name();
     }
 
     public static void launch_UI(Parent h, String s) {

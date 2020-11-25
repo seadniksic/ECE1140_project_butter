@@ -49,7 +49,8 @@ public class driverController {
        // setpointLabel.setText(java.util.Calendar.getInstance().getTime().toString());
     }
 
-    public driverController(int i){
+    // handled within the home controller
+    /*public driverController(int i){
         indexDriver = i;
         System.out.println("in the home controller constructor");
         System.out.println("Index: " + indexDriver);
@@ -66,7 +67,7 @@ public class driverController {
         }catch (Exception e){
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void onMouseClickManMode(MouseEvent mouseEvent) {
         System.out.println("Manual mode has been selected");
@@ -139,7 +140,8 @@ public class driverController {
     }
 
     public void announcementsOn(MouseEvent mouseEvent){
-        Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Announcements(announcementsRB.isSelected());
+        //Main_GUI.train_Cat_1.get_Train_Controller(indexDriver).set_Announcements(announcementsRB.isSelected());
+        // change this to a text field that takes a string and then displays it to the Train Model UI
 
     }
 
@@ -168,9 +170,6 @@ public class driverController {
         //currTempLabel; // don't have a current temperature either
         //tempIn; // dont have a variable for this either*/
      }
-
-     // currSpeed from Sead
-     //
 
 
 }

@@ -1,11 +1,15 @@
 package GUI.Controllers;
 
 import GUI.Main_GUI;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+
+import java.awt.*;
 
 
 public class homeController {
@@ -16,6 +20,10 @@ public class homeController {
     public driverController driverCont = new driverController();
     public trainEngineerController trainEngCont = new trainEngineerController();
 
+    @FXML
+    public Button driverButton;
+    public Button trainEngineerButton;
+
     public homeController(){
         // I was getting an error for not having a default constructor, even though it was not being used
         // So don't delete it even though it isn't being used
@@ -23,16 +31,18 @@ public class homeController {
         System.out.println("index in base constructor: " + index);
     }
 
-  public homeController(int i){
+    // This was commented out in an effort to clean up the code
+    // if an error occurs, try uncommenting this
+  /*public homeController(int i){
       index = i;
       System.out.println("in the home controller constructor");
       System.out.println("Index: " + index);
-      /*try {
-          System.out.println("try statement in constructor with parameter");
-          launch_Home(index);
-      } catch (Exception e){
-          e.printStackTrace();
-      }*/
+      //try {
+      //    System.out.println("try statement in constructor with parameter");
+      //    launch_Home(index);
+      //} catch (Exception e){
+      //    e.printStackTrace();
+      //}
 
      try{
          Parent homeRoot = FXMLLoader.load(getClass().getResource("/GUI/FXML/home.fxml"));
@@ -47,7 +57,7 @@ public class homeController {
          e.printStackTrace();
      }
      //this.index = i;
-    }
+    } */
 
     public void onClickEvent(MouseEvent mouseEvent) {
 
@@ -55,6 +65,10 @@ public class homeController {
     }
 
     public void b1ButtonClicked(MouseEvent mouseEvent) throws Exception {
+
+        //close home stage before driver launches
+        Stage stage = (Stage) driverButton.getScene().getWindow();
+        stage.close();
 
         FXMLLoader driverLoad = new FXMLLoader(getClass().getResource("/GUI/FXML/driver.fxml"));
         driverLoad.setController(driverCont); // manually load controller instance
@@ -122,7 +136,9 @@ public class homeController {
         }*/
         }
 
-    public void launch_Home(int i) throws Exception{
+        // Commented out to clean up code coverage
+    // If errors occur, try to roll this back
+    /*public void launch_Home(int i) throws Exception{
       // opens up the home UI
         index = i;
         System.out.println("Entered launch home");
@@ -154,7 +170,7 @@ public class homeController {
         trainEngineerStage.setScene(trainEngineer);
         trainEngineerStage.show();
 
-    }
+    } */
 
     public void set_Index_Home(int j){
         index = j;

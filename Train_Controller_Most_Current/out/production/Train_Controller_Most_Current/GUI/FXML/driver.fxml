@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseDragOver="#updateTheStuff" onMouseEntered="#updateTheStuff" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseDragOver="#updateTheStuff" onMouseMoved="#updateTheStuff" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
   <tabs>
     <Tab text="Vital">
       <content>
@@ -85,7 +85,7 @@
                   <RadioButton fx:id="doorsLeftRB" layoutX="76.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#doorsLeftClicked" text="Open Doors(Left)" />
                   <RadioButton fx:id="inLightsRB" layoutX="352.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#intLightsOn" text="Turn on Internal Lights" />
                   <RadioButton fx:id="extLightsRB" layoutX="76.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#extLightsOn" text="Turn on External Lights" />
-                  <RadioButton fx:id="advertismentsRB" layoutX="257.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#advertisementsOn" text="Advertisements" />
+                  <RadioButton fx:id="advertisementsRB" layoutX="257.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#advertisementsOn" text="Advertisements" />
                   <RadioButton fx:id="announcementsRB" layoutX="76.0" layoutY="197.0" mnemonicParsing="false" onMouseClicked="#announcementsOn" text="Announcements" />
                   <GridPane layoutX="257.0" layoutY="191.0">
                     <columnConstraints>

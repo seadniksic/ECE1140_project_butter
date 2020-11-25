@@ -20,12 +20,7 @@ import GUI.*;
 public class Train_Catalogue_Controller{
     @FXML
     public ListView tc_List;
-    // int index = list.getSelectionModel().getSelectedIndex();
-    //^^^^^^ this will be used for specific selection of a train controller from the catalogue
 
-    /*public Train_Catalogue_Controller(){
-        tc_List.setItems(Train_Controller_Catalogue.tc_Name_List);
-    }*/
     public homeController homeCont = new homeController();
 
     public void initialize(){
@@ -34,15 +29,6 @@ public class Train_Catalogue_Controller{
     }
 
     public void tc_Selected(MouseEvent mouseEvent) throws Exception {
-        //homeController(tc_List.getSelectionModel().getSelectedIndex());
-        //System.out.println("tc selected");
-        //Parent homeRoot = FXMLLoader.load(getClass().getClassLoader().getResource("src/GUI/FXML/home.fxml"));
-        //Scene home = new Scene(homeRoot);
-        //Stage homeStage = new Stage();
-//////
-        //homeStage.setScene(home);
-        //homeStage.show();
-        //System.out.println("dead function");
 
         // Sets home controller index equal to the train controller catalogue selected by the user
         //Print statements for troubleshooting
@@ -61,13 +47,7 @@ public class Train_Catalogue_Controller{
            System.out.println("The Try/Catch statement to load the FXML file failed");
            e.printStackTrace();
        }
-      /* Parent homeRoot = FXMLLoader.load(getClass().getResource("/GUI/FXML/home.fxml"));
-       Scene homeScene = new Scene(homeRoot);
-       Stage homeStage = new Stage();
-       homeStage.setTitle("Train Controller Home");
 
-       homeStage.setScene(homeScene);
-       homeStage.show();*/
     }
 
 

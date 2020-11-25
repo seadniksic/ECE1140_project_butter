@@ -21,7 +21,7 @@ public class Train_Controller {
     private double current_Speed;
     private Date setpointUpdate;
     private Boolean loopStarted = false;
-    private boolean announcements;
+    private String announcements;
     private boolean advertisements;
     private boolean open_Doors_Left;
     private boolean open_Doors_Right;
@@ -121,6 +121,7 @@ public class Train_Controller {
         brakes_On = brakes;
         // send to Sead
         try{
+            // this is throwing an error
             Network.tm_Interface.set_Brake_Status(ID, brakes);
         } catch (Exception e){
             e.printStackTrace();
@@ -156,11 +157,16 @@ public class Train_Controller {
         return authority;
     }
 
-    public void set_Announcements(boolean b){
+    public void set_Announcements(String s){
         // Sead needs an announcements function in his interface
+        try {
+            Network.tm_Interface.set_Announcements(ID, s);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
-    public boolean get_Announcements(){
+    public String get_Announcements(){
         return announcements;
     }
 
@@ -179,26 +185,31 @@ public class Train_Controller {
 
     //public void set_Left_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     //public void set_Right_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
-    public void set_Open_Doors_Left(boolean doors){
-        // we need a differentiation between left and right doors
-        try {
-            Network.tm_Interface.set_Left_Door_Status(ID, doors); // opens doors VIA Train Model
-        } catch (Exception e){
-            e.printStackTrace();
+    public void set_Open_Doors_Left(boolean doors) {
+        // doors should not open if the train is moving
+        if (current_Speed == 0) {
+            try {
+                Network.tm_Interface.set_Left_Door_Status(ID, doors); // opens doors VIA Train Model
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            open_Doors_Left = doors; // sets state in the Train Controller module
         }
-        open_Doors_Left = doors; // sets state in the Train Controller module
     }
 
-    public void set_Open_Doors_Right(boolean doors){
-        // we need a differentiation between left and right doors
-        try {
-            Network.tm_Interface.set_Right_Door_Status(ID, doors); // opens doors VIA Train Model
-        } catch (Exception e){
-            e.printStackTrace();
+    public void set_Open_Doors_Right(boolean doors) {
+        // doors should not open if the train is moving
+        if (current_Speed == 0) {
+            try {
+                Network.tm_Interface.set_Right_Door_Status(ID, doors); // opens doors VIA Train Model
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            open_Doors_Right = doors; // sets state in the Train Controller module
         }
-        open_Doors_Right = doors; // sets state in the Train Controller module
     }
 
+    // need getters after splitting into right and left
     /*public boolean get_Open_Doors(){
         return open_Doors;
     }*/
@@ -276,12 +287,12 @@ public class Train_Controller {
         return setpointUpdate.toString();
     }
 
-    public double power_Iteration_2(double vSead) {
+    /*public double power_Iteration_2(double vSead) {
         double speed_Dub = commanded_Speed;
         double vError = (double) ((0.277778 * speed_Dub) - vSead); // converstion factor to calculate from km/hr to m/s
         double power = vError * Kp;
         return power;
-    }
+    }*/
 
     // need a function that deals with the manual mode power. Also need a handler function that decides whether to call this one or that one
     public void calculate_Power_Command() throws RemoteException, InterruptedException {
@@ -297,48 +308,70 @@ public class Train_Controller {
         //vCommand = (double) commanded_Speed; // what is was before modfication
 
         //check manual speed against commanded speed, verify it isnt over, then replace commanded speed with manual speed
+        double output_Power = 0;
 
         while (true == true) {
             // handles for breaking
             while(brakes_On == true || e_Brake_On == true){
                 currV = Network.tm_Interface.update_Speed(ID, 0);
+                System.out.println("curr v: " + currV);
                 // need to keep updating the current speed
                 set_Current_Speed(currV);
                 Thread.sleep(dt);
             }
+
             //Handling for whether we are in manual mode or automatic mode
             if(manual_Mode == true && manual_Speed >0 && manual_Speed <= commanded_Speed){
                 vCommand = (double) manual_Speed;
             } else {
                 vCommand = (double) commanded_Speed;
             }
-            loopStarted = true;
-            //vCommand = (double) commanded_Speed;
-            error = vCommand - currV;
-            //if (error >= 0) {
-                System.out.println(ID + " currV: " + currV + "\n" + "error: " + error + "\n");
-                integral = integral + (error * (dt/1000));
-                double output_Power = (Kp * error) + (Ki * integral);
 
-                //limits the power to always being positive
-                if (output_Power < 0) {
-                    output_Power = 0;
+            //breaks when the current velocity is greater than the commanded velocity
+            if(current_Speed > vCommand + 0.3){
+                while(current_Speed > vCommand){
+                    set_Brakes_On(true);
+                    currV = Network.tm_Interface.update_Speed(ID, 0);
+                    set_Current_Speed(currV);
+                    Thread.sleep(dt);
                 }
-                //limits the power output to 120 Kilowatts
-                else if (output_Power > 120000){
-                    output_Power = 120000;
-                }
-                System.out.println("power: " + output_Power);
-                currV = Network.tm_Interface.update_Speed(ID, output_Power);
-                set_Current_Speed(currV);
-                previousError = error;
-                Thread.sleep(dt);
-                System.out.println("Dt is: " + dt);
-            /*}
-            else {
-                currV = Network.tm_Interface.update_Speed(ID,0);
-                System.out.println("currv in negative: " + currV);
-            }*/
+                set_Brakes_On(false);
+            }
+
+            // loopStarted marks that there is an active loop running for this train controller
+            loopStarted = true;
+            error = vCommand - currV;
+
+            System.out.println(ID + " currV: " + currV + "\n" + "error: " + error + "\n");
+
+            if(output_Power >= 120000) {
+                // integral term does not update if the output power is greater than the max as per Project Slides
+                integral = integral;
+                System.out.println("output power greater than max");
+            } else{
+                integral = integral + (error * (((double)dt) / 1000));
+                System.out.println("testing: " + (((double)dt) / 1000));
+                System.out.println("output power not greater than max");
+            }
+            System.out.println("integral var: " + integral);
+
+            output_Power = (Kp * error) + (Ki * integral);
+            System.out.println("power: " + output_Power);
+            //limits the power to always being positive
+            if (output_Power < 0) {
+                output_Power = 0;
+            }
+            //limits the power output to 120 Kilowatts as per Datasheet
+            else if (output_Power > 120000){
+                System.out.println("output before limited: " + output_Power);
+                output_Power = 120000;
+            }
+            System.out.println("power: " + output_Power);
+            currV = Network.tm_Interface.update_Speed(ID, output_Power);
+            set_Current_Speed(currV);
+            previousError = error;
+            Thread.sleep(dt);
+            System.out.println("Dt is: " + dt);
 
         }
     }
