@@ -4,15 +4,18 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -31,6 +34,7 @@ public class Block_GUI {
 
 
     TextField block_Num_TF;
+    TextField line_TF;
     TextField section_TF;
     TextField length_TF;
     TextField grade_TF;
@@ -82,7 +86,7 @@ public class Block_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                summon_Block_Editor();
+                summon_Block_Editor(false);
                 System.out.println(to_String());
             }
         };
@@ -97,7 +101,9 @@ public class Block_GUI {
                 parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
                 parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
                 parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
-                parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
+                if(parent_Block.isSwitch){
+                    parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
+                }
                 parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
                 parent_Block.isYard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
                 parent_Block.isSwitch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
@@ -118,6 +124,16 @@ public class Block_GUI {
         };
         param_Button.setOnAction(event);
     }
+    private void map_is_Switch_CheckBox(CheckBox param_Checkbox){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.isSwitch = is_Switch_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                summon_Block_Editor(true);
+            }
+        };
+        param_Checkbox.setOnAction(event);
+    }
 
     private Scene return_Block_Editor_Scene(){
 
@@ -128,18 +144,29 @@ public class Block_GUI {
 
         is_Switch_CheckBox = new CheckBox("Switch");
         is_Switch_CheckBox.setSelected(parent_Block.isSwitch);
+        map_is_Switch_CheckBox(is_Switch_CheckBox);
 
         Button save_Button = new Button("Save and Close");
         map_Save_Button(save_Button);
 
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Next_HBox(), return_Set_Next_2_HBox(), return_Set_Previous_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, save_Button);
+
+        // Only add the settings for special blocks if they are selected as such
+        HBox temp_Set_Next_2_HBox = new HBox();
+        if(is_Switch_CheckBox.isSelected()){
+            System.out.println("Reassignment");
+            temp_Set_Next_2_HBox = return_Set_Next_2_HBox();
+        }
+        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Previous_HBox(), temp_Set_Next_2_HBox, return_Set_Next_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, save_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
         return new Scene(this_VBox, 500, 600);
     }
-    private void summon_Block_Editor(){
+    private void summon_Block_Editor(Boolean is_Summoned_Again){
+        if(is_Summoned_Again){
+            block_Stage.close();
+        }
         block_Stage.setScene(return_Block_Editor_Scene());
         block_Stage.show();
     }
@@ -154,6 +181,15 @@ public class Block_GUI {
 
         return block_Num_HBox;
     }
+//    private HBox return_Line_HBox(){
+//        Label line_Label = new Label("Line: ");
+//        line_TF = new TextField(parent_Block.section);
+//        HBox section_HBox = new HBox();
+//        section_HBox.getChildren().addAll(section_Label, section_TF);
+//        section_HBox.setAlignment(Pos.CENTER);
+//
+//        return section_HBox;
+//    }
     private HBox return_section_HBox(){
         Label section_Label = new Label("Section: ");
         section_TF = new TextField(parent_Block.section);
@@ -164,7 +200,7 @@ public class Block_GUI {
         return section_HBox;
     }
     private HBox return_length_HBox(){
-        Label length_Label = new Label("Length: ");
+        Label length_Label = new Label("Length (m): ");
         length_TF = new TextField(String.valueOf(parent_Block.length));
         HBox length_HBox = new HBox();
         length_HBox.getChildren().addAll(length_Label, length_TF);
@@ -173,7 +209,7 @@ public class Block_GUI {
         return length_HBox;
     }
     private HBox return_grade_HBox(){
-        Label grade_Label = new Label("Grade: ");
+        Label grade_Label = new Label("Grade (%): ");
         grade_TF = new TextField(String.valueOf(parent_Block.grade));
         HBox grade_HBox = new HBox();
         grade_HBox.getChildren().addAll(grade_Label, grade_TF);
@@ -191,16 +227,23 @@ public class Block_GUI {
         return set_Next_HBox;
     }
     private HBox return_Set_Next_2_HBox(){
-        Label set_Next_2_Label = new Label("Next Block 2 (Switches Only): ");
+        //Label set_Next_2_Label = new Label("Next Block 2 (Switches Only): ");
+        final TextArea text = new TextArea("Next Block 2 (Switches Only): ");
+        text.setStyle("-fx-font-size: 12px;");
+        text.setWrapText(true);
+        text.setMaxHeight(12);
+        text.setMaxWidth(175);
+        text.setStyle("-fx-background-color: #F4F4F4");
+        text.setEditable(false);
         set_Next_2_TF = new TextField(String.valueOf(parent_Block.next_Block_Number_2));
         HBox set_Next_2_HBox = new HBox();
-        set_Next_2_HBox.getChildren().addAll(set_Next_2_Label, set_Next_2_TF);
+        set_Next_2_HBox.getChildren().addAll(text, set_Next_2_TF);
         set_Next_2_HBox.setAlignment(Pos.CENTER);
 
         return set_Next_2_HBox;
     }
     private HBox return_Set_Previous_HBox(){
-        Label set_Previous_Label = new Label("Previous: ");
+        Label set_Previous_Label = new Label("Previous Block: ");
         set_Previous_TF = new TextField(String.valueOf(parent_Block.previous_Block_Number));
         HBox set_Previous_HBox = new HBox();
         set_Previous_HBox.getChildren().addAll(set_Previous_Label, set_Previous_TF);
