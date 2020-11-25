@@ -284,6 +284,7 @@ public class Track_Model_Murphy_GUI {
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
                             if(block.x_Coord == Integer.parseInt(x_Coord_S) && block.y_Coord == Integer.parseInt(y_Coord_S)){
+                                block.is_Builder = false;
                                 block.section = extracted_Section;
                                 block.blockNumber = extracted_Block_Num;
                                 block.length = extracted_Block_Length;

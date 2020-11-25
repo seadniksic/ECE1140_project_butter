@@ -86,7 +86,7 @@ public class Block_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                summon_Block_Editor(false);
+                summon_Block_Editor(false, parent_Block.is_Builder);
                 System.out.println(to_String());
             }
         };
@@ -129,13 +129,13 @@ public class Block_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 parent_Block.isSwitch = is_Switch_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
-                summon_Block_Editor(true);
+                summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
         param_Checkbox.setOnAction(event);
     }
 
-    private Scene return_Block_Editor_Scene(){
+    private Scene return_Builder_Block_Editor_Scene(){
 
         Label description_label = new Label("Welcome to the block editor!");
 
@@ -163,14 +163,26 @@ public class Block_GUI {
 
         return new Scene(this_VBox, 500, 600);
     }
-    private void summon_Block_Editor(Boolean is_Summoned_Again){
-        if(is_Summoned_Again){
+    private Scene return_Murphy_Block_Editor_Scene(){
+        Label description_label = new Label("Welcome to the block editor!");
+        VBox this_VBox = new VBox();
+        this_VBox.getChildren().addAll(description_label);
+        this_VBox.setAlignment(Pos.TOP_CENTER);
+        this_VBox.setSpacing(20);
+
+        return new Scene(this_VBox, 500, 600);
+    }
+    private void summon_Block_Editor(Boolean param_Is_Summoned_Again, Boolean param_Is_Builder){
+        if(param_Is_Summoned_Again){
             block_Stage.close();
         }
-        block_Stage.setScene(return_Block_Editor_Scene());
+        if(param_Is_Builder){
+            block_Stage.setScene(return_Builder_Block_Editor_Scene());
+        }else{
+            block_Stage.setScene(return_Murphy_Block_Editor_Scene());
+        }
         block_Stage.show();
     }
-
     private HBox return_block_Num_HBox(){
         Label block_Num_Label = new Label("Block Number: ");
         block_Num_TF = new TextField(String.valueOf(parent_Block.blockNumber));
@@ -181,15 +193,6 @@ public class Block_GUI {
 
         return block_Num_HBox;
     }
-//    private HBox return_Line_HBox(){
-//        Label line_Label = new Label("Line: ");
-//        line_TF = new TextField(parent_Block.section);
-//        HBox section_HBox = new HBox();
-//        section_HBox.getChildren().addAll(section_Label, section_TF);
-//        section_HBox.setAlignment(Pos.CENTER);
-//
-//        return section_HBox;
-//    }
     private HBox return_section_HBox(){
         Label section_Label = new Label("Section: ");
         section_TF = new TextField(parent_Block.section);

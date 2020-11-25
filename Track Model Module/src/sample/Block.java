@@ -3,44 +3,50 @@ package sample;
 public class Block {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
 
-    // Core info
+    // Backend
     int x_Coord;
     int y_Coord;
+    Block_GUI this_Block_GUI;
+    Boolean is_Builder;
+
+    // Core information
     String section;
     int blockNumber;
     double length;
     double grade;
-
     int next_Block_Number;
     int previous_Block_Number;
-
     Boolean isOccupied = false;
 
-    // Options for Yard Blocks Only
+    // Yard only
     Boolean isYard;
 
-    // Options for Switches only
+    // Switch only
     Boolean isSwitch;
     int next_Block_Number_2;
     Boolean is_Switched;
 
-    Block_GUI this_Block_GUI;
+
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Block(int param_X, int param_Y){
+        // Backend
         this_Block_GUI = new Block_GUI(this);
         x_Coord = param_X;
         y_Coord = param_Y;
+        is_Builder = true;
 
+        // Core information
         section = "!";
         blockNumber = -1;
         length = -1.0;
         grade = -1.0;
-
         next_Block_Number = -1;
         previous_Block_Number = -1;
 
+        // Yard only
         isYard = false;
 
+        // Switch only
         isSwitch = false;
         next_Block_Number_2 = -1;
         is_Switched = false;
