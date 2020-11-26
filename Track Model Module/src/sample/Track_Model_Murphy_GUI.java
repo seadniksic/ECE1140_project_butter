@@ -18,11 +18,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-public class Track_Model_Murphy_GUI {
+public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
     public Stage murphy_Stage;
     Label description_label;
@@ -145,20 +146,13 @@ public class Track_Model_Murphy_GUI {
                         return new Task<Void>() {
                             protected Void call() throws Exception {
                                 // Actions
-                                for(int i = 0; i < 50; i++){
+                                for(int i = 0; i < 20; i++){
                                     Platform.runLater( ()->{
                                         if (simulate_Was_Clicked) {
-                                            System.out.println("Entering");
-                                            update_Occupancy(param_Line_Index, 0, 10.0);
-                                            swap_To_Line_Scene(param_Line_Index, param_GridPane);
+                                            update_Occupancy(param_GridPane, param_Line_Index, 0, 10.0);
                                         } else {
                                             // Set up before getting distances from trains
-                                            System.out.println("Spawning Train...");
-                                            spawn_Train_In_Yard(param_Line_Index, 1);
-                                            swap_To_Line_Scene(param_Line_Index, param_GridPane);
-
-                                            set_Switch_At_Block(param_Line_Index, 3, true);
-                                            set_Switch_At_Block(param_Line_Index, 21, true);
+                                            spawn_Train_In_Yard(param_Line_Index, 1, param_GridPane);
                                             simulate_Was_Clicked = true;
                                         }
                                     });
@@ -181,6 +175,7 @@ public class Track_Model_Murphy_GUI {
         };
         param_Button.setOnAction(event);
     }
+
     private void configureMenuBar(MenuBar param_MenuBar){
         Menu file_Menu = new Menu("File");
         MenuItem open_Track_MI = new MenuItem(("Open Track"));
@@ -292,14 +287,14 @@ public class Track_Model_Murphy_GUI {
                                 block.next_Block_Number = extracted_Next_Block_Number;
                                 block.next_Block_Number_2 = extracted_Next_Block_Number_2;
                                 block.previous_Block_Number = extracted_Previous_Block_Number;
-                                block.isYard = extracted_is_Yard;
-                                block.isSwitch = extracted_is_Switch;
+                                block.is_Yard = extracted_is_Yard;
+                                block.is_Switch = extracted_is_Switch;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
                                     block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
-                                    if(block.isYard){
+                                    if(block.is_Yard){
                                         block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Mustard"));
                                     }
-                                    if(block.isSwitch){
+                                    if(block.is_Switch){
                                         block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Blue"));
                                     }
                                 }
@@ -346,12 +341,12 @@ public class Track_Model_Murphy_GUI {
         murphy_Stage.show();
     }
 
-    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number){
+    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number, GridPane param_GridPane){
         Line working_Line = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index);
         // Find the block in the coordinate plane and turn its occupancy on
         for (Block[] blocks : working_Line.block_Arr) {
             for (Block block : blocks) {
-                if(block.blockNumber == param_Block_Number && block.isYard){
+                if(block.blockNumber == param_Block_Number && block.is_Yard){
                     System.out.println("Spawning train at block: " + block.blockNumber);
                     block.set_Occupancy(true);
                     //TODO: The arrays below need to be in tandem
@@ -360,8 +355,9 @@ public class Track_Model_Murphy_GUI {
                 }
             }
         }
+        swap_To_Line_Scene(param_Line_Index, param_GridPane);
     }
-    public void update_Occupancy(int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
+    public void update_Occupancy(GridPane param_GridPane, int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
         // Print statements are concatenated into ...
         System.out.println("\nUpdating occupancy...");
         // For every row in the line
@@ -399,7 +395,7 @@ public class Track_Model_Murphy_GUI {
                         }
 
                         // Perform different actions if the block is a switch
-                        if(block.isSwitch){
+                        if(block.is_Switch){
                             System.out.println("This block: " + block.blockNumber + " is a switch");
                             System.out.println("Block number 1: " + block.next_Block_Number);
                             System.out.println("Block number 2: " + block.next_Block_Number_2);
@@ -424,7 +420,7 @@ public class Track_Model_Murphy_GUI {
                                         block1.set_Occupancy(true);
                                         this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                         // Destroy the train if the new occupancy is a yard
-                                        if(block1.isYard){
+                                        if(block1.is_Yard){
                                             System.out.println("Absorbing train at block 1: " + block1.blockNumber);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.remove(param_Occupancy_Index);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.remove(param_Occupancy_Index);
@@ -447,7 +443,7 @@ public class Track_Model_Murphy_GUI {
                                         block1.set_Occupancy(true);
                                         this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                         // Destroy the train if the new occupancy is a yard
-                                        if(block1.isYard){
+                                        if(block1.is_Yard){
                                             System.out.println("Absorbing train at block 1: " + block1.blockNumber);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.remove(param_Occupancy_Index);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.remove(param_Occupancy_Index);
@@ -481,7 +477,7 @@ public class Track_Model_Murphy_GUI {
                                         block1.set_Occupancy(true);
                                         this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                         // Destroy the train if the new occupancy is a yard
-                                        if(block1.isYard){
+                                        if(block1.is_Yard){
                                             System.out.println("Absorbing train at block 1: " + block1.blockNumber);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.remove(param_Occupancy_Index);
                                             this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.remove(param_Occupancy_Index);
@@ -505,6 +501,7 @@ public class Track_Model_Murphy_GUI {
             }
         }
         print_Update_Occupancy("Did not move", param_Line_Index);
+        swap_To_Line_Scene(param_Line_Index, param_GridPane);
     }
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched){
         for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
@@ -515,6 +512,20 @@ public class Track_Model_Murphy_GUI {
             }
         }
     }
+
+
+
+    // Cringe
+    @Override
+    public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
+
+    }
+
+    @Override
+    public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
+
+    }
+
     void print_Update_Occupancy(String param_Where_Called, int param_Line_Index){
         System.out.println("Called at: " + param_Where_Called);
         System.out.println("Current occupancies: ");
@@ -535,22 +546,3 @@ public class Track_Model_Murphy_GUI {
 // Safekeeping
 //this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.remove(param_Occupancy_Index);
 //this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.remove(param_Occupancy_Index);
-
-//                    if(simulate_Was_Clicked){
-//                        update_Occupancy(param_Line_Index, 0, 10.0);
-//                        swap_To_Line_Scene(param_Line_Index, param_GridPane);
-//                    } else{
-//                        // Set up before getting distances from trains
-//                        System.out.println("Spawning Train...");
-////                        spawn_Train_In_Yard(param_Line_Index, 62);
-//                          spawn_Train_In_Yard(param_Line_Index, 1);
-//                        swap_To_Line_Scene(param_Line_Index, param_GridPane);
-////                        set_Switch_At_Block(param_Line_Index,76, false);
-////                        set_Switch_At_Block(param_Line_Index,77, true);
-////                        set_Switch_At_Block(param_Line_Index,101, true);
-//                          set_Switch_At_Block(param_Line_Index, 3, true);
-//                          set_Switch_At_Block(param_Line_Index, 21, true);
-//                        simulate_Was_Clicked = true;
-//                    }
-//            }
-//        };

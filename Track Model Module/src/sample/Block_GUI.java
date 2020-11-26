@@ -44,6 +44,7 @@ public class Block_GUI {
 
     CheckBox is_Yard_CheckBox;
     CheckBox is_Switch_CheckBox;
+    CheckBox is_Station_CheckBox;
 
     Stage block_Stage;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
@@ -101,22 +102,25 @@ public class Block_GUI {
                 parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
                 parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
                 parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
-                if(parent_Block.isSwitch){
+                if(parent_Block.is_Switch){
                     parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
                 }
                 parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
-                parent_Block.isYard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
-                parent_Block.isSwitch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
+                parent_Block.is_Yard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
+                parent_Block.is_Switch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
+                parent_Block.is_Station = (is_Station_CheckBox.isSelected() != false ? true : is_Station_CheckBox.isSelected());
 
                 //TODO: Only change color if the block number is not -1, (declared)
                 if(parent_Block.blockNumber != -1){
                     changeColor(color_Map.get("Green"));
-
-                    if(parent_Block.isYard){
+                    if(parent_Block.is_Yard){
                         changeColor(color_Map.get("Mustard"));
                     }
-                    if(parent_Block.isSwitch){
+                    if(parent_Block.is_Switch){
                         changeColor(color_Map.get("Blue"));
+                    }
+                    if(parent_Block.is_Station){
+                        changeColor(color_Map.get("Purple"));
                     }
                 }
                 block_Stage.close();
@@ -128,7 +132,17 @@ public class Block_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                parent_Block.isSwitch = is_Switch_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                parent_Block.is_Switch = is_Switch_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                summon_Block_Editor(true, parent_Block.is_Builder);
+            }
+        };
+        param_Checkbox.setOnAction(event);
+    }
+    private void map_is_Station_CheckBox(CheckBox param_Checkbox){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.is_Station = is_Station_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
                 summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
@@ -140,11 +154,15 @@ public class Block_GUI {
         Label description_label = new Label("Welcome to the block editor!");
 
         is_Yard_CheckBox = new CheckBox("Yard");
-        is_Yard_CheckBox.setSelected(parent_Block.isYard);
+        is_Yard_CheckBox.setSelected(parent_Block.is_Yard);
 
         is_Switch_CheckBox = new CheckBox("Switch");
-        is_Switch_CheckBox.setSelected(parent_Block.isSwitch);
+        is_Switch_CheckBox.setSelected(parent_Block.is_Switch);
         map_is_Switch_CheckBox(is_Switch_CheckBox);
+
+        is_Station_CheckBox = new CheckBox("Station");
+        is_Station_CheckBox.setSelected(parent_Block.is_Station);
+        map_is_Station_CheckBox(is_Station_CheckBox);
 
         Button save_Button = new Button("Save and Close");
         map_Save_Button(save_Button);
@@ -157,7 +175,7 @@ public class Block_GUI {
             System.out.println("Reassignment");
             temp_Set_Next_2_HBox = return_Set_Next_2_HBox();
         }
-        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Previous_HBox(), temp_Set_Next_2_HBox, return_Set_Next_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, save_Button);
+        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Previous_HBox(), temp_Set_Next_2_HBox, return_Set_Next_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, is_Station_CheckBox, save_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
