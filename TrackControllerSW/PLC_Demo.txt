@@ -1,0 +1,16 @@
+PROGRAM greenController1
+
+SWITCH 0
+012
+013 Occupied
+014 Occupied
+011 Clear
+010 Clear
+SWITCH 1
+012
+001 Occupied
+002 Occupied
+013 Clear
+014 Clear
+
+END_PROGRAM
