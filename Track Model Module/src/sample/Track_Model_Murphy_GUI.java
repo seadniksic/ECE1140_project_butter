@@ -10,18 +10,16 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import networking.Track_Model_Interface;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
@@ -30,6 +28,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     Boolean simulate_Was_Clicked;
     private Service<Void> backgroundThread;
     Track_Model_Builder_Data this_TMBD;
+    GridPane global_GridPane;
+    Button seads_Simulate_Button;
+    int global_Line_Index; //TODO: Make param_Line_Index global
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Track_Model_Murphy_GUI(){
         murphy_Stage = new Stage();
@@ -78,7 +79,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
         return new Scene(this_VBox, 500, 500);
     }
-    private Scene return_Line_Scene(int param_Line_Index, GridPane param_GridPane){
+    private Scene return_Line_Scene(int param_Line_Index){
         MenuBar start_MenuBar = new MenuBar();
         configureMenuBar(start_MenuBar);
 
@@ -87,16 +88,16 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         }
 
         // Update Gridpane
-        param_GridPane = new GridPane();
+        global_GridPane = new GridPane();
         Block[][] line_Block_Arr = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr;
 
         for(int i = 0; i < line_Block_Arr.length; i++){
             for(int j = 0; j < line_Block_Arr[i].length; j++){
-                param_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
+                global_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
             }
         }
 
-        GridPane canvas_GP = param_GridPane;
+        GridPane canvas_GP = global_GridPane;
         canvas_GP.setAlignment(Pos.CENTER);
         canvas_GP.setHgap(3);
         canvas_GP.setVgap(3);
@@ -104,11 +105,12 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         Button return_To_Track_Button = new Button("Go Back");
         map_Return_To_Track_Button(return_To_Track_Button);
 
-        Button simulate_Button = new Button("Simulate");
-        map_Simulate_Button(simulate_Button, canvas_GP, param_Line_Index);
+
+        seads_Simulate_Button = new Button("Simulate");
+        map_Simulate_Button(param_Line_Index);
 
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP, simulate_Button);
+        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP, seads_Simulate_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -119,7 +121,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                swap_To_Line_Scene(param_Line_Index, new GridPane());
+                swap_To_Line_Scene(param_Line_Index); //TODO: new gridpane was the second parameter of this function in this call
                 simulate_Was_Clicked = false;
             }
         };
@@ -134,46 +136,57 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         };
         param_Button.setOnAction(event);
     }
-    private void map_Simulate_Button(Button param_Button, GridPane param_GridPane, int param_Line_Index){
+    private void map_Simulate_Button(int param_Line_Index){
+        seads_Simulate_Button.setOnAction(outer_Update_Occupancy(param_Line_Index, 0, 10.0));
+    }
+    public void fire_Simulate(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
+        seads_Simulate_Button.fire();
+    }
+
+    public EventHandler<ActionEvent> outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
+        System.out.println("1param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
+
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                // New code for autonomy
-                System.out.println("Clicked");
+                System.out.println("actionEvent");
                 backgroundThread = new Service<Void>() {
                     @Override
                     protected Task<Void> createTask() {
+                        System.out.println("createTask");
                         return new Task<Void>() {
                             protected Void call() throws Exception {
+                                System.out.println("call");
                                 // Actions
-                                for(int i = 0; i < 20; i++){
                                     Platform.runLater( ()->{
+                                        System.out.println("RunLater");
                                         if (simulate_Was_Clicked) {
-                                            update_Occupancy(param_GridPane, param_Line_Index, 0, 10.0);
+                                            System.out.println("2param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
+                                            update_Occupancy(param_Line_Index, param_Occupancy_Index, param_Distance_Traveled_In_Tick);
                                         } else {
                                             // Set up before getting distances from trains
-                                            spawn_Train_In_Yard(param_Line_Index, 1, param_GridPane);
+                                            spawn_Train_In_Yard(param_Line_Index, 1);
                                             simulate_Was_Clicked = true;
                                         }
                                     });
-                                    Thread.sleep(150);
-                                }
                                 return null;
                             }
                         };
                     }
                 };
                 //final GetUpdatedOccupancyService service = new GetUpdatedOccupancyService();
+                System.out.println("3param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
                 backgroundThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent workerStateEvent) {
                         System.out.println("Done");
                     }
                 });
+                System.out.println("4param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
                 backgroundThread.restart();
             }
         };
-        param_Button.setOnAction(event);
+        return event;
     }
 
     private void configureMenuBar(MenuBar param_MenuBar){
@@ -336,12 +349,12 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             murphy_Stage.show();
         }
     }
-    public void swap_To_Line_Scene(int param_Line_Index, GridPane param_GridPane){
-        murphy_Stage.setScene(return_Line_Scene(param_Line_Index, param_GridPane));
+    public void swap_To_Line_Scene(int param_Line_Index){
+        murphy_Stage.setScene(return_Line_Scene(param_Line_Index));
         murphy_Stage.show();
     }
 
-    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number, GridPane param_GridPane){
+    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number){
         Line working_Line = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index);
         // Find the block in the coordinate plane and turn its occupancy on
         for (Block[] blocks : working_Line.block_Arr) {
@@ -355,9 +368,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                 }
             }
         }
-        swap_To_Line_Scene(param_Line_Index, param_GridPane);
+        swap_To_Line_Scene(param_Line_Index);
     }
-    public void update_Occupancy(GridPane param_GridPane, int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
+    public void update_Occupancy(int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
         // Print statements are concatenated into ...
         System.out.println("\nUpdating occupancy...");
         // For every row in the line
@@ -501,7 +514,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             }
         }
         print_Update_Occupancy("Did not move", param_Line_Index);
-        swap_To_Line_Scene(param_Line_Index, param_GridPane);
+        swap_To_Line_Scene(param_Line_Index);
     }
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched){
         for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
@@ -515,7 +528,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
 
 
-    // Cringe
+    //TODO: Tony
     @Override
     public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
 

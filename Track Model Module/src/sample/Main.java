@@ -9,6 +9,16 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
 //        // Network staeughff
 //        Network.start_Server();
+//        // Tony
+////        while (Network.connected_Module_1 != true) {
+////            try {
+////                Network.connect_To_Modules();
+////            } catch (Exception e) {
+////            }
+////
+////        }
+//
+//        // Sead
 //        while (Network.connected_Module_2 != true) {
 //            try {
 //                Network.connect_To_Modules();
