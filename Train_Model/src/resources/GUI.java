@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import networking.Network;
+import java.text.DecimalFormat;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -80,8 +81,9 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         main_Stage = primaryStage;
+
         Network.start_Server();
-        while (Network.connected_Module_2 != true) {
+        while (!Network.connected_Module_2) {
             try {
                 Network.connect_To_Modules();
             } catch (Exception e) {
@@ -98,7 +100,7 @@ public class GUI extends Application {
         main_data.removeAll();
         DecimalFormat df = new DecimalFormat("0.0000");
         ObservableList<Property> temp = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
                 new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
@@ -209,8 +211,10 @@ public class GUI extends Application {
         Train_Model train = tc.trains.get(index);
         current_index = index;
 
+        DecimalFormat df = new DecimalFormat("0.00");
+
         main_data = FXCollections.observableArrayList(
-                new Property("Speed", train.get_Velocity(), "m/s"),
+                new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
                 new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")

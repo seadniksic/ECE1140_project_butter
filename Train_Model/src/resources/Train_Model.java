@@ -31,7 +31,7 @@ public class Train_Model {
     private double velocity;
     public int num_Cars;
     private double distance;
-    private long time;
+    private double time = 0;
     private boolean advertisements;
     private String announcements;
     private double grade;
@@ -109,13 +109,9 @@ public class Train_Model {
     public void set_Failure(String type) throws RemoteException {
         //Take appropriate action on failure
         this.failure = type;
-
-        if (failure.equals("Signal")) {
-            set_Emergency_Brake_Status(true);
-        } else if (failure.equals("Engine")) {
-            set_Emergency_Brake_Status(true);
-        }
+        Network.tc_Interface.set_Failure_Status(id, type);
     }
+
 
     public String get_Failure() { return failure; }
     public double get_Grade() { return this.grade; }
@@ -130,6 +126,10 @@ public class Train_Model {
 
     public boolean get_Ext_Lights() {
         return this.ext_Lights;
+    }
+
+    public void remove_Failure_Status() {
+        failure = null;
     }
 
     public ArrayList<Double> get_Force() {
@@ -174,15 +174,18 @@ public class Train_Model {
 
     public boolean get_Advertisements() {return this.advertisements;}
 
-    public double update_Speed(double power) {
+    public double update_Speed(double power) throws RemoteException {
         double cycle_Time;
-        if (System.currentTimeMillis() - time > 2000) {
-            time = System.currentTimeMillis();
-            cycle_Time = 1;
+        System.out.println("current tim");
+        if (Network.server_Object.get_Current_Time() - time > 2) {
+            time = Network.server_Object.get_Current_Time();
+            cycle_Time = .01;
         } else {
-            cycle_Time = (double) (System.currentTimeMillis() - time);
+            cycle_Time = Network.server_Object.get_Current_Time() - time;
+            System.out.println("Current Time: " + Network.server_Object.get_Current_Time());
+            System.out.println("Time: " + time);
         }
-        cycle_Time /= 1000;
+        System.out.println("Cycle time: " + cycle_Time);
 
         this.engine_Power = power;
 
@@ -221,6 +224,7 @@ public class Train_Model {
                     force -= (F_g_x + static_friction);
                 }
             }
+            System.out.println("Here!");
         } else if (current_Velocity >=.01) {
             neg_Force = (F_g_x + kinetic_friction);
             if (emergency_Brake_Status) {
@@ -238,7 +242,7 @@ public class Train_Model {
 
         System.out.println("Acc: "+ acc);
 
-        current_Velocity += (acc * (double) cycle_Time);
+        current_Velocity += (acc * cycle_Time);
 
 //        System.out.println("F_g: " + F_g);
 //        System.out.println("F_g_x: " + F_g_x);
@@ -249,10 +253,10 @@ public class Train_Model {
 //        System.out.println("acceleration: " + acc);
 
         //Update position
-        double new_Distance = current_Velocity * (double) cycle_Time + distance;
+        double new_Distance = current_Velocity * cycle_Time + distance;
 
-        time = System.currentTimeMillis();
-        //Network.tm_interface.send_Distance(new_Distance - distance);
+        time = Network.server_Object.get_Current_Time();
+        //Network.tm_Interface.outer_Update_Occupancy(1, id, new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 

@@ -12,6 +12,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     static int train_Total = 0;
     static ArrayList<Train_Model> trains = new ArrayList<Train_Model>();
     static ObservableList<String> name_List = FXCollections.observableArrayList();
+    static double sim_Time;
 
     public static void create_Model(int cars) throws RemoteException {
         Train_Model new_Model = new Train_Model(cars, train_Total);
@@ -49,7 +50,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     }
 
     //Meyers calls this function in a loop
-    public double update_Speed(int train_Num, double power) {  //
+    public double update_Speed(int train_Num, double power) throws RemoteException {  //
         return trains.get(train_Num).update_Speed(power);
     }
 
@@ -127,6 +128,15 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
 
     public double get_Velocity(int train_Num) { return trains.get(train_Num).get_Velocity(); }
 
+    public double get_Current_Time() {
+        return (Math.round(sim_Time * 100.0) / 100.0);
+    }
 
+    public void update_Time(double time) {
+        sim_Time = time;
+        System.out.println(time);
+    }
+
+    public void remove_Failure_Status(int train_Num) { trains.get(train_Num).remove_Failure_Status(); }
 
 }
