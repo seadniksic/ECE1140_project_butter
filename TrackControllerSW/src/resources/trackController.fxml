@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<Pane prefHeight="696.0" prefWidth="985.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.trackControllerUI">
+   <children>
+      <Pane fx:id="faultPane" layoutX="29.0" layoutY="66.0" prefHeight="633.0" prefWidth="948.0">
+         <children>
+            <ScrollPane fx:id="faultBox" layoutX="104.0" layoutY="38.0" onMouseEntered="#load_Data" prefHeight="581.0" prefWidth="740.0" />
+            <Label text="FAULT HISTORY">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+      <Label fx:id="tabLabel" layoutX="414.0" layoutY="18.0" text="Section" />
+      <MenuButton layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="MenuButton">
+         <items>
+            <MenuItem fx:id="trackView" mnemonicParsing="false" onAction="#set_Track_View" text="Track View" />
+            <MenuItem mnemonicParsing="false" onAction="#set_Signal_View" text="Signal Control" />
+            <MenuItem mnemonicParsing="false" onAction="#set_Fault_View" text="Fault History" />
+            <MenuItem mnemonicParsing="false" onAction="#set_PLC_View" text="PLC" />
+         </items>
+      </MenuButton>
+      <Pane fx:id="trackPane" layoutX="14.0" layoutY="49.0" prefHeight="633.0" prefWidth="721.0">
+         <children>
+            <ScrollPane fx:id="blockBox" layoutX="14.0" layoutY="10.0" onMouseEntered="#load_Data" prefHeight="613.0" prefWidth="279.0" />
+            <ScrollPane fx:id="blockBox2" layoutX="323.0" layoutY="14.0" onMouseEntered="#load_Data" prefHeight="613.0" prefWidth="367.0" />
+         </children>
+      </Pane>
+      <Pane fx:id="plcPane" layoutX="10.0" layoutY="49.0" prefHeight="633.0" prefWidth="964.0">
+         <children>
+            <Button layoutX="450.0" layoutY="393.0" mnemonicParsing="false" onAction="#upload_PLC" text="Enter" />
+            <TextField fx:id="plcField" layoutX="370.0" layoutY="304.0" prefHeight="25.0" prefWidth="203.0" />
+            <Label layoutX="324.0" layoutY="198.0" text="Enter the PLC path">
+               <font>
+                  <Font size="34.0" />
+               </font>
+            </Label>
+            <Button layoutX="717.0" layoutY="607.0" mnemonicParsing="false" onAction="#debug" text="DEBUG" />
+            <Label fx:id="fileLabel" layoutX="413.0" layoutY="124.0" text="Current File: ">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Label layoutX="336.0" layoutY="37.0" text="PLC Configuration">
+               <font>
+                  <Font size="34.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+      <Pane fx:id="debugPane" layoutX="80.0" layoutY="42.0" prefHeight="633.0" prefWidth="865.0">
+         <children>
+            <TextField fx:id="trainMoveField" layoutX="119.0" layoutY="105.0" />
+            <Label layoutX="97.0" layoutY="67.0" text="Enter block number to move train to" />
+            <Button layoutX="170.0" layoutY="148.0" mnemonicParsing="false" onAction="#move_Train" text="Move" />
+            <Label layoutX="347.0" layoutY="11.0" text="DEBUG">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Button layoutX="101.0" layoutY="198.0" mnemonicParsing="false" onAction="#reset_Blocks" text="RESET BLOCK OCCUPANCIES">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Button layoutX="678.0" layoutY="148.0" mnemonicParsing="false" onAction="#close_Block" text="Close Block" />
+            <Button layoutX="482.0" layoutY="148.0" mnemonicParsing="false" onAction="#open_Block" text="Open Block" />
+            <TextField fx:id="openField" layoutX="446.0" layoutY="105.0" />
+            <Label layoutX="446.0" layoutY="67.0" text="Enter block number to close" />
+            <TextField fx:id="closeField" layoutX="653.0" layoutY="105.0" />
+            <Label layoutX="642.0" layoutY="67.0" text="Enter block number to open" />
+            <TextField fx:id="manualField" layoutX="464.0" layoutY="286.0" />
+            <Label layoutX="424.0" layoutY="263.0" text="Enter switch block number to manually set" />
+            <Button layoutX="513.0" layoutY="393.0" mnemonicParsing="false" onAction="#manual_Switch" text="Switch" />
+            <RadioButton fx:id="defaultRadio" layoutX="493.0" layoutY="327.0" mnemonicParsing="false" onAction="#set_Default" text="Default (true)" />
+            <RadioButton fx:id="otherRadio" layoutX="495.0" layoutY="356.0" mnemonicParsing="false" onAction="#set_Other" text="Other (false)" />
+            <TextField fx:id="faultField" layoutX="120.0" layoutY="281.0" />
+            <Label layoutX="69.0" layoutY="258.0" prefHeight="17.0" prefWidth="214.0" text="Enter block number to apply failures to" />
+            <Button layoutX="159.0" layoutY="450.0" mnemonicParsing="false" onAction="#set_Fail" text="Apply" />
+            <RadioButton fx:id="brRadio" layoutX="130.0" layoutY="327.0" mnemonicParsing="false" onAction="#set_BR" text="Broken Rail" />
+            <RadioButton fx:id="tcfRadio" layoutX="130.0" layoutY="356.0" mnemonicParsing="false" onAction="#set_TCF" text="Track Circuit Failure" />
+            <RadioButton fx:id="powerRadio" layoutX="130.0" layoutY="385.0" mnemonicParsing="false" onAction="#set_PF" text="Power Failure" />
+            <RadioButton fx:id="clearRadio" layoutX="130.0" layoutY="418.0" mnemonicParsing="false" onAction="#set_Clear" text="Clear Failures" />
+         </children>
+      </Pane>
+      <Pane fx:id="signalPane" layoutX="19.0" layoutY="56.0" prefHeight="633.0" prefWidth="948.0">
+         <children>
+            <ScrollPane fx:id="lightBox" layoutX="415.0" layoutY="42.0" onMouseEntered="#load_Data" prefHeight="589.0" prefWidth="279.0" />
+            <Label layoutX="159.0" layoutY="14.0" text="SWITCHES">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Label layoutX="503.0" layoutY="7.0" text="LIGHTS">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Label layoutX="756.0" layoutY="7.0" text="CROSSGUARD">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Label fx:id="switchLabel" layoutX="55.0" layoutY="281.0" onMouseEntered="#load_Data" text="SWITCHES">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffb01f" height="87.0" layoutX="732.0" layoutY="273.0" stroke="BLACK" strokeType="INSIDE" width="200.0" fx:id="xBox" />
+            <Label layoutX="721.0" layoutY="371.0" prefHeight="62.0" prefWidth="214.0" text="Cross Bar" fx:id="xLabel">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+   </children>
+</Pane>
