@@ -1,7 +1,6 @@
 package resources;
 
-import javafx.application.Platform;
-import javafx.concurrent.Service;
+
 import javafx.concurrent.Task;
 import networking.*;
 
@@ -521,16 +520,9 @@ public class CTC_Back implements CTC_Interface {
         }
 
 
+    //make a change
 
 
-
-
-
-    }
-
-
-
-    public class Dispatch_Caller {
 
 
     }
