@@ -22,7 +22,7 @@ public interface CTC_Interface extends Remote{
 
     public void open_Block(String line, int block) throws RemoteException;
 
-    public void train_Moved(int trainNum, int block) throws RemoteException;//moves occupancy state of block of train
+    public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException;//moves occupancy state of block of train
 
 
     //public void import_Track_File(File trackFile) throws FileNotFoundException, RemoteException; // receives file from track model NOT IMPLEMENTED

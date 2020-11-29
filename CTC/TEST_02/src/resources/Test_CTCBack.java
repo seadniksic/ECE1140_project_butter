@@ -34,7 +34,7 @@ public class Test_CTCBack {
         assertEquals(0,tester.get_Train_List().size());
         assertEquals(0,tester.get_Line_List().size());
     }
-
+/*
     @Test
     void test_Dispatch2() throws FileNotFoundException , RemoteException {
         tester.import_Train_Schedule();
@@ -51,6 +51,8 @@ public class Test_CTCBack {
         System.out.println("Authority: " + tester.get_Train_List().get(0).get_Authority());
         System.out.println("Sug Speed: " + tester.get_Train_List().get(0).get_Suggest_Speed());
     }
+
+ */
     //Test that the import schedule function works
     //function reads from file and files list
     //test that list is greater than zero

@@ -58,6 +58,13 @@ public class Line {
 
     }
 
+    public boolean get_Block_Occupancy(Integer blockNum){
+        return blocksList.get(blockNum-1).get_Occupancy();
+    }
+
+    public String get_Block_Infrastructure(Integer blockNum){
+        return blocksList.get(blockNum-1).get_Infrastructure();
+    }
     public List<String> get_Infrastructure_List(){
         infrastructure.clear();
         for(Block bl : blocksList){
@@ -108,7 +115,7 @@ public class Line {
         List<Integer> switches = new ArrayList<>();
 
         for(int i = 0; i < blocksList.size(); i++){
-            if(blocksList.get(i).get_Infrastructure().contains("SWITCH")){
+            if(blocksList.get(i).get_Infrastructure().contains("SWITCH") || blocksList.get(i).get_Infrastructure().contains("Switch")){
                 switches.add(i+1);
             }
 

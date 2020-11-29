@@ -169,6 +169,7 @@ public class Train {
 
     // public void setCurrentPosition(String currentPos){ currentBlock = currentPos; }
 
+    //TODO make sure infrastructure and time lists are organized properly
     public void set_Infrastructure_List(List<String> inf){ infrastructureList = inf; }
 
     public void set_Time_List(List<LocalTime> times){ timeList = times; }
@@ -195,10 +196,11 @@ public class Train {
             currentIndex++;
         }
     }
-
+    //TODO make sure arrived() is getting called. adjust train.arrived for index out of range error
     public void arrived(){
         currentIndex ++;
     }
+
 
     public void clear_Infrastructure_List(){
         infrastructureList.clear();

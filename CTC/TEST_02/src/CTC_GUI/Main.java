@@ -243,7 +243,7 @@ public class Main extends Application {
                         Network.server_Object.get_Train_List().get(trainNumberFromName).add_Time(LocalTime.parse(timeArrival.getText()));
                         try {
                             Network.server_Object.dispatch(trainNumberFromName, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
-                        } catch (RemoteException remoteException) {
+                        } catch (RemoteException | InterruptedException remoteException) {
                             remoteException.printStackTrace();
                         }
 
@@ -590,7 +590,7 @@ public class Main extends Application {
 
                     try {
                         Network.tcsw_Interface.send_Speed_Authority(trainNum,speed,authority);
-                    } catch (RemoteException remoteException) {
+                    } catch (RemoteException | InterruptedException remoteException) {
                         remoteException.printStackTrace();
                     }
                 });
@@ -679,11 +679,14 @@ public class Main extends Application {
 
         simSetMult10.setOnAction(e->{
             if(Network.Simulation_Interface != null){
+
                 try {
                     Network.Simulation_Interface.update_Multiplier(10);
                 } catch (RemoteException remoteException) {
                     remoteException.printStackTrace();
                 }
+
+
             }else{
                 show_No_Sim_Connection();
             }

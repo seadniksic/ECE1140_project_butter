@@ -128,11 +128,33 @@ public class CTC_Back implements CTC_Interface {
         for(int i  = 0; i < lineList.size(); i++){
             if(lineList.get(i).get_Line().equals(trainList.get(trainIndex).get_Current_Line())){
                 lineIndex = i;
+                break;
             }
         }
-        System.out.println("Line Index: " + lineIndex);
 
         //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
+
+        System.out.println("Line Index: " + lineIndex);
+        //check line occupancy after current
+        int nextBlock = trainList.get(trainIndex).get_Current_Block()+1;
+
+        for(int i = 0; i < 5; i ++){
+
+            //if(lineList.get(lineIndex).get_Block_Occupancy(nextBlock + i) == true){
+               // trainList.get(trainIndex).set_Authority(0);
+               // break;
+           // }else
+            if(lineList.get(lineIndex).get_Block_Infrastructure(nextBlock +i).contains("Station")){
+                  trainList.get(trainIndex).set_Authority(nextBlock - i+1);
+                  break;
+            }else{
+                trainList.get(trainIndex).set_Authority(i);
+            }
+
+        }
+
+
+
 
         //OLD WAY
 //        System.out.println("Current INFR: "+ trainList.get(trainIndex).get_Current_Infrastructure());
@@ -164,9 +186,9 @@ public class CTC_Back implements CTC_Interface {
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
     }
 
-    public void dispatch(Integer trainIndex) throws RemoteException {
-        System.out.println("hit dispatch automatic function");
-        System.out.println(trainIndex);
+    public void dispatch(Integer trainIndex) throws RemoteException, InterruptedException {
+        System.out.println("hit dispatch automatic function ");
+       // System.out.println(trainIndex);
 
         if(!trainList.get(trainIndex).get_Sent_Create_Command()){
             Network.tcsw_Interface.create_Train(
@@ -180,21 +202,24 @@ public class CTC_Back implements CTC_Interface {
 
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
+        System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
+        System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
+
         Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
           trainList.get(trainIndex).get_Authority());
     }
 
-    public void dispatch(Integer trainIndex, String nextStop, LocalTime arrivalTime) throws RemoteException{
+    public void dispatch(Integer trainIndex, String nextStop, LocalTime arrivalTime) throws RemoteException, InterruptedException {
         System.out.println("hit dispatch manual function");
 
         if(!trainList.get(trainIndex).get_Sent_Create_Command()){
-//            Network.tcsw_Interface.create_Train(
-//                    trainList.get(trainIndex).get_Number_Of_Cars(),
-//                    trainList.get(trainIndex).get_Current_Line(),
-//                    trainList.get(trainIndex).get_Current_Block());
-//
-//            System.out.println(trainList.get(trainIndex).get_Current_Block());
-//            trainList.get(trainIndex).set_Sent_Create_Command(true);
+            Network.tcsw_Interface.create_Train(
+                    trainList.get(trainIndex).get_Number_Of_Cars(),
+                    trainList.get(trainIndex).get_Current_Line(),
+                    trainList.get(trainIndex).get_Current_Block());
+
+            System.out.println(trainList.get(trainIndex).get_Current_Block());
+            trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
        // String holdCurrentInfr = trainList.get(trainIndex).get_Current_Infrastructure();
         Integer holdCurrentIndex = trainList.get(trainIndex).get_Current_Index();
@@ -229,8 +254,8 @@ public class CTC_Back implements CTC_Interface {
         calculate_Authority(trainIndex);
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
         System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
-        //Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
-          //     trainList.get(trainIndex).get_Authority());
+        Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
+               trainList.get(trainIndex).get_Authority());
 
     }
 
@@ -270,12 +295,16 @@ public class CTC_Back implements CTC_Interface {
 
                     String timeString = "0";//used for adjusting time to parse into LOCALTIME
                     if(i< h.length)
-                    if (h[i].contains(":")){
+                    if (h[i].contains(":")) {
 
-                        trainList.get(i-3).set_Current_Line(h[0]);
+                        trainList.get(i - 3).set_Current_Line(h[0]);
                         System.out.println(h[0]);
-                        trainList.get(i-3).set_Current_Block(Integer.parseInt(h[1]));
+
+                        if (h[i].equals("0:00")){
+                            trainList.get(i - 3).set_Current_Block(Integer.parseInt(h[1]));
                         System.out.println(h[1]);
+                        }
+
                         trainList.get(i-3).add_Infrastructure(h[2]);
                        System.out.println(h[2]);
                         trainList.get(i-3).add_Time(LocalTime.parse(timeString.concat(h[i])));
@@ -513,25 +542,26 @@ public class CTC_Back implements CTC_Interface {
     }
 
 
-    //TODO make sure this calls calculate authority and sends authority, also updates block occupancy on track and train
-    public void train_Moved(int trainNum, int block) throws RemoteException{
+
+    public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException {
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
 
-//        trainList.get(trainNum).set_Current_Block(block);
+         trainList.get(trainNum).set_Current_Block(block);
+
 //        trainList.get(trainNum).moved_Block();
 //
-//        int lineIndex = 0;
-//        for(int i = 0; i < lineList.size(); i++){
-//            if(lineList.get(i).get_Line().equals(trainList.get(trainNum)
-//                    .get_Current_Line())){
-//                lineIndex = i;
-//            }
-//        }
-//        if(block != 1) {
-//            lineList.get(lineIndex).toggle_Block_Occupancy(block - 1);
-//        }
-//        lineList.get(lineIndex).toggle_Block_Occupancy(block);
+        int lineIndex = 0;
+        for(int i = 0; i < lineList.size(); i++){
+            if(lineList.get(i).get_Line().equals(trainList.get(trainNum).get_Current_Line())){
+                lineIndex = i;
+            }
+        }
+        if(block > 1) {
+            lineList.get(lineIndex).toggle_Block_Occupancy(block - 2);
+        }
+        lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
+        dispatch(trainNum);
 
     }
 
@@ -542,7 +572,7 @@ public class CTC_Back implements CTC_Interface {
     }
 
 
-    //TODO only dispatch on spawn time. then handle dispatching when arrived at station
+
 
     public void update_Time(double time) throws RemoteException{
         //System.out.println(time);
@@ -562,7 +592,6 @@ public class CTC_Back implements CTC_Interface {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("HIT UPDATE");
                         Main.update_GUI_Time();
                     }
                 });
@@ -570,12 +599,13 @@ public class CTC_Back implements CTC_Interface {
         }).start();
 
 
+
         if((minutes % 1.0) == 0.0 && automatic) {
 
 
 
             for (Train tr : trainList) {
-                for (LocalTime ti : tr.get_Time_List()) {
+                LocalTime ti = tr.get_Time_List().get(0);//this should only see first time for time list
                     if (ti.toSecondOfDay() == finalTime) {
 
                         int finalTrainIndex = trainIndex;
@@ -586,7 +616,7 @@ public class CTC_Back implements CTC_Interface {
                             @Override public Void call() {
                                 try {
                                     dispatch(finalTrainIndex);
-                                } catch (RemoteException e) {
+                                } catch (RemoteException | InterruptedException e) {
                                     e.printStackTrace();
                                 }
 
@@ -596,7 +626,7 @@ public class CTC_Back implements CTC_Interface {
                         new Thread(task).start();
 
                     }
-                }
+
                 trainIndex++;
             }
         }
