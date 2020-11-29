@@ -131,10 +131,10 @@ public class Line {
 
         }
         System.out.println("Block 1: " + bIndex1 + ", Block 2: " + bIndex2);
-        distance += blocksList.get(bIndex1).get_Length();
-        Integer currentBlock = bIndex1;
+        distance += blocksList.get(bIndex1-1).get_Length();
+        Integer currentBlock = bIndex1-1;
         String currentInfrastructure = "";
-        Integer previousBlock = bIndex1 - 1;
+        Integer previousBlock = bIndex1 - 2;
         boolean countUp = true;
         while(!hitstop) {
 

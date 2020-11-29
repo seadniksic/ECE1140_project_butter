@@ -113,9 +113,9 @@ public class CTC_Back implements CTC_Interface {
     public void calculate_Authority(Integer trainIndex){
         //Integer blocks_between = lineList.get().get_Number_Of_Blocks_Between(trainList.get(trainIndex).
         // getCurrentInfrastructure(), trainList.get(trainIndex).getNextInfrastructure());
-        //TODO GET NUM OF BLOCKS BETWEEN NEEDS TO REALIZE SWITCH
+
         //
-        //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
+
         System.out.println("CALC AUTH HIT:");
         Integer blocks_between = 10;
 
@@ -132,17 +132,20 @@ public class CTC_Back implements CTC_Interface {
         }
         System.out.println("Line Index: " + lineIndex);
 
-        System.out.println("Current INFR: "+ trainList.get(trainIndex).get_Current_Infrastructure());
-        System.out.println("Next INFR: " + trainList.get(trainIndex).get_Next_Infrastructure());
+        //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
 
-        blocks_between =
-         lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
-                trainList.get(trainIndex).get_Next_Infrastructure());
-
-
-        System.out.println("AUTHORITY: " + blocks_between);
-        trainList.get(trainIndex).set_Authority(blocks_between);
-        //Integer blocks_between = 11;
+        //OLD WAY
+//        System.out.println("Current INFR: "+ trainList.get(trainIndex).get_Current_Infrastructure());
+//        System.out.println("Next INFR: " + trainList.get(trainIndex).get_Next_Infrastructure());
+//
+//        blocks_between =
+//         lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
+//                trainList.get(trainIndex).get_Next_Infrastructure());
+//
+//
+//        System.out.println("AUTHORITY: " + blocks_between);
+//        trainList.get(trainIndex).set_Authority(blocks_between);
+//        //Integer blocks_between = 11;
 
     }
 
@@ -185,13 +188,13 @@ public class CTC_Back implements CTC_Interface {
         System.out.println("hit dispatch manual function");
 
         if(!trainList.get(trainIndex).get_Sent_Create_Command()){
-            Network.tcsw_Interface.create_Train(
-                    trainList.get(trainIndex).get_Number_Of_Cars(),
-                    trainList.get(trainIndex).get_Current_Line(),
-                    trainList.get(trainIndex).get_Current_Block());
-
-            System.out.println(trainList.get(trainIndex).get_Current_Block());
-            trainList.get(trainIndex).set_Sent_Create_Command(true);
+//            Network.tcsw_Interface.create_Train(
+//                    trainList.get(trainIndex).get_Number_Of_Cars(),
+//                    trainList.get(trainIndex).get_Current_Line(),
+//                    trainList.get(trainIndex).get_Current_Block());
+//
+//            System.out.println(trainList.get(trainIndex).get_Current_Block());
+//            trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
        // String holdCurrentInfr = trainList.get(trainIndex).get_Current_Infrastructure();
         Integer holdCurrentIndex = trainList.get(trainIndex).get_Current_Index();
@@ -224,14 +227,17 @@ public class CTC_Back implements CTC_Interface {
 
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
-
-        Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
-               trainList.get(trainIndex).get_Authority());
+        System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
+        System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
+        //Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
+          //     trainList.get(trainIndex).get_Authority());
 
     }
 
-    //TODO create personal schedule and read in properly
+
     public void import_Train_Schedule() throws FileNotFoundException{
+
+
         scheduleFile = new File(schedulePath);
         Scanner sc = new Scanner(scheduleFile);
         List<String> linesList = new ArrayList<>();
@@ -239,48 +245,102 @@ public class CTC_Back implements CTC_Interface {
         do {
             linesList.add(sc.next());
         }while(sc.hasNext());
-        //System.out.println(linesList.get(0).substring(73,124));
-        //System.out.println(linesList.get(0).length()); -1
+
         //find how many trains there are on the schedule and add them to list
-        int numberOfTrains = 0 ;
-        if(linesList.get(0).length() > 74){
-            numberOfTrains = (linesList.get(0).length() - 74)/ 5;
-        }
-
         //account for trains being created already
-        numberOfTrains += trainList.size();
-
+        int numberOfTrains = trainList.size() + linesList.get(0).length() - 2;
+        System.out.println("number of trains = " + numberOfTrains);
         for(int j = 0 + trainList.size(); j < numberOfTrains; j++){
 
             Train t = new Train("TR" + j);
             create_Train(t);
+            System.out.println("Created TR" + j);
         }
 
+        //add times to train
         int lIndex =-1 ;
         for(String s: linesList){
             String[] h = s.split(",");
 
             ///////FOR ADDING TRAINS/////////////////////
-            if(h.length > 30){
-                //index 31 for first train
-                int end = 31 + trainList.size();
-                for(int i = 31; i < end; i++) {
+            if(h.length >3){
+                System.out.println(h[0] + h[1]+h[2]);
+                int end = 3 + trainList.size();
+                for(int i = 3; i < end; i++) {
+
                     String timeString = "0";//used for adjusting time to parse into LOCALTIME
+                    if(i< h.length)
                     if (h[i].contains(":")){
 
-                        trainList.get(i-31).set_Current_Line(h[0]);
-                        //System.out.println(h[0]);
-                        trainList.get(i-31).set_Current_Block(Integer.parseInt(h[2]));
-                        //
-                        trainList.get(i-31).add_Infrastructure(h[6]);
-                       // System.out.println(h[6]);
-                        trainList.get(i-31).add_Time(LocalTime.parse(timeString.concat(h[i])));
-                       // System.out.println(h[i]);
+                        trainList.get(i-3).set_Current_Line(h[0]);
+                        System.out.println(h[0]);
+                        trainList.get(i-3).set_Current_Block(Integer.parseInt(h[1]));
+                        System.out.println(h[1]);
+                        trainList.get(i-3).add_Infrastructure(h[2]);
+                       System.out.println(h[2]);
+                        trainList.get(i-3).add_Time(LocalTime.parse(timeString.concat(h[i])));
+                        System.out.println(h[i]);
                     }
                 }
             }
 
         }
+
+
+
+        //OLD FILE WAY
+
+
+//        scheduleFile = new File(schedulePath);
+//        Scanner sc = new Scanner(scheduleFile);
+//        List<String> linesList = new ArrayList<>();
+//        sc.useDelimiter("\\r\\n");
+//        do {
+//            linesList.add(sc.next());
+//        }while(sc.hasNext());
+//        //System.out.println(linesList.get(0).substring(73,124));
+//        //System.out.println(linesList.get(0).length()); -1
+//        //find how many trains there are on the schedule and add them to list
+//        int numberOfTrains = 0 ;
+//        if(linesList.get(0).length() > 74){
+//            numberOfTrains = (linesList.get(0).length() - 74)/ 5;
+//        }
+//
+//        //account for trains being created already
+//        numberOfTrains += trainList.size();
+//
+//        for(int j = 0 + trainList.size(); j < numberOfTrains; j++){
+//
+//            Train t = new Train("TR" + j);
+//            create_Train(t);
+//        }
+//
+//        int lIndex =-1 ;
+//        for(String s: linesList){
+//            String[] h = s.split(",");
+//
+//            ///////FOR ADDING TRAINS/////////////////////
+//            if(h.length > 30){
+//
+//                int end = 31 + trainList.size();
+//                for(int i = 31; i < end; i++) {
+//
+//                    String timeString = "0";//used for adjusting time to parse into LOCALTIME
+//                    if (h[i].contains(":")){
+//
+//                        trainList.get().set_Current_Line(h[0]);
+//                        //System.out.println(h[0]);
+//                        trainList.get(i-31).set_Current_Block(Integer.parseInt(h[2]));
+//                        //
+//                        trainList.get(i-31).add_Infrastructure(h[6]);
+//                       // System.out.println(h[6]);
+//                        trainList.get(i-31).add_Time(LocalTime.parse(timeString.concat(h[i])));
+//                       // System.out.println(h[i]);
+//                    }
+//                }
+//            }
+//
+//        }
 
 
     }

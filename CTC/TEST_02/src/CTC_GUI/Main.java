@@ -791,7 +791,7 @@ public class Main extends Application {
             if(Network.server_Object != null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Choose Schedule File");
-                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\IdeaProjects\\TEST_02\\src\\resources"));
+                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\"));
                 File selectedFile = fileChooser.showOpenDialog(CTCStage);
 
                 Network.server_Object.set_Schedule_Path(selectedFile.getAbsolutePath());
@@ -817,7 +817,7 @@ public class Main extends Application {
             if(Network.server_Object != null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Choose Track File");
-                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\IdeaProjects\\TEST_02\\src\\resources"));
+                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\"));
                 // fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files", "*.txt"))
                 File selectedFile = fileChooser.showOpenDialog(CTCStage);
 
