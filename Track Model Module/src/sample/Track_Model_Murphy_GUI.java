@@ -1,6 +1,9 @@
 package sample;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -25,9 +28,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
     public Stage murphy_Stage;
     Label description_label;
-    Boolean simulate_Was_Clicked;
+    static boolean simulate_Was_Clicked = false;
     private Service<Void> backgroundThread;
-    Track_Model_Builder_Data this_TMBD;
+    static Track_Model_Builder_Data this_TMBD;
     GridPane global_GridPane;
     Button seads_Simulate_Button;
     int global_Line_Index; //TODO: Make param_Line_Index global
@@ -87,6 +90,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             description_label = new Label("Viewing Line: " + (this_TMBD.this_Track.get_Line_At_Index(param_Line_Index).index + 1));
         }
 
+        // Update ObservableList
+        ObservableList<Button> temp = FXCollections.observableArrayList();
+
         // Update Gridpane
         global_GridPane = new GridPane();
         Block[][] line_Block_Arr = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr;
@@ -94,6 +100,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         for(int i = 0; i < line_Block_Arr.length; i++){
             for(int j = 0; j < line_Block_Arr[i].length; j++){
                 global_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
+               // temp.add(line_Block_Arr[i][j].this_Block_GUI.this_Button);
             }
         }
 
@@ -114,7 +121,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
-        return new Scene(this_VBox, 1500, 1500);
+        return new Scene(this_VBox, 800, 800);
     }
 
     private void map_Line_Button(Button param_Button, int param_Line_Index){
@@ -137,37 +144,43 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         param_Button.setOnAction(event);
     }
     private void map_Simulate_Button(int param_Line_Index){
-        seads_Simulate_Button.setOnAction(outer_Update_Occupancy(param_Line_Index, 0, 10.0));
+
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                if(simulate_Was_Clicked){
+                    outer_Update_Occupancy(param_Line_Index, 0, 10.0);
+                }else{
+                    try {
+                        spawn_Train_In_Yard(2, param_Line_Index, 1);
+                        simulate_Was_Clicked = true;
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        seads_Simulate_Button.setOnAction(event);
     }
     public void fire_Simulate(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
         seads_Simulate_Button.fire();
     }
 
-    public EventHandler<ActionEvent> outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
+    public void outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
         System.out.println("1param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
+        System.out.println("simulate: " + simulate_Was_Clicked);
 
-        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                System.out.println("actionEvent");
+
                 backgroundThread = new Service<Void>() {
                     @Override
                     protected Task<Void> createTask() {
-                        System.out.println("createTask");
                         return new Task<Void>() {
                             protected Void call() throws Exception {
-                                System.out.println("call");
                                 // Actions
                                     Platform.runLater( ()->{
-                                        System.out.println("RunLater");
-                                        if (simulate_Was_Clicked) {
-                                            System.out.println("2param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
-                                            update_Occupancy(param_Line_Index, param_Occupancy_Index, param_Distance_Traveled_In_Tick);
-                                        } else {
-                                            // Set up before getting distances from trains
-                                            spawn_Train_In_Yard(param_Line_Index, 1);
-                                            simulate_Was_Clicked = true;
-                                        }
+                                        System.out.println("2param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
+                                        update_Occupancy(param_Line_Index, param_Occupancy_Index, param_Distance_Traveled_In_Tick);
                                     });
                                 return null;
                             }
@@ -175,18 +188,13 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                     }
                 };
                 //final GetUpdatedOccupancyService service = new GetUpdatedOccupancyService();
-                System.out.println("3param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
                 backgroundThread.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent workerStateEvent) {
                         System.out.println("Done");
                     }
                 });
-                System.out.println("4param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
                 backgroundThread.restart();
-            }
-        };
-        return event;
     }
 
     private void configureMenuBar(MenuBar param_MenuBar){
@@ -288,6 +296,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                     int extracted_Previous_Block_Number = Integer.parseInt(block_Line_Elements.get(7));
                     Boolean extracted_is_Yard = Boolean.parseBoolean(block_Line_Elements.get(8));
                     Boolean extracted_is_Switch = Boolean.parseBoolean(block_Line_Elements.get(9));
+                    Boolean extracted_is_Station = Boolean.parseBoolean(block_Line_Elements.get(10));
+
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
@@ -302,6 +312,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                 block.previous_Block_Number = extracted_Previous_Block_Number;
                                 block.is_Yard = extracted_is_Yard;
                                 block.is_Switch = extracted_is_Switch;
+                                block.is_Station = extracted_is_Station;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
                                     block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
                                     if(block.is_Yard){
@@ -309,6 +320,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                     }
                                     if(block.is_Switch){
                                         block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Blue"));
+                                    }
+                                    if(block.is_Station){
+                                        block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Purple"));
                                     }
                                 }
                             }
@@ -354,20 +368,67 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         murphy_Stage.show();
     }
 
-    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number){
+    public void spawn_Train_In_Yard(int param_Cars, int param_Line_Index, int param_Block_Number) throws RemoteException {
         Line working_Line = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index);
         // Find the block in the coordinate plane and turn its occupancy on
         for (Block[] blocks : working_Line.block_Arr) {
             for (Block block : blocks) {
                 if(block.blockNumber == param_Block_Number && block.is_Yard){
                     System.out.println("Spawning train at block: " + block.blockNumber);
+
+                    // Sead's maker thread
+//                    Train_Maker maker = new Train_Maker();
+//                    maker.start();
+
+                    // Sead
+                    //Network.tm_Interface.create_Train(2);
+
+                    System.out.println("Block block blocks");
+
+                    // Adnan original - 3 occupancy functions
                     block.set_Occupancy(true);
                     //TODO: The arrays below need to be in tandem
                     working_Line.occupancies.add(block.blockNumber);
                     working_Line.distances.add(0.0);
+
+                    // Sead's alternative - 3 occupancy functions
+//                        Service diff_BackgroundThread;
+//                        diff_BackgroundThread = new Service<Void>() {
+//                            @Override
+//                            protected Task<Void> createTask() {
+//                                return new Task<Void>() {
+//                                    protected Void call() throws Exception {
+//                                        // Actions
+//                                        Platform.runLater( ()->{
+//                                            block.set_Occupancy(true);
+//                                            //TODO: The arrays below need to be in tandem
+//                                            working_Line.occupancies.add(block.blockNumber);
+//                                            working_Line.distances.add(0.0);
+//                                        });
+//                                        return null;
+//                                    }
+//                                };
+//                            }
+//                        };
                 }
             }
         }
+        // Sead's alternative - swap
+//        backgroundThread = new Service<Void>() {
+//            @Override
+//            protected Task<Void> createTask() {
+//                return new Task<Void>() {
+//                    protected Void call() throws Exception {
+//                        // Actions
+//                        Platform.runLater( ()->{
+//                            swap_To_Line_Scene(param_Line_Index);
+//                        });
+//                        return null;
+//                    }
+//                };
+//            }
+//        };
+        // Adnan original - swap
         swap_To_Line_Scene(param_Line_Index);
     }
     public void update_Occupancy(int param_Line_Index, int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
@@ -514,6 +575,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             }
         }
         print_Update_Occupancy("Did not move", param_Line_Index);
+
+        // Second call
         swap_To_Line_Scene(param_Line_Index);
     }
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched){
@@ -554,8 +617,50 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             System.out.println(this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).past_Occupancies.get(i));
         }
     }
+
+    public void send_Speed_Authority(int train_Num, double speed, int authority) throws RemoteException, InterruptedException {
+        Network.tm_Interface.send_Speed_Authority(train_Num, speed, authority, 0.0);
+        System.out.println("Sending speed and authority to train model");
+    }
+
+
+    // Sead's thing
+    class Train_Maker extends Thread {
+        public void run() {
+            try {
+                // Displaying the thread that is running
+                Network.tm_Interface.create_Train(2);
+
+            } catch (Exception e) {
+                // Throwing an exception
+                System.out.println("Exception is caught");
+            }
+        }
+    }
+
 }
 
 // Safekeeping
 //this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).occupancies.remove(param_Occupancy_Index);
 //this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).distances.remove(param_Occupancy_Index);
+
+//                                        if (simulate_Was_Clicked) {
+//
+//                                        } else {
+//                                            // Set up before getting distances from trains
+//                                            spawn_Train_In_Yard(param_Line_Index, 1);
+//                                            simulate_Was_Clicked = true;
+//                                            System.out.println("Setting to true");
+//                                            System.out.println("simulate: " + simulate_Was_Clicked);
+//                                        }
+
+
+
+//        if (simulate_Was_Clicked) {
+//            System.out.println("2param_Line_Index: " + param_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick);
+//            update_Occupancy(param_Line_Index, param_Occupancy_Index, param_Distance_Traveled_In_Tick);
+//        } else {
+//            // Set up before getting distances from trains
+//            spawn_Train_In_Yard(param_Line_Index, 1);
+//            simulate_Was_Clicked = true;
+//        }

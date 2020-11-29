@@ -85,13 +85,9 @@ public class Track_Model_Builder_GUI {
             description_label = new Label("Editing Line: " + (this_TMBD.this_Track.get_Line_At_Index(param_Line_Index).index + 1));
         }
 
-        System.out.println(param_GridPane.getColumnCount());
-
         // Update Gridpane
         param_GridPane = new GridPane();
         Block[][] line_Block_Arr = this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr;
-//        System.out.println("Length: " + line_Block_Arr.length);
-//        System.out.println("Width: " + line_Block_Arr[0].length);
         for(int i = 0; i < line_Block_Arr.length; i++){
             for(int j = 0; j < line_Block_Arr[i].length; j++){
                 param_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
@@ -294,16 +290,12 @@ public class Track_Model_Builder_GUI {
 
                 // Creating lines
                 if(next_Line.substring(0, 3).equals("L: ")){
-                    // Update lines
-                    System.out.println(next_Line);
                     current_Line_index = Integer.parseInt(String.valueOf(next_Line.charAt(3)));
                     this_TMBD.this_Track.add_Line(new Line(current_Line_index));
                 }
 
                 // Setting canvases to lines
                 if(next_Line.substring(0, 3).equals("C: ")){
-                    // Update lines
-                    System.out.println(next_Line);
                     // Iterate through line to get dimensions
                     String x_String = "", y_String = "";
                     Boolean collect_X = false, collect_Y = false;
@@ -326,11 +318,9 @@ public class Track_Model_Builder_GUI {
                     ArrayList<String> block_Line_Elements = new ArrayList<String>();
                     String build = "";
                     for(int i = 2; i < next_Line.length(); i++){
-                        System.out.println("Substring atm: " + next_Line.substring(i, i+1));
                         if(!next_Line.substring(i, i+1).equals(",")){
                             if(!next_Line.substring(i, i+1).equals(" ")){
                                 build += next_Line.substring(i, i+1);
-                                System.out.println("Build: " + build);
                             }
                         }else{
                             block_Line_Elements.add(build);
@@ -352,8 +342,6 @@ public class Track_Model_Builder_GUI {
                         x_Coord_S = (coord_String.substring(i, i+1).equals("x")? x_Coord_S.substring(0, x_Coord_S.length() - 1) : x_Coord_S);
                         collect_Y = (coord_String.substring(i, i+1).equals("x")? true : collect_Y);
 
-                        System.out.println("x_Coord_S: " + x_Coord_S);
-                        System.out.println("y_Coord_S: " + y_Coord_S);
                     }
 
                     // Assign elements from text file to data
@@ -425,32 +413,24 @@ public class Track_Model_Builder_GUI {
     }
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
 
-    //*******************************************************************************************************************************************************
-    // Opens the first scene of the stage                                                                                                                   *
-    //*******************************************************************************************************************************************************
+
     public void swap_to_Start_Scene(){
         builder_Stage.setScene(return_Start_Scene());
         builder_Stage.show();
     }
-    //*******************************************************************************************************************************************************
-    // Changes the scene when a new track is created                                                                                                        *
-    //*******************************************************************************************************************************************************
+
     public void swap_To_New_Track_Scene(ArrayList<Button> param_Line_Button_ArrayList){
         if(this_TMBD.this_File != null){
             builder_Stage.setScene(return_New_Track_Scene(param_Line_Button_ArrayList));
             builder_Stage.show();
         }
     }
-    //*******************************************************************************************************************************************************
-    // Changes the scene when a line is selected                                                                                                            *
-    //*******************************************************************************************************************************************************
+
     public void swap_To_Line_Scene(int param_Line_Index, GridPane param_GridPane){
         builder_Stage.setScene(return_Line_Scene(param_Line_Index, param_GridPane));
         builder_Stage.show();
     }
-    //*******************************************************************************************************************************************************
-    // Changes the scene when the user selects to set their canvas                                                                                          *
-    //*******************************************************************************************************************************************************
+
     public void swap_To_Set_Canvas_Scene(int param_Line_Index, GridPane param_GridPane){
         builder_Stage.setScene(return_set_Canvas_Scene(param_Line_Index, param_GridPane));
         builder_Stage.show();

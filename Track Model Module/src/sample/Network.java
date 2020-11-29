@@ -49,16 +49,16 @@ public class Network extends Track_Model_Murphy_GUI {
     }
 
     public static void connect_To_Modules() {
-//        if (!connected_Module_1) {
-//            try {
-//                Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
-//                tcs_Interface = (Track_Controller_SW_Interface) registry.lookup("Track_Controller_SW_Interface");
-//                connected_Module_1 = true;
-//            } catch (Exception e) {
-//                System.err.println("Client exception: " + e.toString());
-//                e.printStackTrace();
-//            }
-//        }
+        if (!connected_Module_1) {
+            try {
+                Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
+                tcs_Interface = (Track_Controller_SW_Interface) registry.lookup("Track_Controller_SW_Interface");
+                connected_Module_1 = true;
+            } catch (Exception e) {
+                System.err.println("Client exception: " + e.toString());
+                e.printStackTrace();
+            }
+        }
         if (!connected_Module_2) {
             try {
                 Registry registry = LocateRegistry.getRegistry(module_2_IP, module_2_Port);
