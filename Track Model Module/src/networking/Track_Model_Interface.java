@@ -14,7 +14,7 @@ public interface Track_Model_Interface extends Remote {
     public void spawn_Train_In_Yard(int param_Cars, int param_Line_Index, int param_Block_Number) throws RemoteException;
 
     public void outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
-    public void fire_Simulate(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
+    //public void fire_Simulate(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
 
     //                                                                              switch state
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) throws RemoteException;
