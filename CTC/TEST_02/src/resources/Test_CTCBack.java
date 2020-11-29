@@ -90,3 +90,32 @@ public class Test_CTCBack {
 
     }
 }
+
+
+
+/*
+//////////////////////////INVOKES MY OWN SIM TIME///////////
+        Task task = new Task<Void>() {
+            @Override public Void call() {
+                for(int i = 0; i <100; i++) {
+                    System.out.println("HIT ++");
+                    try {
+                        Network.server_Object.update_Time(++simTime);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                return null;
+            }
+        };
+        new Thread(task).start();
+
+
+
+ */

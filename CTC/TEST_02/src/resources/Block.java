@@ -29,7 +29,8 @@ public class Block {
         condition = true;
     }
 
-    public Block(char sec, int num, double len, double gra, int speed, String inf, String stationSide, double ele,double cumEle){
+    //TODO make stationSide on gui, make gui realize lights on or off
+    public Block(char sec, int num, double len, double gra, int speed, String inf, String sSide, double ele,double cumEle){
         section = sec;
         number = num;
         length = len;
@@ -38,6 +39,7 @@ public class Block {
         infrastructure = inf;
         elevation = ele;
         cumulativeElevation = cumEle;
+        stationSide = sSide;
         occupancy = false;
         condition = true;
         lights = false;

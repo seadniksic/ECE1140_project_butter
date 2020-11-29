@@ -26,8 +26,13 @@ import resources.*;
 
 
 public class Main extends Application {
+    public static TextField simulationTime = new TextField("00");
 
+    public static void update_GUI_Time(){
+        if(Network.server_Object != null)
+        simulationTime.setText(String.valueOf(Network.server_Object.get_Sim_Time()));
 
+    }
 
     public void fill_Train_ChoiceBox(ChoiceBox cB){
         if( Network.server_Object != null ){
@@ -68,6 +73,8 @@ public class Main extends Application {
         tF.setEditable(false);
         tF.setStyle("-fx-background-color: grey;");
     }
+
+
 
     public void show_No_ServerObject(){
         Alert noServerObjectAlert = new Alert(Alert.AlertType.ERROR);
@@ -1304,7 +1311,11 @@ public class Main extends Application {
 
         modeToggle.setOnAction(e->{
             if(Network.server_Object != null) {
-                Network.server_Object.toggle_Automatic();
+                try {
+                    Network.server_Object.toggle_Automatic();
+                } catch (RemoteException remoteException) {
+                    remoteException.printStackTrace();
+                }
                 if (Network.server_Object.get_Automatic()) {
 
                     modeToggle.setStyle("-fx-background-color: yellow;");
@@ -1323,7 +1334,7 @@ public class Main extends Application {
         });
 
         Label simulationTimeLabel = new Label("SIM TIME (s): ");
-        TextField simulationTime = new TextField("00");
+        //TextField simulationTime = new TextField("00");
 
 
 
@@ -1361,13 +1372,6 @@ public class Main extends Application {
                 "- The mode can be changed by pressing the big colorful button at the bottom right."
         );
         WELCOME.showAndWait();
-
-
-        scene1.setOnMouseMoved(mouseEvent -> {
-
-            simulationTime.setText(String.valueOf(Network.server_Object.get_Sim_Time()));
-        });
-
     }
 
 

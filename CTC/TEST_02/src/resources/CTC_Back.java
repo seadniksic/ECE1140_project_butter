@@ -1,13 +1,16 @@
 package resources;
 
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import networking.*;
-
+import CTC_GUI.*;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.time.LocalTime;
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 public class CTC_Back implements CTC_Interface {
 
@@ -73,7 +76,7 @@ public class CTC_Back implements CTC_Interface {
         return t.get_Infrastructure_List();
     }
 
-    public void toggle_Automatic() {
+    public void toggle_Automatic() throws RemoteException {
         automatic = !automatic;
     }
 
@@ -227,6 +230,7 @@ public class CTC_Back implements CTC_Interface {
 
     }
 
+    //TODO create personal schedule and read in properly
     public void import_Train_Schedule() throws FileNotFoundException{
         scheduleFile = new File(schedulePath);
         Scanner sc = new Scanner(scheduleFile);
@@ -477,6 +481,9 @@ public class CTC_Back implements CTC_Interface {
         trainList.get(trainNum).add_Ticket();
     }
 
+
+    //TODO only dispatch on spawn time. then handle dispatching when arrived at station
+
     public void update_Time(double time) throws RemoteException{
         //System.out.println(time);
        // System.out.printf("%.2f\n",time);
@@ -488,6 +495,21 @@ public class CTC_Back implements CTC_Interface {
         double minutes = 0;
         minutes = finalTime /60;
         int trainIndex = 0;
+
+
+        new Thread(new Runnable() {
+            @Override public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("HIT UPDATE");
+                        Main.update_GUI_Time();
+                    }
+                });
+            }
+        }).start();
+
+
         if((minutes % 1.0) == 0.0 && automatic) {
 
 
@@ -520,7 +542,7 @@ public class CTC_Back implements CTC_Interface {
         }
 
 
-    //make a change
+
 
 
 
