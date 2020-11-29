@@ -23,6 +23,7 @@ public class CTC_Back implements CTC_Interface {
 
 
 
+//TODO check schedule viability ie can it move that length within the time needed give speed limits applied
 
     public CTC_Back(){
         trainList.clear();
@@ -449,7 +450,7 @@ public class CTC_Back implements CTC_Interface {
     }
 
 
-    //TODO make sure this calls calculate authority and sends authority, also updates block occupancy
+    //TODO make sure this calls calculate authority and sends authority, also updates block occupancy on track and train
     public void train_Moved(int trainNum, int block) throws RemoteException{
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
 
