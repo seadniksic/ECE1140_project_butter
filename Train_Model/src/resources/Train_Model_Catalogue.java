@@ -13,6 +13,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     static ArrayList<Train_Model> trains = new ArrayList<Train_Model>();
     static ObservableList<String> name_List = FXCollections.observableArrayList();
     static double sim_Time;
+    static int multiplier;
 
     public static void create_Model(int cars) throws RemoteException {
         Train_Model new_Model = new Train_Model(cars, train_Total);
@@ -31,13 +32,19 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         Network.tc_Interface.add_Train_Controller(cars);
     }
 
-    public void create_Train(int cars){
+    public void create_Train(int cars) throws RemoteException {
+        System.out.println("Create Train: " + train_Total);
         Train_Model new_Model = new Train_Model(cars, train_Total);
-        train_Total += 1;
         trains.add(new_Model);
+        name_List.add("Train " + (train_Total));
+        create_Controller(cars);
+        train_Total += 1;
     }
 
-    public void send_Speed_Authority(int train_Num, int speed, int authority, double grade) throws RemoteException, InterruptedException {
+    public void send_Speed_Authority(int train_Num, double speed, int authority, double grade) throws RemoteException, InterruptedException {
+        System.out.println("------------------------------------");
+        System.out.println("in speed and authority");
+        System.out.println("train_Num: " + train_Num);
         trains.get(train_Num).send_Speed_Authority(speed, authority, grade);
     }
 
@@ -135,6 +142,10 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public void update_Time(double time) {
         sim_Time = time;
         System.out.println(time);
+    }
+
+    public void update_Multiplier(int m) {
+        multiplier = m;
     }
 
     public void remove_Failure_Status(int train_Num) { trains.get(train_Num).remove_Failure_Status(); }

@@ -2,10 +2,12 @@ package resources;
 
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,11 +28,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import networking.Network;
+
+import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 
 import java.io.FileInputStream;
@@ -83,59 +88,54 @@ public class GUI extends Application {
         main_Stage = primaryStage;
 
         Network.start_Server();
-        while (!Network.connected_Module_2) {
-            try {
-                Network.connect_To_Modules();
-            } catch (Exception e) {
-
-            }
-
-        }
         //Set scene and show
         set_Scene(get_Catalogue_Scene(), "Train Catalogue");
     }
 
     public static void refresh_Table(int id) {
         Train_Model train = Train_Model_Catalogue.trains.get(id);
-        main_data.removeAll();
-        DecimalFormat df = new DecimalFormat("0.0000");
-        ObservableList<Property> temp = FXCollections.observableArrayList(
-                new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
-                new Property("Power", train.get_Engine_Power(), "watts"),
-                new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
-                new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
-        );
+        System.out.println("GET");
+        if (main_data != null) {
+            main_data.removeAll();
+            DecimalFormat df = new DecimalFormat("0.0000");
+            ObservableList<Property> temp = FXCollections.observableArrayList(
+                    new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
+                    new Property("Power", train.get_Engine_Power(), "watts"),
+                    new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
+                    new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
+            );
 
-        ObservableList<Property> temp2 = FXCollections.observableArrayList(
-                new Property("Grade", train.get_Grade(), "degrees"),
-                new Property("Positive_Force", train.get_Force().get(1), "Newtons"),
-                new Property("Negative Force", train.get_Force().get(2), "Newtons"),
-                new Property("Effective Force", train.get_Force().get(0), "Newtons"),
-                new Property("Max Force", train.get_Force().get(3), "Newtons")
-        );
+            ObservableList<Property> temp2 = FXCollections.observableArrayList(
+                    new Property("Grade", train.get_Grade(), "degrees"),
+                    new Property("Positive_Force", train.get_Force().get(1), "Newtons"),
+                    new Property("Negative Force", train.get_Force().get(2), "Newtons"),
+                    new Property("Effective Force", train.get_Force().get(0), "Newtons"),
+                    new Property("Max Force", train.get_Force().get(3), "Newtons")
+            );
 
-        ObservableList<Property> temp3 = FXCollections.observableArrayList(
-                new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
-                new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
-                new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
-                new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
-                new Property("Cabin Temperature", train.get_Temperature(), "F"),
-                new Property("Advertisements", train.get_Advertisements(), "")
-        );
+            ObservableList<Property> temp3 = FXCollections.observableArrayList(
+                    new Property("Left Doors", !train.get_Left_Door_Status() ? "closed" : "open", ""),
+                    new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
+                    new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
+                    new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
+                    new Property("Cabin Temperature", train.get_Temperature(), "F"),
+                    new Property("Advertisements", train.get_Advertisements(), "")
+            );
 
-        ObservableList<Property> temp4 = FXCollections.observableArrayList(
-                new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
-                new Property("Engine Power Limit", 120, "kilowatts"),
-                new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
-                new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
-                new Property("Cars", train.get_Num_Cars(), "cars")
+            ObservableList<Property> temp4 = FXCollections.observableArrayList(
+                    new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
+                    new Property("Engine Power Limit", 120, "kilowatts"),
+                    new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
+                    new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
+                    new Property("Cars", train.get_Num_Cars(), "cars")
 
-        );
-        FXCollections.copy(main_data, temp);
-        FXCollections.copy(advanced_data, temp2);
-        FXCollections.copy(non_vital_data, temp3);
-        FXCollections.copy(attributes_data, temp4);
-        System.out.println("---------Update Ran-----------");
+            );
+            FXCollections.copy(main_data, temp);
+            FXCollections.copy(advanced_data, temp2);
+            FXCollections.copy(non_vital_data, temp3);
+            FXCollections.copy(attributes_data, temp4);
+            System.out.println("---------Update Ran-----------");
+        }
     }
 
     public static void set_Scene(Scene scene, String title){
@@ -167,11 +167,20 @@ public class GUI extends Application {
 
 
     public Scene get_Catalogue_Scene() {
-        VBox layout = new VBox(10);
-        layout.setAlignment(Pos.CENTER);
+        VBox layout = new VBox();
+        VBox main = new VBox();
+        main.setAlignment(Pos.CENTER);
+        main.setPadding(new Insets(30,10,10,10));
+        main.setSpacing(10);
+
+        Button b = new Button("Connect to Track Model");
+        Button c = new Button("Connect to Train Controller");
+        Button test = new Button("Send");
+
 //
         Text label = new Text("Train Catalogue");
-        label.setStyle("-fx-font: 24 arial;");
+        label.setTextAlignment(TextAlignment.CENTER);
+        label.setStyle("-fx-font: 24 arial; -fx-padding: 10 10 10 10;");
 
         Button button = new Button("Spawn Train");
 
@@ -180,6 +189,43 @@ public class GUI extends Application {
         list.setPlaceholder(new Label("No Trains To Display"));
         list.setItems(Train_Model_Catalogue.name_List);
 
+        Menu menu = new Menu("Connect To Modules");
+        MenuItem menuItem1 = new MenuItem("Track Model");
+        MenuItem menuItem2 = new MenuItem("Train Controller");
+
+        menu.getItems().add(menuItem1);
+        menu.getItems().add(menuItem2);
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(menu);
+
+        EventHandler<ActionEvent> event_tc = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e)
+            {
+                Network.connect_To_Train_Controller();
+            }
+        };
+
+        EventHandler<ActionEvent> event_tm = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e)
+            {
+                Network.connect_To_Track_Model();
+            }
+        };
+
+        menuItem1.setOnAction(event_tm);
+        menuItem2.setOnAction(event_tc);
+
+
+        b.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent e) {
+                Network.connect_To_Track_Model();
+            }
+        });
+        c.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent e) {
+                Network.connect_To_Train_Controller();
+            }
+        });
 
         button.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent e) {
@@ -194,23 +240,42 @@ public class GUI extends Application {
             public void handle(MouseEvent e) {
                 int index = list.getSelectionModel().getSelectedIndex();
                 if (index != -1) {
-                    set_Scene(get_Train_Scene(index), "Train View");
+                    try {
+                        set_Scene(get_Train_Scene(index), "Train View");
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        fileNotFoundException.printStackTrace();
+                    }
                 }
             }
         });
 
-        layout.getChildren().addAll(label, button, list);
-        Scene scene = new Scene(layout,CS_SCALE_FACTOR_X * screen_X,CS_SCALE_FACTOR_Y * screen_Y);
+        main.getChildren().addAll(label,button,list);
+        layout.getChildren().addAll(menuBar, main);
+        Scene scene = new Scene(layout, CS_SCALE_FACTOR_X * screen_X,CS_SCALE_FACTOR_Y * screen_Y);
         return scene;
 
     }
 
-    public Scene get_Train_Scene(int index) {
+    public Scene get_Train_Scene(int index) throws FileNotFoundException {
         Font f2 = Font.font("Verdana", 30);
         //Fetch correct train instance and data
         Train_Model train = tc.trains.get(index);
         current_index = index;
 
+        Button test = new Button("Send");
+        test.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent e) {
+                for (int i = 0; i < 1000; i++) {
+                    System.out.println(i);
+                    try {
+                        Thread.sleep(500);
+                        Network.tm_Interface.outer_Update_Occupancy(1, index, i);
+                    } catch (RemoteException | InterruptedException remoteException) {
+                        remoteException.printStackTrace();
+                    }
+                }
+            }
+        });
         DecimalFormat df = new DecimalFormat("0.00");
 
         main_data = FXCollections.observableArrayList(
@@ -262,8 +327,15 @@ public class GUI extends Application {
 
         TextField textField = new TextField("");
         TextField space = new TextField("");
+        TextField space2 = new TextField("");
+
+        space2.setVisible(false);
+        space2.setMinHeight(100);
+//        Image back_Logo = new Image("UIControls/logo.png");
+//        ImageView view = new ImageView(img);
         space.setVisible(false);
         space.setMinWidth(1300);
+
         Button new_Speed = new Button("Submit Speed");
         Text speed = new Text("Speed: "+ train.get_Velocity());
         Text num_Cars = new Text("Number of Cars: "+ train.num_Cars);
@@ -282,6 +354,8 @@ public class GUI extends Application {
         }
 
         Button back_button = new Button("Back");
+        back_button.setStyle("-fx-border-radius: 0px");
+
         Button advanced_info = new Button("Advanced Information");
         Button ebrake = new Button("Emergency brake");
         ebrake.setLayoutX(500);
@@ -297,13 +371,13 @@ public class GUI extends Application {
         TableView<Property> advanced_table = new TableView();
         TableView<Property> attributes_table = new TableView();
         TableView<Property> non_vital_table = new TableView();
-        main_table.setMaxSize(365, 200);
+        main_table.setMaxSize(365, 250);
         main_table.setFixedCellSize(40);
         advanced_table.setFixedCellSize(80);
-        advanced_table.setMaxSize(300, 200);
-        non_vital_table.setMaxSize(365, 200);
+        advanced_table.setMinSize(360, 800);
+        non_vital_table.setMaxSize(365, 250);
         non_vital_table.setFixedCellSize(30);
-        attributes_table.setMaxSize(365, 200);
+        attributes_table.setMaxSize(365, 250);
         attributes_table.setFixedCellSize(30);
 
         //Creating tables for displaying data
@@ -389,13 +463,14 @@ public class GUI extends Application {
 
 
 
-        center_bottom.getChildren().addAll(main_Label_Contatiner, attributes_Label_Contatiner,non_Vital_Label_Container);
+        center_bottom.getChildren().addAll(attributes_Label_Contatiner, main_Label_Contatiner, non_Vital_Label_Container);
         VBox menu = new VBox();
         //menu.prefHeightProperty().bind(layout.heightProperty());
-        menu.setPrefWidth(360);
+        menu.setPrefWidth(330);
         menu.setPrefHeight(700);
         menu.getChildren().addAll(advanced_table);
         menu.setTranslateX(-360);
+        menu.setTranslateY(-100);
         AtomicBoolean advanced_menu_isopen = new AtomicBoolean(false);
         TranslateTransition menuTranslation = new TranslateTransition(Duration.millis(500), menu);
         menuTranslation.setFromX(-360);
@@ -457,31 +532,74 @@ public class GUI extends Application {
             }
         });
 
-        top_Top.getChildren().addAll(back_button, space, ebrake);
+
+        Image e_image;
+        ImageView e_brake_image = new ImageView();
+        if (!train.get_Emergency_Brake_Status()) {
+            try {
+                Image temp_img = new Image(new FileInputStream(asset_Location + "lever2.png"));
+                e_brake_image.setImage(temp_img);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                Image temp_img = new Image(new FileInputStream(asset_Location + "lever3.png"));
+                e_brake_image.setImage(temp_img);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        e_brake_image.setPreserveRatio(true);
+        e_brake_image.setFitHeight(100);
+        e_brake_image.setFitWidth(100);
+        //e_brake_image.setTranslateX(-80);
+
+        e_brake_image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent mouseEvent) {
+                if (!train.get_Emergency_Brake_Status()) {
+                    try {
+                        Image temp_img = new Image(new FileInputStream(asset_Location + "lever3.png"));
+                        e_brake_image.setImage(temp_img);
+                        train.set_Emergency_Brake_Status(true);
+                    } catch (FileNotFoundException | RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+
+        VBox ebrake_image_container = new VBox();
+        Text ebrake_image_label = new Text("Passenger Emergency Brake");
+        ebrake_image_container.getChildren().addAll(e_brake_image, ebrake_image_label);
+        ebrake_image_container.setAlignment(Pos.CENTER);
+
+        top_Top.getChildren().addAll(back_button, space, ebrake_image_container);
         top_Top.setAlignment(Pos.CENTER_LEFT);
 
-        //top_Bottom.getChildren().addAll(main_Table);
+        top_Bottom.getChildren().addAll();
         top_Bottom.setAlignment(Pos.CENTER);
 
-        bottom_Top.getChildren().addAll(destruction_Mode);
+        //bottom_Top.getChildren().addAll(e_brake_image);
         bottom_Top.setAlignment(Pos.CENTER);
 //        bottom_Top.setPadding(new Insets(0,0,0,200));
+        bottom_Middle.getChildren().add(destruction_Mode);
 
-        bottom_Bottom.getChildren().addAll(new_Speed, textField, advanced_info);
+
+        bottom_Bottom.getChildren().addAll(advanced_info, new_Speed, textField);
 
         top.getChildren().addAll(top_Top, top_Middle, top_Bottom);
-        bottom.getChildren().addAll(bottom_Bottom, bottom_Middle, bottom_Top);
+        bottom.getChildren().addAll(bottom_Top, bottom_Middle, bottom_Bottom);
 
         //Find and load main image
-        try {
-            Image temp = new Image(new FileInputStream(asset_Location + "trans_model_1_real.png"));
-            ImageView image = new ImageView(temp);
-            center.getChildren().addAll(title, image, center_bottom, failure);
-            center.setAlignment(Pos.CENTER);
-        }catch (Exception e) {
-            System.out.println("File Not Found");
-            center.getChildren().addAll(failure, title, center_bottom);
-        }
+        Image temp = new Image(new FileInputStream(asset_Location + "train_2.png"));
+        ImageView train_im = new ImageView(temp);
+
+        center.getChildren().addAll(title, train_im, center_bottom, failure);
+        center.setAlignment(Pos.CENTER);
+
 
 
 
@@ -571,6 +689,75 @@ public class GUI extends Application {
                 .add(margin));
         table.minHeightProperty().bind(table.prefHeightProperty());
         table.maxHeightProperty().bind(table.prefHeightProperty());
+    }
+
+    public ImageView get_Train_State(Train_Model t) throws FileNotFoundException {
+        Image temp;
+
+        if (!t.get_Int_Lights() && !t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_1.png"));
+
+        } else if (!t.get_Int_Lights() && !t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_2.png"));
+
+        } else if (!t.get_Int_Lights() && t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_3.png"));
+
+        } else if (!t.get_Int_Lights() && t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_4.png"));
+
+        } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_5.png"));
+
+        } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_6.png"));
+
+        } else if (t.get_Int_Lights() && t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_7.png"));
+
+        } else {
+            temp = new Image(new FileInputStream(asset_Location + "train_8.png"));
+        }
+
+        ImageView image = new ImageView(temp);
+        return image;
+
+
+    }
+
+
+
+
+    public void change_Train_State(int id) throws FileNotFoundException {
+        Image temp;
+        Train_Model t = Train_Model_Catalogue.trains.get(id);
+
+        if (!t.get_Int_Lights() && !t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_1.png"));
+
+        } else if (!t.get_Int_Lights() && !t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_2.png"));
+
+        } else if (!t.get_Int_Lights() && t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_3.png"));
+
+        } else if (!t.get_Int_Lights() && t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_4.png"));
+
+        } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_5.png"));
+
+        } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_6.png"));
+
+        } else if (t.get_Int_Lights() && t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            temp = new Image(new FileInputStream(asset_Location + "train_7.png"));
+
+        } else {
+            temp = new Image(new FileInputStream(asset_Location + "train_8.png"));
+        }
+
+        ImageView image = new ImageView(temp);
     }
 
 }

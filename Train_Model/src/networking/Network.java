@@ -45,26 +45,30 @@ public class Network extends Train_Model_Catalogue {
         }
     }
 
-    public static void connect_To_Modules() {
-//        if (!connected_Module_1) {
-//            try {
-//                Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
-//                tm_Interface = (Track_Model_Interface) registry.lookup("Track_Model_Interface");
-//                connected_Module_1 = true;
-//            } catch (Exception e) {
-//                System.err.println("Client exception: " + e.toString());
-//                e.printStackTrace();
-//            }
-//        }
-        if (!connected_Module_2) {
+    public static void connect_To_Train_Controller() {
             try {
                 Registry registry = LocateRegistry.getRegistry(module_2_IP, module_2_Port);
                 tc_Interface = (Train_Controller_Interface) registry.lookup("Train_Controller_Interface");
                 connected_Module_2 = true;
+                System.out.println("Connected To Train Controller");
             } catch (Exception e) {
                 System.err.println("Client exception: " + e.toString());
                 e.printStackTrace();
             }
-        }
     }
+
+    public static void connect_To_Track_Model() {
+            try {
+                Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
+                tm_Interface = (Track_Model_Interface) registry.lookup("Track_Model_Interface");
+                connected_Module_1 = true;
+                System.out.println("Connected To Track Model");
+            } catch (Exception e) {
+                System.err.println("Client exception: " + e.toString());
+                e.printStackTrace();
+            }
+    }
+
+
+
 }

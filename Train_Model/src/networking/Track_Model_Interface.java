@@ -11,18 +11,18 @@ public interface Track_Model_Interface extends Remote {
 
 //    public void send_Distance(double distance){ }
 
-    public void spawn_Train_In_Yard(int param_Line_Index, int param_Block_Number) throws RemoteException;
+    public void spawn_Train_In_Yard(int param_Cars, int param_Line_Index, int param_Block_Number) throws RemoteException;
 
-    //                                  Line                    train number           distance traveled from last tick
-    public EventHandler<ActionEvent> outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
+    public void outer_Update_Occupancy(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
+    public void fire_Simulate(int param_Line_Index, int param_Occupancy_Index, double param_Distance_Traveled_In_Tick) throws RemoteException;
 
     //                                                                              switch state
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) throws RemoteException;
     public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) throws RemoteException;
     public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) throws RemoteException;
 
-    // ??
-    //public void send_Speed_Authority(int train_Num, int speed, int authority, double grade);
+    // Track Controller
+    public void send_Speed_Authority(int train_Num, double speed, int authority) throws RemoteException, InterruptedException;
 
 
 }

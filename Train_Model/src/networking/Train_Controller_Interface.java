@@ -6,7 +6,7 @@ import java.util.List;
 
 
 public interface Train_Controller_Interface extends Remote{
-    public void set_Defaults(int kp_Passed, int ki_Passed, int cars) throws RemoteException;
+    public void set_Defaults(int kp_Passed, int ki_Passed, int cars, int trainEngInd) throws RemoteException;
 
     public int get_Default_Kp(int cars) throws RemoteException;
 
@@ -22,7 +22,7 @@ public interface Train_Controller_Interface extends Remote{
 
     //public List get_Train_Controller_List() throws RemoteException;
 
-    public void set_Commanded_Speed_Authority(int index, int speed, int auth) throws RemoteException, InterruptedException;
+    public void set_Commanded_Speed_Authority(int index, double speed, int auth) throws RemoteException, InterruptedException;
 
     public void update_Time(double time) throws RemoteException;
 

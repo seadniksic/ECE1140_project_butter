@@ -18,16 +18,16 @@ public class Train_Model {
     static double brake_acc = 1.2;
     static double e_brake_acc = 2.7;
     public int id;
-    private boolean int_Lights;
-    private boolean ext_Lights;
-    private boolean left_Door_Status;
-    private boolean right_Door_Status;
+    private boolean int_Lights = true;
+    private boolean ext_Lights = false;
+    private boolean left_Door_Status = false;
+    private boolean right_Door_Status = false;
     private int temperature;
     private int wheel_Slippage;
     private int power_Consumption;
     private double engine_Power;
     private boolean brake_Status;
-    private boolean emergency_Brake_Status;
+    private boolean emergency_Brake_Status = false;
     private double velocity;
     public int num_Cars;
     private double distance;
@@ -256,7 +256,7 @@ public class Train_Model {
         double new_Distance = current_Velocity * cycle_Time + distance;
 
         time = Network.server_Object.get_Current_Time();
-        //Network.tm_Interface.outer_Update_Occupancy(1, id, new_Distance - distance);
+        Network.tm_Interface.outer_Update_Occupancy(0, id, new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 
@@ -277,8 +277,30 @@ public class Train_Model {
         this.mass = (crew + passengers) * average_Person_Mass + (num_Cars * car_Mass);
     }
 
-    public void send_Speed_Authority(int speed, int authority, double grade_in) throws RemoteException, InterruptedException {
+    public void send_Speed_Authority(double speed, int authority, double grade_in) throws RemoteException, InterruptedException {
+        System.out.println("-------------------");
+        System.out.println("Speed: " + speed);
+        System.out.println("Authority: " + authority);
+        System.out.println("Grade: " + grade_in);
+        System.out.println("-------------------");
         Network.tc_Interface.set_Commanded_Speed_Authority(id, speed, authority);
+//        Thread thread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                for (int i = 0; i < 1000; i++) {
+//                    System.out.println(i);
+//                    try {
+//                        Thread.sleep(500);
+//                        Network.tm_Interface.outer_Update_Occupancy(1, id, i);
+//                    } catch (RemoteException | InterruptedException remoteException) {
+//                        remoteException.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+
+        //thread.start();
+
         set_Grade(grade_in);
     }
 
