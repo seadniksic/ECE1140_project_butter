@@ -276,7 +276,12 @@ public class Line {
 
     private Double get_Distance_Between_Blocks(Integer start, Integer end){
         Double distance = 0.0;
-        distance += blocksList.get(start).get_Length();
+        while(start != end) {
+            distance += blocksList.get(start).get_Length();
+
+            start++;
+        }
+
 
 
         return distance;

@@ -81,6 +81,10 @@ public class Test_CTCBack {
         //assertTrue(tester.get_Line_List().get(0).get_Section_List().size() == 26);
         int zero = 0;
         assertTrue(train_List_Length > zero);
+
+
+
+
     }
 
     //Test that the import track function works
@@ -89,7 +93,68 @@ public class Test_CTCBack {
 
     @Test
     void test_Determine_Authority() throws FileNotFoundException {
+        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\blue_track");
+        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\blue_schedule");
 
+        tester.import_Train_Schedule();
+        tester.import_Track_File();
+
+        System.out.println("CALC AUTH HIT:");
+        Integer blocks_between = 10;
+
+        int lineIndex = -1;
+        boolean open = true;
+        //First check if path is open
+        //assume it is open for now
+
+        int j = 0;
+
+        while(j < 10){
+
+
+
+
+            for (int i = 0; i < tester.get_Line_List().size(); i++) {
+                if (tester.get_Line_List().get(i).get_Line().equals(tester.get_Train_List().get(0).get_Current_Line())) {
+                    lineIndex = i;
+                    break;
+                }
+            }
+
+            //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
+
+            System.out.println("Line Index: " + lineIndex);
+            //check line occupancy after current
+            int nextBlock = tester.get_Train_List().get(0).get_Current_Block() + 1;
+            System.out.println(" ----------------");
+
+            for (int i = 1; i <= 5; i++) {
+
+                //if(lineList.get(lineIndex).get_Block_Occupancy(nextBlock + i) == true){
+                // trainList.get(trainIndex).set_Authority(0);
+                // break;
+                // }else
+
+                String infrastructureHolder = tester.get_Line_List().get(0).get_Block_Infrastructure(nextBlock + i );
+                System.out.println("Station output " + infrastructureHolder);
+                if (infrastructureHolder.contains("Station")) {
+                    tester.get_Train_List().get(0).set_Authority(i);
+
+                    break;
+                } else {
+                    tester.get_Train_List().get(0).set_Authority(i);
+                }
+
+            }
+
+            if(tester.get_Line_List().get(0).get_Block_Infrastructure(nextBlock).contains("Station")){
+                tester.get_Train_List().get(0).set_Authority(0);
+            }
+
+            System.out.println("Authority = " + tester.get_Train_List().get(0).get_Authority());
+            tester.get_Train_List().get(0).set_Current_Block( tester.get_Train_List().get(0).get_Current_Block() + 1 );
+            j++;
+        }
     }
 }
 

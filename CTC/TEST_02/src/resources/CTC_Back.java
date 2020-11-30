@@ -111,19 +111,13 @@ public class CTC_Back implements CTC_Interface {
     }
 
     public void calculate_Authority(Integer trainIndex){
-        //Integer blocks_between = lineList.get().get_Number_Of_Blocks_Between(trainList.get(trainIndex).
-        // getCurrentInfrastructure(), trainList.get(trainIndex).getNextInfrastructure());
 
-        //
+
+
 
         System.out.println("CALC AUTH HIT:");
-        Integer blocks_between = 10;
 
         int lineIndex = -1;
-        boolean open = true;
-        //First check if path is open
-        //assume it is open for now
-
 
         for(int i  = 0; i < lineList.size(); i++){
             if(lineList.get(i).get_Line().equals(trainList.get(trainIndex).get_Current_Line())){
@@ -132,42 +126,33 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-        //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
+
+
+        //TODO don't hit dispacth... ie this function if train has arrived at station
 
         System.out.println("Line Index: " + lineIndex);
         //check line occupancy after current
-        int nextBlock = trainList.get(trainIndex).get_Current_Block()+1;
+        //int nextBlock = trainList.get(trainIndex).get_Current_Block()+1;
 
-        for(int i = 0; i < 5; i ++){
-
-            //if(lineList.get(lineIndex).get_Block_Occupancy(nextBlock + i) == true){
-               // trainList.get(trainIndex).set_Authority(0);
-               // break;
-           // }else
-            if(lineList.get(lineIndex).get_Block_Infrastructure(nextBlock +i).contains("Station")){
-                  trainList.get(trainIndex).set_Authority(nextBlock - i+1);
-                  break;
-            }else{
+        for (int i = 0; i <= 5; i++) {
+            //TODO remove jank if statement // used for reaching end blue line
+            String infrastructureHolder = "";
+           // if(nextBlock + i < 15)
+                infrastructureHolder = lineList.get(lineIndex).get_Block_Infrastructure(trainList.get(trainIndex).get_Current_Block() + i );
+            System.out.println("Station output " + infrastructureHolder);
+            if (infrastructureHolder.contains("Station")) {
+                trainList.get(trainIndex).set_Authority(i);
+                break;
+            } else {
                 trainList.get(trainIndex).set_Authority(i);
             }
-
         }
+        //if(nextBlock < 15) {//TODO  <-- remove this jank if statement
+//            if (lineList.get(lineIndex).get_Block_Infrastructure(nextBlock).contains("Station")) {
+//                trainList.get(trainIndex).set_Authority(0);
+//            }
+        //}
 
-
-
-
-        //OLD WAY
-//        System.out.println("Current INFR: "+ trainList.get(trainIndex).get_Current_Infrastructure());
-//        System.out.println("Next INFR: " + trainList.get(trainIndex).get_Next_Infrastructure());
-//
-//        blocks_between =
-//         lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
-//                trainList.get(trainIndex).get_Next_Infrastructure());
-//
-//
-//        System.out.println("AUTHORITY: " + blocks_between);
-//        trainList.get(trainIndex).set_Authority(blocks_between);
-//        //Integer blocks_between = 11;
 
     }
 
