@@ -6,6 +6,7 @@ import java.rmi.RemoteException;
 
 public interface Track_Controller_SW_Interface extends Remote {
 
+
     //Track Model calls these methods
     void make_Controllers(String[] lines, int[][] blocks) throws RemoteException;
 
@@ -27,7 +28,7 @@ public interface Track_Controller_SW_Interface extends Remote {
 
     void send_Speed_Authority(int trainNum, double speed, int authority) throws RemoteException; // CTC -> track controller -> track model -> train model
 
-    boolean set_Switch_Manual(String trackLine, int blockNum, boolean state) throws RemoteException;
+    boolean set_Switch_Manual(String trackLine, int blockNum) throws RemoteException;
 
     //static void add_Ticket(int trainNum) throws RemoteException;
 
