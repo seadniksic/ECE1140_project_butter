@@ -121,7 +121,7 @@ public class Test_CTCBack {
                 }
             }
 
-            //TODO have see 4 blocks ahead of it. if clear set to 4 if less set lower
+
 
             System.out.println("Line Index: " + lineIndex);
             //check line occupancy after current
@@ -162,27 +162,22 @@ public class Test_CTCBack {
 
 /*
 //////////////////////////INVOKES MY OWN SIM TIME///////////
-        Task task = new Task<Void>() {
-            @Override public Void call() {
-                for(int i = 0; i <100; i++) {
-                    System.out.println("HIT ++");
-                    try {
-                        Network.server_Object.update_Time(++simTime);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
+          Task task = new Task<Void>() {
+                @Override public Void call() throws InterruptedException {
+                    for(int i = 0; i <100; i++) {
+                        System.out.println("HIT ++");
+                        try {
+                            int simTime = 0;
+                            Network.server_Object.update_Time(++simTime);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        Thread.sleep(500);
                     }
-                    try {
-                        sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
+                    return null;
                 }
-                return null;
-            }
-        };
-        new Thread(task).start();
-
+            };
+            new Thread(task).start();
 
 
  */

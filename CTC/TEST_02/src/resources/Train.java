@@ -169,7 +169,7 @@ public class Train {
 
     // public void setCurrentPosition(String currentPos){ currentBlock = currentPos; }
 
-    //TODO make sure infrastructure and time lists are organized properly
+
     public void set_Infrastructure_List(List<String> inf){ infrastructureList = inf; }
 
     public void set_Time_List(List<LocalTime> times){ timeList = times; }
@@ -186,6 +186,29 @@ public class Train {
         numberOfTickets ++;
     }
 
+    public void sort_Lists(){
+        int n = timeList.size();
+        for (int i = 0; i < n; i++) {
+            // find position of smallest num between (i + 1)th element and last element
+            int pos = i;
+            for (int j = i; j < n; j++) {
+                if (timeList.get(j).compareTo(timeList.get(pos)) < 0) {
+                    pos = j;
+                }
+            }
+            // Swap min (smallest num) to current position on array
+            LocalTime minTime = timeList.get(pos);
+            String minInfrastructure = infrastructureList.get(pos);
+            timeList.set(pos, timeList.get(i));
+            infrastructureList.set(pos,infrastructureList.get(i));
+            timeList.set(i, minTime);
+            infrastructureList.set(i,minInfrastructure);
+        }
+
+
+
+    }
+
     public void add_Ticket(Integer add){
         numberOfTickets += add;
     }
@@ -196,6 +219,7 @@ public class Train {
             currentIndex++;
         }
     }
+
     //TODO make sure arrived() is getting called. adjust train.arrived for index out of range error
     public void arrived(){
         currentIndex ++;

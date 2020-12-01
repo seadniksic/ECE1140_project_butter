@@ -287,7 +287,7 @@ public class Line {
         return distance;
     }
 
-
+//TODO HIGHEST PRIORITY UNDERSTAND ROUTE WHEN GIVING DISTANCE
 
     public void close_Line(){
         for(Block b: blocksList){

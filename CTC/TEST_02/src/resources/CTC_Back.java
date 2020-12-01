@@ -8,7 +8,9 @@ import CTC_GUI.*;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -111,14 +113,9 @@ public class CTC_Back implements CTC_Interface {
     }
 
     public void calculate_Authority(Integer trainIndex){
-
-
-
-
         System.out.println("CALC AUTH HIT:");
-
+        //first find the index of the line the train is on.
         int lineIndex = -1;
-
         for(int i  = 0; i < lineList.size(); i++){
             if(lineList.get(i).get_Line().equals(trainList.get(trainIndex).get_Current_Line())){
                 lineIndex = i;
@@ -126,20 +123,14 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-
-
         //TODO don't hit dispacth... ie this function if train has arrived at station
 
-        System.out.println("Line Index: " + lineIndex);
-        //check line occupancy after current
-        //int nextBlock = trainList.get(trainIndex).get_Current_Block()+1;
+        //System.out.println("Line Index: " + lineIndex);
 
         for (int i = 0; i <= 5; i++) {
-            //TODO remove jank if statement // used for reaching end blue line
             String infrastructureHolder = "";
-           // if(nextBlock + i < 15)
                 infrastructureHolder = lineList.get(lineIndex).get_Block_Infrastructure(trainList.get(trainIndex).get_Current_Block() + i );
-            System.out.println("Station output " + infrastructureHolder);
+            //System.out.println("Station output " + infrastructureHolder);
             if (infrastructureHolder.contains("Station")) {
                 trainList.get(trainIndex).set_Authority(i);
                 break;
@@ -147,12 +138,6 @@ public class CTC_Back implements CTC_Interface {
                 trainList.get(trainIndex).set_Authority(i);
             }
         }
-        //if(nextBlock < 15) {//TODO  <-- remove this jank if statement
-//            if (lineList.get(lineIndex).get_Block_Infrastructure(nextBlock).contains("Station")) {
-//                trainList.get(trainIndex).set_Authority(0);
-//            }
-        //}
-
 
     }
 
@@ -161,11 +146,13 @@ public class CTC_Back implements CTC_Interface {
         System.out.println("SUG SPEED HIT:");
         Double distance = determine_Distance(trainIndex);
         System.out.println("Distance: " + distance);
+
+        //TODO subtract time waited at station from time
         long time = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
                 trainList.get(trainIndex).get_Next_Infrastructure());//this is in minutes
         double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
-        System.out.println("time: " + time);
-        System.out.println("r: " + r);
+        //System.out.println("time: " + time);
+        //System.out.println("r: " + r);
 
         //test
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
@@ -175,11 +162,13 @@ public class CTC_Back implements CTC_Interface {
         System.out.println("hit dispatch automatic function ");
        // System.out.println(trainIndex);
 
-        if(!trainList.get(trainIndex).get_Sent_Create_Command()){
+        if(!trainList.get(trainIndex).get_Sent_Create_Command() && Network.tcsw_Interface != null){
+
             Network.tcsw_Interface.create_Train(
                     trainList.get(trainIndex).get_Number_Of_Cars(),
                     trainList.get(trainIndex).get_Current_Line(),
                     trainList.get(trainIndex).get_Current_Block());
+
             trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
        // System.out.println(trainList.get(trainIndex).get_Number_Of_Cars());
@@ -188,8 +177,9 @@ public class CTC_Back implements CTC_Interface {
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
-        System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
+        System.out.println("authority send: " + trainList.get(trainIndex).get_Authority());
 
+        if( Network.tcsw_Interface != null)
         Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
           trainList.get(trainIndex).get_Authority());
     }
@@ -197,7 +187,7 @@ public class CTC_Back implements CTC_Interface {
     public void dispatch(Integer trainIndex, String nextStop, LocalTime arrivalTime) throws RemoteException, InterruptedException {
         System.out.println("hit dispatch manual function");
 
-        if(!trainList.get(trainIndex).get_Sent_Create_Command()){
+        if(!trainList.get(trainIndex).get_Sent_Create_Command() && Network.tcsw_Interface != null){
             Network.tcsw_Interface.create_Train(
                     trainList.get(trainIndex).get_Number_Of_Cars(),
                     trainList.get(trainIndex).get_Current_Line(),
@@ -239,6 +229,8 @@ public class CTC_Back implements CTC_Interface {
         calculate_Authority(trainIndex);
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
         System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
+
+        if(Network.tcsw_Interface != null)
         Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
                trainList.get(trainIndex).get_Authority());
 
@@ -285,10 +277,9 @@ public class CTC_Back implements CTC_Interface {
                         trainList.get(i - 3).set_Current_Line(h[0]);
                         System.out.println(h[0]);
 
-                        if (h[i].equals("0:00")){
-                            trainList.get(i - 3).set_Current_Block(Integer.parseInt(h[1]));
-                        System.out.println(h[1]);
-                        }
+                        //TODO TALK TO ADNAN WHAT YARD BLOCK NUMBER IS CURRENTLY SET TO 1, 0 in my code will return -1 as block 1 is index 0, unless i add a yard block for index 0
+                        trainList.get(i - 3).set_Current_Block(1);
+
 
                         trainList.get(i-3).add_Infrastructure(h[2]);
                        System.out.println(h[2]);
@@ -296,65 +287,14 @@ public class CTC_Back implements CTC_Interface {
                         System.out.println(h[i]);
                     }
                 }
+
             }
 
         }
 
-
-
-        //OLD FILE WAY
-
-
-//        scheduleFile = new File(schedulePath);
-//        Scanner sc = new Scanner(scheduleFile);
-//        List<String> linesList = new ArrayList<>();
-//        sc.useDelimiter("\\r\\n");
-//        do {
-//            linesList.add(sc.next());
-//        }while(sc.hasNext());
-//        //System.out.println(linesList.get(0).substring(73,124));
-//        //System.out.println(linesList.get(0).length()); -1
-//        //find how many trains there are on the schedule and add them to list
-//        int numberOfTrains = 0 ;
-//        if(linesList.get(0).length() > 74){
-//            numberOfTrains = (linesList.get(0).length() - 74)/ 5;
-//        }
-//
-//        //account for trains being created already
-//        numberOfTrains += trainList.size();
-//
-//        for(int j = 0 + trainList.size(); j < numberOfTrains; j++){
-//
-//            Train t = new Train("TR" + j);
-//            create_Train(t);
-//        }
-//
-//        int lIndex =-1 ;
-//        for(String s: linesList){
-//            String[] h = s.split(",");
-//
-//            ///////FOR ADDING TRAINS/////////////////////
-//            if(h.length > 30){
-//
-//                int end = 31 + trainList.size();
-//                for(int i = 31; i < end; i++) {
-//
-//                    String timeString = "0";//used for adjusting time to parse into LOCALTIME
-//                    if (h[i].contains(":")){
-//
-//                        trainList.get().set_Current_Line(h[0]);
-//                        //System.out.println(h[0]);
-//                        trainList.get(i-31).set_Current_Block(Integer.parseInt(h[2]));
-//                        //
-//                        trainList.get(i-31).add_Infrastructure(h[6]);
-//                       // System.out.println(h[6]);
-//                        trainList.get(i-31).add_Time(LocalTime.parse(timeString.concat(h[i])));
-//                       // System.out.println(h[i]);
-//                    }
-//                }
-//            }
-//
-//        }
+        for(int i = 0; i < trainList.size(); i++){
+            trainList.get(i).sort_Lists();
+        }
 
 
     }
@@ -461,6 +401,42 @@ public class CTC_Back implements CTC_Interface {
         return working;
     }
 
+
+
+    public LocalTime get_SimTime_As_LocalTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        long currentSimTime = simTime;
+
+        long hours = TimeUnit.SECONDS.toHours(simTime);
+        currentSimTime -= TimeUnit.HOURS.toSeconds(hours);
+        long minutes = TimeUnit.SECONDS.toMinutes(simTime);
+        currentSimTime -= TimeUnit.MINUTES.toSeconds(minutes);
+
+        String HH;
+        if(hours <10) {
+            HH = "0" + String.valueOf(hours);
+        }else{
+            HH = String.valueOf(hours);
+        }
+
+        String mm;
+        if(minutes <10) {
+            mm = "0" + String.valueOf(minutes);
+        }else{
+            mm = String.valueOf(minutes);
+        }
+
+        String ss;
+        if(currentSimTime <10) {
+            ss = "0" + String.valueOf(currentSimTime);
+        }else{
+            ss = String.valueOf(currentSimTime);
+        }
+
+        return LocalTime.parse(HH + ":" + mm + ":" + ss, formatter);
+
+    }
+
     public void close_Line(String line) throws RemoteException{
         //close entire track so each block is closed
         int lineIndex = -1;
@@ -541,11 +517,16 @@ public class CTC_Back implements CTC_Interface {
                 lineIndex = i;
             }
         }
+
+        //TODO this needs to changed based of actual occupancy ie length of train and block
         if(block > 1) {
             lineList.get(lineIndex).toggle_Block_Occupancy(block - 2);
         }
+
+
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
+        //TODO check if train should be dispatched again, wait if at station
         dispatch(trainNum);
 
     }
@@ -587,8 +568,6 @@ public class CTC_Back implements CTC_Interface {
 
         if((minutes % 1.0) == 0.0 && automatic) {
 
-
-
             for (Train tr : trainList) {
                 LocalTime ti = tr.get_Time_List().get(0);//this should only see first time for time list
                     if (ti.toSecondOfDay() == finalTime) {
@@ -623,6 +602,8 @@ public class CTC_Back implements CTC_Interface {
 
 
     }
+
+
 
 }
 
