@@ -33,6 +33,11 @@ public class Block {
     Boolean is_Station;
     String station_Name;
 
+    // Failure Modes
+    Boolean broken_Rail;
+    Boolean track_Circuit_Failure;
+    Boolean power_Failure;
+
 
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Block(int param_X, int param_Y){
@@ -65,6 +70,11 @@ public class Block {
         // Station only
         is_Station = false;
         station_Name = "";
+
+        // Failure Modes
+        broken_Rail = false;
+        track_Circuit_Failure = false;
+        power_Failure = false;
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------

@@ -54,6 +54,10 @@ public class Block_GUI {
     RadioButton is_Beta_RB;
     RadioButton is_Gamma_RB;
 
+    CheckBox broken_Rail_CheckBox;
+    CheckBox tCF_CheckBox;
+    CheckBox power_Failure_CheckBox;
+
 
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Block_GUI(Block param_Parent_Block){
@@ -192,6 +196,36 @@ public class Block_GUI {
         };
         param_Checkbox.setOnAction(event);
     }
+    private void map_Broken_Rail_CheckBox(CheckBox param_Checkbox){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.broken_Rail = broken_Rail_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                summon_Block_Editor(true, parent_Block.is_Builder);
+            }
+        };
+        param_Checkbox.setOnAction(event);
+    }
+    private void map_tCF_CheckBox(CheckBox param_Checkbox){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.track_Circuit_Failure = tCF_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                summon_Block_Editor(true, parent_Block.is_Builder);
+            }
+        };
+        param_Checkbox.setOnAction(event);
+    }
+    private void map_Power_Failure_CheckBox(CheckBox param_Checkbox){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.power_Failure = power_Failure_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                summon_Block_Editor(true, parent_Block.is_Builder);
+            }
+        };
+        param_Checkbox.setOnAction(event);
+    }
 
     // Returning scenes
     private Scene return_Builder_Block_Editor_Scene(){
@@ -304,8 +338,35 @@ public class Block_GUI {
     }
     private Scene return_Murphy_Block_Editor_Scene(){
         Label description_label = new Label("Welcome to the block editor!");
+
+        // Block info
+
+
+        // If scenario stations and ticket sales
+
+        // Failure checkboxes
+
+
+        broken_Rail_CheckBox = new CheckBox("Broken Rail");
+        broken_Rail_CheckBox.setSelected(parent_Block.broken_Rail);
+        map_Broken_Rail_CheckBox(broken_Rail_CheckBox);
+
+        tCF_CheckBox = new CheckBox("Track Circuit Failure");
+        tCF_CheckBox.setSelected(parent_Block.track_Circuit_Failure);
+        map_tCF_CheckBox(tCF_CheckBox);
+
+        power_Failure_CheckBox = new CheckBox("Power Failure");
+        power_Failure_CheckBox.setSelected(parent_Block.power_Failure);
+        map_Power_Failure_CheckBox(power_Failure_CheckBox);
+
+        // Holds checkbox row
+        HBox fail_HBox = new HBox();
+        fail_HBox.getChildren().addAll(broken_Rail_CheckBox, tCF_CheckBox, power_Failure_CheckBox);
+        fail_HBox.setAlignment(Pos.TOP_CENTER);
+        fail_HBox.setSpacing(20);
+
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(description_label);
+        this_VBox.getChildren().addAll(description_label,return_section_HBox(), return_block_Num_HBox(), fail_HBox);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -316,6 +377,7 @@ public class Block_GUI {
     private HBox return_block_Num_HBox(){
         Label block_Num_Label = new Label("Block Number: ");
         block_Num_TF = new TextField(String.valueOf(parent_Block.blockNumber));
+        block_Num_TF.setEditable(parent_Block.is_Builder);
         HBox block_Num_HBox = new HBox();
         block_Num_HBox.getChildren().addAll(block_Num_Label, block_Num_TF);
         block_Num_HBox.setAlignment(Pos.CENTER);
@@ -326,6 +388,7 @@ public class Block_GUI {
     private HBox return_section_HBox(){
         Label section_Label = new Label("Section: ");
         section_TF = new TextField(parent_Block.section);
+        section_TF.setEditable(parent_Block.is_Builder);
         HBox section_HBox = new HBox();
         section_HBox.getChildren().addAll(section_Label, section_TF);
         section_HBox.setAlignment(Pos.CENTER);
@@ -335,6 +398,7 @@ public class Block_GUI {
     private HBox return_length_HBox(){
         Label length_Label = new Label("Length (m): ");
         length_TF = new TextField(String.valueOf(parent_Block.length));
+        length_TF.setEditable(parent_Block.is_Builder);
         HBox length_HBox = new HBox();
         length_HBox.getChildren().addAll(length_Label, length_TF);
         length_HBox.setAlignment(Pos.CENTER);
@@ -344,6 +408,7 @@ public class Block_GUI {
     private HBox return_grade_HBox(){
         Label grade_Label = new Label("Grade (%): ");
         grade_TF = new TextField(String.valueOf(parent_Block.grade));
+        grade_TF.setEditable(parent_Block.is_Builder);
         HBox grade_HBox = new HBox();
         grade_HBox.getChildren().addAll(grade_Label, grade_TF);
         grade_HBox.setAlignment(Pos.CENTER);
@@ -353,6 +418,7 @@ public class Block_GUI {
     private HBox return_Set_Next_HBox(){
         Label set_Next_Label = new Label("Next Block:       ");
         set_Next_TF = new TextField(String.valueOf(parent_Block.next_Block_Number));
+        set_Next_TF.setEditable(parent_Block.is_Builder);
         HBox set_Next_HBox = new HBox();
         set_Next_HBox.getChildren().addAll(set_Next_Label, set_Next_TF);
         set_Next_HBox.setAlignment(Pos.CENTER);
@@ -362,6 +428,7 @@ public class Block_GUI {
     private HBox return_Set_Next_2_HBox(){
         Label set_Next_2_Label = new Label("Next Block 2: ");
         set_Next_2_TF = new TextField(String.valueOf(parent_Block.next_Block_Number_2));
+        set_Next_2_TF.setEditable(parent_Block.is_Builder);
         HBox set_Next_2_HBox = new HBox();
         set_Next_2_HBox.getChildren().addAll(set_Next_2_Label, set_Next_2_TF);
         set_Next_2_HBox.setAlignment(Pos.CENTER);
@@ -371,6 +438,7 @@ public class Block_GUI {
     private HBox return_Station_name_HBox(){
         Label station_Name_Label = new Label("Station Name: ");
         station_Name_TF = new TextField(String.valueOf(parent_Block.station_Name));
+        station_Name_TF.setEditable(parent_Block.is_Builder);
         HBox station_Name_HBox = new HBox();
         station_Name_HBox.getChildren().addAll(station_Name_Label, station_Name_TF);
         station_Name_HBox.setAlignment(Pos.CENTER);
@@ -380,6 +448,7 @@ public class Block_GUI {
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous Block: ");
         set_Previous_TF = new TextField(String.valueOf(parent_Block.previous_Block_Number));
+        set_Previous_TF.setEditable(parent_Block.is_Builder);
         HBox set_Previous_HBox = new HBox();
         set_Previous_HBox.getChildren().addAll(set_Previous_Label, set_Previous_TF);
         set_Previous_HBox.setAlignment(Pos.CENTER);

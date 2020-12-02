@@ -148,7 +148,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             @Override
             public void handle(ActionEvent actionEvent) {
                     if(simulate_Was_Clicked){
-                        outer_Update_Occupancy(0, 50.0);
+                        outer_Update_Occupancy(0, 60.0);
                     }else{
                         try {
                             spawn_Train_In_Yard(2, working_Line_Index, 0);
@@ -526,6 +526,23 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         // Update GUI based on new objects in
     }
 
+    void print_Update_Occupancy(String param_Where_Called){
+        System.out.println("Called at: " + param_Where_Called);
+        System.out.println("Current occupancies: ");
+        for (Integer occupancy : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies) {
+            System.out.println(occupancy);
+        }
+        System.out.println("Current distances: ");
+        for (Double distance : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances) {
+            System.out.println(distance);
+        }
+        System.out.println("Past occupancies: ");
+        for (int i = 0; i < this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.size(); i++){
+            System.out.println(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.get(i));
+        }
+    }
+
+
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
 
     // Swap to Scene
@@ -545,8 +562,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         murphy_Stage.show();
     }
 
-    // Interface functions
-
+    // ------------------------------------------------------------ Receiving Interface Functions ---------------------------------------------------------------------------
     // Called by Train Model
     public void outer_Update_Occupancy(int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
         System.out.println();
@@ -640,6 +656,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         };
     }
 
+    // Called by Track Controller
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched){
         System.out.println("Running set_Switch_At_Block: " + "param_Line_Index: " + param_Line_Index + ", " + "param_Block_Number: " + param_Block_Number + ", " + "param_Is_Switched: " + param_Is_Switched);
         for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
@@ -650,32 +667,21 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             }
         }
     }
+    public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
 
-
-
-    void print_Update_Occupancy(String param_Where_Called){
-        System.out.println("Called at: " + param_Where_Called);
-        System.out.println("Current occupancies: ");
-        for (Integer occupancy : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies) {
-            System.out.println(occupancy);
-        }
-        System.out.println("Current distances: ");
-        for (Double distance : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances) {
-            System.out.println(distance);
-        }
-        System.out.println("Past occupancies: ");
-        for (int i = 0; i < this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.size(); i++){
-            System.out.println(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.get(i));
-        }
     }
-
+    public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
+    }
     public void send_Speed_Authority(int train_Num, double speed, int authority) throws RemoteException, InterruptedException {
-       if(Network.tm_Interface != null){
+        if(Network.tm_Interface != null){
             Network.tm_Interface.send_Speed_Authority(train_Num, speed, authority, 0.0);
             System.out.println("Sending speed and authority to train model");
-      }
+        }
     }
 
+
+    // ------------------------------------------------------------ Calling Interface Functions ---------------------------------------------------------------------------
+    // Called onto Track Controller
     private void call_Network_Train_Moved(Block param_Block){
         //TODO: Hardcoded train num
 
@@ -692,16 +698,5 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
        }
     }
 
-
-
-    //TODO: Tony
-    @Override
-    public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
-
-    }
-
-    @Override
-    public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
-
-    }
+    // Called onto Train Model
 }
