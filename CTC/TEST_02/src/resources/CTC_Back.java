@@ -11,7 +11,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.lang.Thread.sleep;
 
 public class CTC_Back implements CTC_Interface {
@@ -124,23 +124,28 @@ public class CTC_Back implements CTC_Interface {
         }
 
         //TODO don't hit dispacth... ie this function if train has arrived at station
+//
+//        //System.out.println("Line Index: " + lineIndex);
+//
+//        for (int i = 0; i <= 5; i++) {
+//            String infrastructureHolder = "";
+//                infrastructureHolder = lineList.get(lineIndex).get_Block_Infrastructure(trainList.get(trainIndex).get_Current_Block() + i );
+//            //System.out.println("Station output " + infrastructureHolder);
+//            if (infrastructureHolder.contains("Station")) {
+//                trainList.get(trainIndex).set_Authority(i);
+//                break;
+//            } else {
+//                trainList.get(trainIndex).set_Authority(i);
+//            }
+//        }
 
-        //System.out.println("Line Index: " + lineIndex);
+        //get number of blocks between current infra and next infra
 
-        for (int i = 0; i <= 5; i++) {
-            String infrastructureHolder = "";
-                infrastructureHolder = lineList.get(lineIndex).get_Block_Infrastructure(trainList.get(trainIndex).get_Current_Block() + i );
-            //System.out.println("Station output " + infrastructureHolder);
-            if (infrastructureHolder.contains("Station")) {
-                trainList.get(trainIndex).set_Authority(i);
-                break;
-            } else {
-                trainList.get(trainIndex).set_Authority(i);
-            }
+        //if this number number is greater than current current authority do nothing
+        int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),trainList.get(trainIndex).get_Next_Infrastructure());
+        if(trainList.get(trainIndex).get_Authority() == 0){
+            trainList.get(trainIndex).set_Authority(numberOfBlocks);
         }
-
-
-
 
     }
 
@@ -149,13 +154,16 @@ public class CTC_Back implements CTC_Interface {
         Double distance = determine_Distance(trainIndex);
         System.out.println("Distance: " + distance);
 
-        long time = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
+        long scheduletime = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
                 trainList.get(trainIndex).get_Next_Infrastructure());//this is in minutes
+        long simDiffTime = MINUTES.between( get_SimTime_As_LocalTime() ,trainList.get(trainIndex).get_Arrival_Time_Of_Next_INFR());
 
+        long time = Math.min(scheduletime, simDiffTime);
+
+        System.out.println("TIME: " + time);
         double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
 
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
-
     }
 
     public void dispatch(Integer trainIndex) throws RemoteException, InterruptedException {
@@ -230,7 +238,6 @@ public class CTC_Back implements CTC_Interface {
 
     }
 
-
     public void import_Train_Schedule() throws FileNotFoundException{
 
 
@@ -291,6 +298,7 @@ public class CTC_Back implements CTC_Interface {
         }
 
         System.out.println(trainList.get(0).get_Infrastructure_List());
+        System.out.println(trainList.get(0).get_Time_List());
 
     }
 
@@ -489,22 +497,26 @@ public class CTC_Back implements CTC_Interface {
 
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
+
         //TODO DOES THIS WORK?
         if(trainList.get(trainNum).get_Authority() == 0 && automatic ){
             trainList.get(trainNum).arrived();
-            long hold = simTime + 60; //60 seconds wait
-            while(simTime < hold ){}//do nothing
-            dispatch(trainNum);
+            Task task = new Task<Void>() {
+                @Override public Void call() throws InterruptedException, RemoteException {
+                    long hold = simTime + 60; //60 seconds wait
+                    while(simTime < hold ){}//do nothing
+                    dispatch(trainNum);
+                    return null;
+                }
+            };
+            new Thread(task).start();
         }else if(trainList.get(trainNum).get_Authority() == 0 && !automatic ){
             trainList.get(trainNum).arrived();
             return;
         }else if(trainList.get(trainNum).get_Authority() > 0){
+            trainList.get(trainNum).train_Moved();
             dispatch(trainNum);
         }
-
-
-
-
     }
 
     public void add_Ticket_CTC(int trainNum) throws RemoteException{

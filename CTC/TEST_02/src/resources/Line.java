@@ -158,62 +158,22 @@ public class Line {
     }
 
     public Integer get_Number_Of_Blocks_Between(String start, String stop){
-
-        Integer blocks = 0;
-        Integer bIndex1 = 0, bIndex2 = 0;
-        boolean hitstop = false;
+        Integer numOfBlocks =0;
+        int startBlock = 0,stopBlock=1;
+        //find block after start infrastructure and block of stop
         for(Block b: blocksList){
-            if(b.get_Infrastructure().contains(start)){
-                bIndex1 = b.get_Number();
-            }else if(b.get_Infrastructure().contains(stop)){
-                bIndex2 = b.get_Number()-1;
+            if(b.get_Infrastructure().toLowerCase().contains(start.toLowerCase())){
+                startBlock = b.get_Number() + 1;
+            }
+            if(b.get_Infrastructure().toLowerCase().contains((stop.toLowerCase()))){
+                stopBlock = b.get_Number();
+                System.out.println("STOPBLOCK = " + stopBlock);
+                break;
             }
 
         }
-
-        blocks ++;
-        Integer currentBlock = bIndex1;
-        Integer previousBlock = bIndex1 - 1;
-        boolean countUp = true;
-        while(!hitstop) {
-            //check if switch
-            if (blocksList.get(currentBlock).get_Infrastructure().contains("SWITCH")
-                    && !blocksList.get(previousBlock).get_Infrastructure().contains("SWITCH")) {
-
-                String currentGetInfrastructure = blocksList.get(currentBlock).get_Infrastructure();
-                int indexOfSwitch = currentGetInfrastructure.indexOf("SWITCH");
-                //int indexOfSpaceAfterSwitchBlock = currentGetInfrastructure.indexOf(" ", indexOfSwitch+1);
-
-                String blockStringNumber =
-                        currentGetInfrastructure.substring(indexOfSwitch+1, currentGetInfrastructure.length()-1);
-                blockStringNumber = blockStringNumber.trim();
-                int blockNumber = Integer.parseInt(blockStringNumber);
-
-                blocks ++;
-
-                if(blockNumber > currentBlock){
-                    countUp = false;
-                }else{
-                    countUp = true;
-                }
-                previousBlock = currentBlock;
-                currentBlock = blockNumber;
-
-
-            }else if(blocksList.get(currentBlock).get_Infrastructure().contains(stop)) {
-                hitstop = true;
-
-            }else if(!countUp){
-                previousBlock = currentBlock;
-                currentBlock --;
-                blocks ++;
-            }else{
-                previousBlock = currentBlock;
-                currentBlock ++;
-                blocks ++;
-            }
-        }
-        return blocks;
+        LinkedList<Integer> path = routeGraph.get_Path(adj,startBlock,stopBlock,151);
+        return path.size();
     }
 
     public List<String> get_Block_Information_List(Integer b){
@@ -251,7 +211,6 @@ public class Line {
         return distance;
     }
 
-//TODO HIGHEST PRIORITY UNDERSTAND ROUTE WHEN GIVING DISTANCE
 
     public void close_Line(){
         for(Block b: blocksList){

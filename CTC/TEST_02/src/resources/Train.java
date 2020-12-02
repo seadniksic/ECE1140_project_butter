@@ -4,7 +4,9 @@ package resources;
 import java.time.LocalTime;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -105,22 +107,42 @@ public class Train {
 
     public Integer get_Authority(){ return authority; }
 
+    public LocalTime get_Arrival_Time_Of_Next_INFR(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
-    public long get_Time_Between(String start, String end){
-        long timeInMinutes = 0;
-        LocalTime first = LocalTime.parse("00:00");
-        LocalTime second = LocalTime.parse("00:00");
+        LocalTime second = LocalTime.parse("00:00",formatter);
         for(int i = 0; i < infrastructureList.size(); i ++){
-            if(infrastructureList.get(i).equals(start)){
-               // System.out.println("HIT FIRST STRING");
-                first = timeList.get(i);
-            }else if(infrastructureList.get(i).equals(end)){
+
+            if(infrastructureList.get(i).contains(get_Next_Infrastructure())){
                 second = timeList.get(i);
+            }else if( second.compareTo(LocalTime.parse("00:00",formatter)) != 0){
+                break;
             }
         }
-        timeInMinutes = MINUTES.between(first,second);
 
-        return timeInMinutes - 1 ;//MINUS ONE ACCOUNTS FOR SPENDING 1 MINUTE AT EACH STATION
+        return second;
+    }
+    public long get_Time_Between(String start, String end){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        long timeInMinutes = 0;
+        LocalTime first = LocalTime.parse("00:00",formatter);
+        LocalTime second = LocalTime.parse("00:00",formatter);
+        System.out.println("WHY IS THIS START? ->> " + start);
+        System.out.println("WHY IS THIS END? ->> " + end);
+        System.out.println(infrastructureList);
+        System.out.println(timeList);
+        for(int i = 0; i < infrastructureList.size(); i ++){
+            if(infrastructureList.get(i).contains(start)){
+                first = timeList.get(i);
+            }else if(infrastructureList.get(i).contains(end)){
+                second = timeList.get(i);
+            }else if( second.compareTo(LocalTime.parse("00:00",formatter)) != 0){
+                break;
+            }
+        }
+        timeInMinutes = MINUTES.between(first, second);
+
+        return timeInMinutes;//TODO DO THIS SOMEWHERE ELSE MINUS ONE ACCOUNTS FOR SPENDING 1 MINUTE AT EACH STATION
     }
 
     public String get_Current_Infrastructure() { return infrastructureList.get(currentIndex);}
@@ -151,13 +173,10 @@ public class Train {
 
     public void set_Number_Of_Cars(){
         Random numOfCar = new Random();
-
         numberOfCars = numOfCar.nextInt(4) + 1;
     }
 
-    public void set_Suggest_Speed(Double sugSpeed) { suggestSpeed = sugSpeed; }
-
-
+    public void set_Suggest_Speed(Double sugSpeed) { suggestSpeed = sugSpeed;}
 
     public void set_Authority(Integer auth){ authority = auth; }
 
@@ -170,7 +189,6 @@ public class Train {
     public void set_Current_Block(Integer b){ currentBlock = b;}
 
     // public void setCurrentPosition(String currentPos){ currentBlock = currentPos; }
-
 
     public void set_Infrastructure_List(List<String> inf){ infrastructureList = inf; }
 
@@ -216,6 +234,9 @@ public class Train {
     }
 
 
+    public void train_Moved(){
+        authority--;
+    }
 
     //TODO make sure arrived() is getting called. adjust train.arrived for index out of range error
     public void arrived(){
