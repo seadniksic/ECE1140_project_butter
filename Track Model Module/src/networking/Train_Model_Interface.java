@@ -33,5 +33,5 @@ public interface Train_Model_Interface extends Remote {
     public void remove_Train(int train_Num) throws RemoteException;
     public void update_Time(double time) throws RemoteException;
     public void remove_Failure_Status(int train_Num) throws RemoteException;
-
+    public void update_Multiplier(int m) throws RemoteException;
 }

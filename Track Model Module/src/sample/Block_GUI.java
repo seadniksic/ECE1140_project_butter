@@ -41,6 +41,7 @@ public class Block_GUI {
     TextField set_Next_TF;
     TextField set_Previous_TF;
     TextField set_Next_2_TF;
+    TextField station_Name_TF;
 
     CheckBox is_Yard_CheckBox;
     CheckBox is_Switch_CheckBox;
@@ -105,6 +106,9 @@ public class Block_GUI {
                 if(parent_Block.is_Switch){
                     parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
                 }
+                if(parent_Block.is_Station){
+                    parent_Block.station_Name = (station_Name_TF.getText() != "" ? station_Name_TF.getText() : parent_Block.station_Name);
+                }
                 parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
                 parent_Block.is_Yard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
                 parent_Block.is_Switch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
@@ -164,6 +168,11 @@ public class Block_GUI {
         is_Station_CheckBox.setSelected(parent_Block.is_Station);
         map_is_Station_CheckBox(is_Station_CheckBox);
 
+        HBox checkBox_HBox = new HBox();
+        checkBox_HBox.getChildren().addAll(is_Yard_CheckBox, is_Switch_CheckBox, is_Station_CheckBox);
+        checkBox_HBox.setAlignment(Pos.TOP_CENTER);
+        checkBox_HBox.setSpacing(20);
+
         Button save_Button = new Button("Save and Close");
         map_Save_Button(save_Button);
 
@@ -172,14 +181,39 @@ public class Block_GUI {
         // Only add the settings for special blocks if they are selected as such
         HBox temp_Set_Next_2_HBox = new HBox();
         if(is_Switch_CheckBox.isSelected()){
-            System.out.println("Reassignment");
             temp_Set_Next_2_HBox = return_Set_Next_2_HBox();
         }
-        this_VBox.getChildren().addAll(description_label, return_section_HBox(), return_block_Num_HBox(), return_length_HBox(), return_grade_HBox(), return_Set_Previous_HBox(), temp_Set_Next_2_HBox, return_Set_Next_HBox(), is_Yard_CheckBox, is_Switch_CheckBox, is_Station_CheckBox, save_Button);
+        HBox temp_Station_Name_HBox = new HBox();
+        if(is_Station_CheckBox.isSelected()){
+            temp_Station_Name_HBox = return_Station_name_HBox();
+        }
+
+
+        HBox columns_HBox = new HBox();
+
+        VBox ints_VBox = new VBox();
+        ints_VBox.getChildren().addAll(return_block_Num_HBox(), return_Set_Previous_HBox(), return_Set_Next_HBox(), temp_Set_Next_2_HBox);
+        ints_VBox.setSpacing(20);
+        ints_VBox.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox text_VBox = new VBox();
+        text_VBox.getChildren().addAll(return_section_HBox(), temp_Station_Name_HBox);
+        text_VBox.setSpacing(20);
+
+        VBox double_VBox = new VBox();
+        double_VBox.getChildren().addAll(return_grade_HBox(), return_length_HBox());
+        double_VBox.setSpacing(20);
+
+        columns_HBox.getChildren().addAll(text_VBox, ints_VBox, double_VBox);
+        columns_HBox.setSpacing(20);
+        columns_HBox.setAlignment(Pos.CENTER);
+
+        this_VBox.getChildren().addAll(description_label, checkBox_HBox, columns_HBox, save_Button);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
+        this_VBox.setAlignment(Pos.CENTER);
 
-        return new Scene(this_VBox, 500, 600);
+        return new Scene(this_VBox, 900, 300);
     }
     private Scene return_Murphy_Block_Editor_Scene(){
         Label description_label = new Label("Welcome to the block editor!");
@@ -239,7 +273,7 @@ public class Block_GUI {
         return grade_HBox;
     }
     private HBox return_Set_Next_HBox(){
-        Label set_Next_Label = new Label("Next Block: ");
+        Label set_Next_Label = new Label("Next Block:       ");
         set_Next_TF = new TextField(String.valueOf(parent_Block.next_Block_Number));
         HBox set_Next_HBox = new HBox();
         set_Next_HBox.getChildren().addAll(set_Next_Label, set_Next_TF);
@@ -248,20 +282,22 @@ public class Block_GUI {
         return set_Next_HBox;
     }
     private HBox return_Set_Next_2_HBox(){
-        //Label set_Next_2_Label = new Label("Next Block 2 (Switches Only): ");
-        final TextArea text = new TextArea("Next Block 2 (Switches Only): ");
-        text.setStyle("-fx-font-size: 12px;");
-        text.setWrapText(true);
-        text.setMaxHeight(12);
-        text.setMaxWidth(175);
-        text.setStyle("-fx-background-color: #F4F4F4");
-        text.setEditable(false);
+        Label set_Next_2_Label = new Label("Next Block 2: ");
         set_Next_2_TF = new TextField(String.valueOf(parent_Block.next_Block_Number_2));
         HBox set_Next_2_HBox = new HBox();
-        set_Next_2_HBox.getChildren().addAll(text, set_Next_2_TF);
+        set_Next_2_HBox.getChildren().addAll(set_Next_2_Label, set_Next_2_TF);
         set_Next_2_HBox.setAlignment(Pos.CENTER);
 
         return set_Next_2_HBox;
+    }
+    private HBox return_Station_name_HBox(){
+        Label station_Name_Label = new Label("Station Name: ");
+        station_Name_TF = new TextField(String.valueOf(parent_Block.station_Name));
+        HBox station_Name_HBox = new HBox();
+        station_Name_HBox.getChildren().addAll(station_Name_Label, station_Name_TF);
+        station_Name_HBox.setAlignment(Pos.CENTER);
+
+        return station_Name_HBox;
     }
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous Block: ");
