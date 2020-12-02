@@ -28,4 +28,5 @@ public interface Train_Controller_Interface extends Remote{
 
     public void update_E_Brake(int index, boolean b) throws RemoteException;
     public void set_Failure_Status(int index, String failure) throws RemoteException;
+    public void set_Temperature(int index, double temp) throws RemoteException, InterruptedException;
 }

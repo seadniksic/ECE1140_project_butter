@@ -52,7 +52,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         trains.get(train_Num).send_Beacon_Information(next_Stop, door_Side);
     }
 
-    public static void test_Send_Speed_Authority(int train_Num, int speed, int authority, double grade) throws RemoteException, InterruptedException {
+    public static void test_Send_Speed_Authority(int train_Num, double speed, int authority, double grade) throws RemoteException, InterruptedException {
         trains.get(train_Num).send_Speed_Authority(speed, authority, grade);
     }
 
@@ -81,8 +81,8 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         trains.get(train_Num).set_Announcements(announcements);
     }
 
-    public void update_Temperature(int train_Num, int temp) {
-        trains.get(train_Num).update_Temperature(temp);
+    public double update_Temperature(int train_Num, double temp) throws InterruptedException, RemoteException {
+        return trains.get(train_Num).update_Temperature(temp);
     }
 
     public void set_Brake_Status(int train_Num, boolean state) {
@@ -119,7 +119,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         return trains.get(train_Num).get_Right_Door_Status();
     }
 
-    public int get_Temperature(int train_Num) {
+    public double get_Temperature(int train_Num) {
         return trains.get(train_Num).get_Temperature();
     }
 

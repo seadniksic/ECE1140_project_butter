@@ -1,6 +1,8 @@
 package resources;
 
 import networking.Network;
+import networking.Train_Model_Interface;
+
 import java.lang.Math;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -18,11 +20,11 @@ public class Train_Model {
     static double brake_acc = 1.2;
     static double e_brake_acc = 2.7;
     public int id;
-    private boolean int_Lights = true;
+    private boolean int_Lights = false;
     private boolean ext_Lights = false;
     private boolean left_Door_Status = false;
     private boolean right_Door_Status = false;
-    private int temperature;
+    private double temperature;
     private int wheel_Slippage;
     private int power_Consumption;
     private double engine_Power;
@@ -47,7 +49,9 @@ public class Train_Model {
     private double max_Force;
     private double e_Brake_Force = 140413;
     private double brake_Force = 61720;
-
+    private double temp_Power = 0;
+    private double temp_Time;
+    private double energy;
 
     public Train_Model(int cars, int new_id) {
         this.id = new_id;
@@ -57,7 +61,6 @@ public class Train_Model {
         update_Mass();
         static_friction = static_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) * 9.81); // Mu * Normal Force (the 10 is to account for the hitches in between trains greatly reducing the static friciton
         kinetic_friction = kinetic_friction_coefficient * (((crew * average_Person_Mass) + (num_Cars * car_Mass)) * 9.81);  // Mu * Normal Force
-        set_Int_Lights(true);
     }
 
     public void add_Passengers(int number) {
@@ -153,7 +156,7 @@ public class Train_Model {
         return this.right_Door_Status;
     }
 
-    public int get_Temperature() {
+    public double get_Temperature() {
         return this.temperature;
     }
 
@@ -177,9 +180,11 @@ public class Train_Model {
     public double update_Speed(double power) throws RemoteException {
         double cycle_Time;
         System.out.println("current tim");
-        if (Network.server_Object.get_Current_Time() - time > 2) {
+        if (Network.server_Object.get_Current_Time() - time > 2 * Train_Model_Catalogue.multiplier) {
             time = Network.server_Object.get_Current_Time();
-            cycle_Time = .01;
+            System.out.println();
+            System.out.println(Train_Model_Catalogue.multiplier);
+            cycle_Time = .001 * Train_Model_Catalogue.multiplier;
         } else {
             cycle_Time = Network.server_Object.get_Current_Time() - time;
             System.out.println("Current Time: " + Network.server_Object.get_Current_Time());
@@ -224,7 +229,6 @@ public class Train_Model {
                     force -= (F_g_x + static_friction);
                 }
             }
-            System.out.println("Here!");
         } else if (current_Velocity >=.01) {
             neg_Force = (F_g_x + kinetic_friction);
             if (emergency_Brake_Status) {
@@ -242,6 +246,7 @@ public class Train_Model {
 
         System.out.println("Acc: "+ acc);
 
+        System.out.println("cycle time: " + cycle_Time);
         current_Velocity += (acc * cycle_Time);
 
 //        System.out.println("F_g: " + F_g);
@@ -256,20 +261,31 @@ public class Train_Model {
         double new_Distance = current_Velocity * cycle_Time + distance;
 
         time = Network.server_Object.get_Current_Time();
-        Network.tm_Interface.outer_Update_Occupancy(0, id, new_Distance - distance);
+        //Network.tm_Interface.outer_Update_Occupancy(0, id, new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 
-        if (GUI.current_index == id) {
-            GUI.refresh_Table(id);
-        }
+
+        GUI.refresh_Table(id);
 
         return velocity;
 
         }
 
-    public int update_Temperature(double power) {
+    public double update_Temperature(double power) throws InterruptedException, RemoteException {
         //Write pid loop here
+        //Volume of car - 291 m^3  Density of dry air - 1.2041  Mass of air 351.4 kg
+        //specific heat capacity of air - 1.006 kJ/kgC
+//        Network.server_Object.get_Current_Time();
+        double temp_energy = power * (Network.server_Object.get_Current_Time() - temp_Time);
+        double increase = temp_energy - energy;
+        temperature += increase / 353.5;
+        temp_Power = power;
+        Network.tc_Interface.set_Temperature(id, temperature);
+        Thread.sleep(1000);
+
+        GUI.refresh_Table(id);
+
         return temperature;
     }
 

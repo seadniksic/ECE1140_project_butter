@@ -100,7 +100,7 @@ public class GUI extends Application {
             DecimalFormat df = new DecimalFormat("0.0000");
             ObservableList<Property> temp = FXCollections.observableArrayList(
                     new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
-                    new Property("Power", train.get_Engine_Power(), "watts"),
+                    new Property("Power", df.format(train.get_Engine_Power()), "watts"),
                     new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
                     new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
             );
@@ -334,15 +334,16 @@ public class GUI extends Application {
 //        Image back_Logo = new Image("UIControls/logo.png");
 //        ImageView view = new ImageView(img);
         space.setVisible(false);
-        space.setMinWidth(1300);
+        space.setMinWidth(1250);
 
         Button new_Speed = new Button("Submit Speed");
         Text speed = new Text("Speed: "+ train.get_Velocity());
         Text num_Cars = new Text("Number of Cars: "+ train.num_Cars);
         Text power = new Text("Engine Power: "+ train.get_Engine_Power());
         Text title = new Text("Train Model " + train.id);
+        title.setFont(new Font("Candara Italic", 40 ));
         //title.setFont(f2);
-        title.setStyle("-fx-font: 40 arial");
+        //title.setStyle("-fx-font: 40 arial");
 
         Text failure = new Text("Giblets");
         failure.setFill(Color.RED);
@@ -353,8 +354,21 @@ public class GUI extends Application {
             failure.setText(train.get_Failure() + " Failure");
         }
 
-        Button back_button = new Button("Back");
-        back_button.setStyle("-fx-border-radius: 0px");
+        Button back_button = new Button();
+        back_button.setText("Back");
+        System.out.println(back_button.getLabelPadding());
+
+        //back_button.setStyle("-fx-border-radius: 10px");
+        back_button.setScaleX(1.15);
+        back_button.setScaleY(1.15);
+        back_button.setTranslateX(20);
+        back_button.setTranslateY(15);
+        back_button.setFont(new Font("Candara", 17));
+        ImageView back_button_logo = new ImageView(new Image(new FileInputStream(asset_Location + "back_arrow.png")));
+        back_button.setGraphic(back_button_logo);
+        back_button_logo.setScaleX(.75);
+        back_button_logo.setScaleY(.75);
+        //back_button.setPadding(new Insets(0,0,0,0));
 
         Button advanced_info = new Button("Advanced Information");
         Button ebrake = new Button("Emergency brake");
@@ -426,16 +440,16 @@ public class GUI extends Application {
         Text attributes_label = new Text("Attributes");
         Text non_vital_label = new Text("Non-Vital");
 
-        main_label.setStyle("-fx-font: 28 arial;");
-        attributes_label.setStyle("-fx-font: 28 arial;");
-        non_vital_label.setStyle("-fx-font: 28 arial;");
+        main_label.setStyle("-fx-font: 28 Candara;");
+        attributes_label.setStyle("-fx-font: 28 Candara;");
+        non_vital_label.setStyle("-fx-font: 28 Candara;");
 
 //        main_label.setPrefSize(120,0);
 //        attributes_label.setPrefSize(120,0);
 //        non_vital_label.setPrefSize(120,0);
 
         VBox main_Label_Contatiner = new VBox();
-        main_Label_Contatiner.setPadding(new Insets(10, 10, 10, 10));
+        main_Label_Contatiner.setPadding(new Insets(10, 10, 10, 70));
         VBox attributes_Label_Contatiner = new VBox();
         attributes_Label_Contatiner.setPadding(new Insets(10, 10, 10, 70));
         VBox non_Vital_Label_Container = new VBox();
@@ -461,10 +475,13 @@ public class GUI extends Application {
         attributes_Label_Contatiner.setAlignment(Pos.CENTER);
         non_Vital_Label_Container.setAlignment(Pos.CENTER);
 
-
-
         center_bottom.getChildren().addAll(attributes_Label_Contatiner, main_Label_Contatiner, non_Vital_Label_Container);
+        center_bottom.setTranslateX(-40);
+        center_bottom.setTranslateY(30);
         VBox menu = new VBox();
+        System.out.println(Font.getFontNames());
+
+
         //menu.prefHeightProperty().bind(layout.heightProperty());
         menu.setPrefWidth(330);
         menu.setPrefHeight(700);
@@ -489,7 +506,7 @@ public class GUI extends Application {
         new_Speed.setOnMouseClicked(evt -> {
             String text = textField.getText();
             try {
-                Train_Model_Catalogue.test_Send_Speed_Authority(index, Integer.parseInt(text), 10000, 0);
+                Train_Model_Catalogue.test_Send_Speed_Authority(index, Double.parseDouble(text) * 1.60934, 10000, 0);
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -537,14 +554,14 @@ public class GUI extends Application {
         ImageView e_brake_image = new ImageView();
         if (!train.get_Emergency_Brake_Status()) {
             try {
-                Image temp_img = new Image(new FileInputStream(asset_Location + "lever2.png"));
+                Image temp_img = new Image(new FileInputStream(asset_Location + "lever_off.png"));
                 e_brake_image.setImage(temp_img);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         } else {
             try {
-                Image temp_img = new Image(new FileInputStream(asset_Location + "lever3.png"));
+                Image temp_img = new Image(new FileInputStream(asset_Location + "lever_on.png"));
                 e_brake_image.setImage(temp_img);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -560,7 +577,7 @@ public class GUI extends Application {
             public void handle(MouseEvent mouseEvent) {
                 if (!train.get_Emergency_Brake_Status()) {
                     try {
-                        Image temp_img = new Image(new FileInputStream(asset_Location + "lever3.png"));
+                        Image temp_img = new Image(new FileInputStream(asset_Location + "test_lever_3_2.png"));
                         e_brake_image.setImage(temp_img);
                         train.set_Emergency_Brake_Status(true);
                     } catch (FileNotFoundException | RemoteException e) {
@@ -575,9 +592,10 @@ public class GUI extends Application {
         Text ebrake_image_label = new Text("Passenger Emergency Brake");
         ebrake_image_container.getChildren().addAll(e_brake_image, ebrake_image_label);
         ebrake_image_container.setAlignment(Pos.CENTER);
+        ebrake_image_container.setPadding(new Insets(60,0,0,0));
 
         top_Top.getChildren().addAll(back_button, space, ebrake_image_container);
-        top_Top.setAlignment(Pos.CENTER_LEFT);
+        top_Top.setAlignment(Pos.TOP_LEFT);
 
         top_Bottom.getChildren().addAll();
         top_Bottom.setAlignment(Pos.CENTER);
@@ -594,16 +612,29 @@ public class GUI extends Application {
         bottom.getChildren().addAll(bottom_Top, bottom_Middle, bottom_Bottom);
 
         //Find and load main image
-        Image temp = new Image(new FileInputStream(asset_Location + "train_2.png"));
-        ImageView train_im = new ImageView(temp);
+        //---------------------------------------------------------------//
+        ImageView train_Im = get_Train_State(train);
+        train_Im.setScaleY(1.1);
+        train_Im.setScaleX(1.1);
+        train_Im.setTranslateX(80);
+        if (train.get_Velocity() > 0) {
+            TranslateTransition trainTranslation = new TranslateTransition(Duration.millis(500), train_Im);
+            trainTranslation.setFromX(200);
+            trainTranslation.setToX(80);
+            trainTranslation.setRate(.6);
+            trainTranslation.play();
+        }
 
-        center.getChildren().addAll(title, train_im, center_bottom, failure);
+
+
+        center.getChildren().addAll(title, train_Im, center_bottom, failure);
         center.setAlignment(Pos.CENTER);
 
 
 
 
         center.setTranslateX(-250);
+        center.setTranslateY(-75);
         TranslateTransition centerTranslation = new TranslateTransition(Duration.millis(500), center);
         centerTranslation.setFromX(-250);
         centerTranslation.setToX(110);
@@ -707,6 +738,9 @@ public class GUI extends Application {
             temp = new Image(new FileInputStream(asset_Location + "train_4.png"));
 
         } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && !t.get_Left_Door_Status()) {
+            System.out.println(t.get_Int_Lights());
+            System.out.println(t.get_Ext_Lights());
+            System.out.println(t.get_Left_Door_Status());
             temp = new Image(new FileInputStream(asset_Location + "train_5.png"));
 
         } else if (t.get_Int_Lights() && !t.get_Ext_Lights() && t.get_Left_Door_Status()) {
