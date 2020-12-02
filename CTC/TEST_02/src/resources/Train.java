@@ -37,6 +37,8 @@ public class Train {
         numberOfTickets = 0;
         currentIndex = 0;
         sentCreateCommand = false;
+        currentBlock = 62;
+
         set_Number_Of_Cars();
     }
 
@@ -118,7 +120,7 @@ public class Train {
         }
         timeInMinutes = MINUTES.between(first,second);
 
-        return timeInMinutes;
+        return timeInMinutes - 1 ;//MINUS ONE ACCOUNTS FOR SPENDING 1 MINUTE AT EACH STATION
     }
 
     public String get_Current_Infrastructure() { return infrastructureList.get(currentIndex);}
@@ -155,7 +157,7 @@ public class Train {
 
     public void set_Suggest_Speed(Double sugSpeed) { suggestSpeed = sugSpeed; }
 
-    public void set_Avg_Speed(Double aSpeed) { avgSpeed = aSpeed; }
+
 
     public void set_Authority(Integer auth){ authority = auth; }
 
@@ -213,12 +215,7 @@ public class Train {
         numberOfTickets += add;
     }
 
-    public void moved_Block(){
-        authority --;
-        if(authority == 0){
-            currentIndex++;
-        }
-    }
+
 
     //TODO make sure arrived() is getting called. adjust train.arrived for index out of range error
     public void arrived(){

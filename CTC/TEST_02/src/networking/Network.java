@@ -39,10 +39,7 @@ public class Network extends CTC_Back {
             Registry registry = LocateRegistry.createRegistry(server_Port);
             registry.rebind("CTC_Interface", stub);
 
-
             System.err.println("Server ready");
-
-
 
             hosting = true;//?ask 'yeah'
         } catch (Exception e) {

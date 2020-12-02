@@ -3,6 +3,7 @@ package resources;
 import resources.Block;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Line {
@@ -12,6 +13,9 @@ public class Line {
     private Boolean status;
     private List<Block> blocksList = new ArrayList<>();
     private List<String> infrastructure = new ArrayList<>();
+    private Graph routeGraph;
+    ArrayList<ArrayList<Integer>> adj;
+    int v;
 
     public Line(){
         line = "";
@@ -48,6 +52,7 @@ public class Line {
         return line;
     }
 
+
     public void toggle_Block_Occupancy(int index){
 
         if(blocksList.get(index).get_Occupancy() == true){
@@ -58,6 +63,8 @@ public class Line {
 
     }
 
+
+    //TODO front end should be calling this
     public boolean get_Block_Occupancy(Integer blockNum){
         return blocksList.get(blockNum-1).get_Occupancy();
     }
@@ -65,6 +72,7 @@ public class Line {
     public String get_Block_Infrastructure(Integer blockNum){
         return blocksList.get(blockNum-1).get_Infrastructure();
     }
+
     public List<String> get_Infrastructure_List(){
         infrastructure.clear();
         for(Block bl : blocksList){
@@ -125,70 +133,26 @@ public class Line {
     }
 
     public Double get_Distance_Between(String start, String stop){
-        Double distance = 0.0;
-        Integer bIndex1 = 0, bIndex2 = 0;
-        boolean hitstop = false;
+        double distance =0;
+        int startBlock = 0,stopBlock=1;
+        //find block after start infrastructure and block of stop
         for(Block b: blocksList){
-            if(b.get_Infrastructure().contains(start)){
-                bIndex1 = b.get_Number();
-            }else if(b.get_Infrastructure().contains(stop)){
-                bIndex2 = b.get_Number();
+            if(b.get_Infrastructure().toLowerCase().contains(start.toLowerCase())){
+                startBlock = b.get_Number() + 1;
+            }
+            if(b.get_Infrastructure().toLowerCase().contains((stop.toLowerCase()))){
+                stopBlock = b.get_Number();
+                System.out.println("STOPBLOCK = " + stopBlock);
                 break;
             }
 
         }
-        System.out.println("Block 1: " + bIndex1 + ", Block 2: " + bIndex2);
-        distance += blocksList.get(bIndex1-1).get_Length();
-        Integer currentBlock = bIndex1-1;
-        String currentInfrastructure = "";
-        Integer previousBlock = bIndex1 - 2;
-        boolean countUp = true;
-        while(!hitstop) {
+        LinkedList<Integer> path = routeGraph.get_Path(adj,startBlock,stopBlock,151);
 
-            //check if switch
-
-            currentInfrastructure = blocksList.get(currentBlock).get_Infrastructure();
-            if (blocksList.get(currentBlock).get_Infrastructure().contains("SWITCH")
-                    && !blocksList.get(previousBlock).get_Infrastructure().contains("SWITCH")) {
-
-                String currentGetInfrastructure = blocksList.get(currentBlock).get_Infrastructure();
-                int indexOfSwitch = currentGetInfrastructure.indexOf("SWITCH");
-                //int indexOfSpaceAfterSwitchBlock = currentGetInfrastructure.indexOf(" ", indexOfSwitch+1);
-
-                String blockStringNumber =
-                        currentGetInfrastructure.substring(indexOfSwitch + 6, currentGetInfrastructure.length());
-                blockStringNumber = blockStringNumber.trim();
-                int blockNumber = Integer.parseInt(blockStringNumber);
-
-
-                distance += blocksList.get(currentBlock).get_Length();
-
-                if(blockNumber > currentBlock){
-                    countUp = false;
-                }else{
-                    countUp = true;
-                }
-                previousBlock = currentBlock;
-                currentBlock = blockNumber;
-
-
-            }else if(blocksList.get(currentBlock).get_Infrastructure().contains(stop)|| blocksList.get(currentBlock).get_Infrastructure().equals(stop)) {
-                hitstop = true;
-
-            }else if(!countUp){
-                previousBlock = currentBlock;
-
-                distance += blocksList.get(currentBlock).get_Length();
-                currentBlock --;
-            }else{
-                previousBlock = currentBlock;
-
-                distance += blocksList.get(currentBlock).get_Length();
-                currentBlock ++;
-            }
-
+        for (int i = path.size() - 1; i >= 0; i--) {
+            System.out.print(path.get(i) + " ");
+            distance+= blocksList.get(i).get_Length();
         }
-
 
         return distance;
     }
@@ -308,6 +272,42 @@ public class Line {
     public void open_Block(int b){
 
         blocksList.get(b-1).set_Condition(true);
+    }
+
+    public void get_Path(int startBlock, int stopBlock){
+        routeGraph.get_Path(adj,startBlock,stopBlock,151);
+    }
+
+    public void create_Graph(){
+
+         v = 151;
+        // Adjacency list for storing which vertices are connected
+         adj = new ArrayList<ArrayList<Integer>>(v);
+        for (int i = 0; i < 151; i++) {
+            adj.add(new ArrayList<Integer>());
+        }
+
+        for(int i = 0; i < v - 2; i ++){
+            Block cb = blocksList.get(i);
+            Block nb = blocksList.get(i+1);
+
+            String cbInfra = cb.get_Infrastructure();
+            cbInfra = cbInfra.replaceAll("\\s+","");
+            int switchTo = -1;
+            if(cbInfra.toLowerCase().contains("switch")){
+                switchTo =  Integer.valueOf(cbInfra.substring(cbInfra.indexOf("SWITCH")+6));
+
+                routeGraph.addEdge(adj,cb.get_Number(),switchTo);
+            }
+            if((line.toLowerCase().contains("g")) && (cb.get_Number() != 100) && (switchTo !=  nb.get_Number())) {
+                routeGraph.addEdge(adj, cb.get_Number(), nb.get_Number());
+            }
+        }
+
+        routeGraph.addEdge(adj,150,29);
+
+
+
     }
 
 }

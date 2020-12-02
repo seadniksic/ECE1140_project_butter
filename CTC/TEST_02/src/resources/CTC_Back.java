@@ -139,23 +139,23 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
+
+
+
     }
 
     public void calculate_Suggested_Speed(Integer trainIndex){
-
         System.out.println("SUG SPEED HIT:");
         Double distance = determine_Distance(trainIndex);
         System.out.println("Distance: " + distance);
 
-        //TODO subtract time waited at station from time
         long time = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
                 trainList.get(trainIndex).get_Next_Infrastructure());//this is in minutes
-        double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
-        //System.out.println("time: " + time);
-        //System.out.println("r: " + r);
 
-        //test
+        double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
+
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
+
     }
 
     public void dispatch(Integer trainIndex) throws RemoteException, InterruptedException {
@@ -171,9 +171,6 @@ public class CTC_Back implements CTC_Interface {
 
             trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
-       // System.out.println(trainList.get(trainIndex).get_Number_Of_Cars());
-        //determine_Path(trainIndex);
-
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
@@ -203,9 +200,6 @@ public class CTC_Back implements CTC_Interface {
 
         System.out.println(infrListHold);
         System.out.println(timeListHold);
-
-       // trainList.get(trainIndex).clear_Infrastructure_List();
-       // trainList.get(trainIndex).clear_Time_List();
 
         System.out.println(trainList.get(trainIndex).get_Time_List());
         System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
@@ -250,9 +244,9 @@ public class CTC_Back implements CTC_Interface {
 
         //find how many trains there are on the schedule and add them to list
         //account for trains being created already
-        int numberOfTrains = trainList.size() + linesList.get(0).length() - 2;
-        System.out.println("number of trains = " + numberOfTrains);
-        for(int j = 0 + trainList.size(); j < numberOfTrains; j++){
+        int numberOfTrains = linesList.get(0).length() - 2;
+
+        for(int j = 0; j < numberOfTrains; j++){
 
             Train t = new Train("TR" + j);
             create_Train(t);
@@ -296,6 +290,7 @@ public class CTC_Back implements CTC_Interface {
             trainList.get(i).sort_Lists();
         }
 
+        System.out.println(trainList.get(0).get_Infrastructure_List());
 
     }
 
@@ -338,19 +333,13 @@ public class CTC_Back implements CTC_Interface {
         }
 
 
-    }
 
-    private static int count_Occurences(String someString, char searchedChar, int index) {
-        if (index >= someString.length()) {
-            return 0;
+        for(Line line: lineList){
+            line.create_Graph();
         }
-
-        int count = someString.charAt(index) == searchedChar ? 1 : 0;
-        return count + count_Occurences(
-                someString, searchedChar, index + 1);
     }
 
-    public double determine_Distance(Integer trainIndex){
+    private double determine_Distance(Integer trainIndex){
         int lineIndex = -1;
         boolean open = true;
         //First check if path is open
@@ -370,29 +359,6 @@ public class CTC_Back implements CTC_Interface {
 
     }
 
-    public int determine_Path_Distance(String start_Infrastructure, String stop_Infrastructure){
-        int lineIndex = -1;
-
-        //find current line
-        for(int i = 0; i < lineList.size(); i++){
-            for(int j = 0; j < lineList.get(i).get_Infrastructure_List().size(); j++) {
-                if(lineList.get(i).get_Infrastructure_List().get(j).equals( start_Infrastructure)){
-                    lineIndex = i;
-                }
-            }
-        }
-        if(lineIndex ==  -1){
-            System.out.println("ERROR: DETERMINE DISTANCE LINEINDEX= 1-");
-            return 0;
-        }
-        //set start block
-
-        int distance = 0;
-
-        return distance;
-
-    }
-
     public boolean test_Switch(String line, int block) throws RemoteException {
         boolean working = false;
         if(Network.tcsw_Interface != null) {
@@ -400,8 +366,6 @@ public class CTC_Back implements CTC_Interface {
         }
         return working;
     }
-
-
 
     public LocalTime get_SimTime_As_LocalTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -502,8 +466,6 @@ public class CTC_Back implements CTC_Interface {
         }
     }
 
-
-
     public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException {
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
 
@@ -518,7 +480,8 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-        //TODO this needs to changed based of actual occupancy ie length of train and block
+        //TODO this needs to changed based of actual occupancy ie length of train and block: each car length is 32 meters so do some math
+
         if(block > 1) {
             lineList.get(lineIndex).toggle_Block_Occupancy(block - 2);
         }
@@ -526,19 +489,28 @@ public class CTC_Back implements CTC_Interface {
 
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
-        //TODO check if train should be dispatched again, wait if at station
-        dispatch(trainNum);
+        //TODO DOES THIS WORK?
+        if(trainList.get(trainNum).get_Authority() == 0 && automatic ){
+            trainList.get(trainNum).arrived();
+            long hold = simTime + 60; //60 seconds wait
+            while(simTime < hold ){}//do nothing
+            dispatch(trainNum);
+        }else if(trainList.get(trainNum).get_Authority() == 0 && !automatic ){
+            trainList.get(trainNum).arrived();
+            return;
+        }else if(trainList.get(trainNum).get_Authority() > 0){
+            dispatch(trainNum);
+        }
+
+
+
 
     }
-
 
     public void add_Ticket_CTC(int trainNum) throws RemoteException{
         System.out.println("Ticket added to: " +trainNum);
         trainList.get(trainNum).add_Ticket();
     }
-
-
-
 
     public void update_Time(double time) throws RemoteException{
         //System.out.println(time);

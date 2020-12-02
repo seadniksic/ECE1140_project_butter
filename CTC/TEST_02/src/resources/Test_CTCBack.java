@@ -156,6 +156,54 @@ public class Test_CTCBack {
             j++;
         }
     }
+
+
+    @Test
+    void test_Determine_Path() throws FileNotFoundException {
+        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\track_thursday");
+        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\schedule_thursday");
+
+        tester.import_Train_Schedule();
+        tester.import_Track_File();
+
+        System.out.println("Number of Lines = " +tester.get_Line_List().size());
+        tester.get_Line_List().get(0).create_Graph();
+
+
+        System.out.println(" ");
+        System.out.println("__________________________");
+        tester.get_Line_List().get(0).get_Path(89, 96);//this is wrong if you go 88 to 96 poplar to shannon
+
+
+        //tester.get_Line_List().get(0).get_Path(97, 105);//this works Castle shannon to dormont
+        //tester.get_Line_List().get(0).get_Path(106, 114);//this works  dormont to glen
+        //tester.get_Line_List().get(0).get_Path(142, 22);//this works central to whited
+
+        System.out.println(" ");
+        System.out.println("__________________________");
+        System.out.println("Whited to STATION");
+        tester.get_Line_List().get(0).get_Path(22,16);
+
+        System.out.println(" ");
+        System.out.println("__________________________");
+        System.out.println("STATION to EDGEBROOK");
+        tester.get_Line_List().get(0).get_Path(16,9);
+
+        System.out.println(" ");
+        System.out.println("__________________________");
+        System.out.println("EDGEBROOK to PIONEER");
+        tester.get_Line_List().get(0).get_Path(8, 2);
+
+
+        System.out.println(" ");
+        System.out.println("__________________________");
+        System.out.println("PIONEER to STATION");
+        tester.get_Line_List().get(0).get_Path(1, 9);
+
+        tester.calculate_Suggested_Speed(0);
+
+        System.out.println(tester.get_Train_List().get(0).get_Suggest_Speed());
+    }
 }
 
 

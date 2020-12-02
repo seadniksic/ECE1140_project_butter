@@ -14,8 +14,6 @@ public class Block {
     private boolean condition;//true is open & false is closed
     private boolean lights;
 
-//bind element to an observable list
-
     public Block(){
         section = ' ';
         number = 0;
@@ -45,6 +43,7 @@ public class Block {
         lights = false;
     }
 
+
     public Character get_Section(){
         return section;
     }
@@ -72,6 +71,7 @@ public class Block {
     public Double get_Elevation() {
         return elevation;
     }
+
 
     public Double get_Cumulative_Elevation() {
         return cumulativeElevation;
