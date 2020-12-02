@@ -276,4 +276,11 @@ public class Line {
 
     }
 
+    public void set_Lights(int block, boolean b){
+        blocksList.get(block-1).set_Lights(b);
+    }
+
+    public void set_Crossbar(int block, boolean b){
+        blocksList.get(block-1).set_Crossbar(b);
+    }
 }

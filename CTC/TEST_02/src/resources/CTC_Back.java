@@ -127,18 +127,18 @@ public class CTC_Back implements CTC_Interface {
 
         //TODO check occupancy and open or close of blocks infront of it
 
-        boolean clear = true;
-        //check if authority is clear 4 blocks ahead.
-        for(int i = trainList.get(trainIndex).get_Current_Block()+1; i < trainList.get(trainIndex).get_Current_Block()+5; i++){
-            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
-                clear = false;
-            }
-            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
-                clear = false;
-            }
-        }
+//        boolean clear = true;
+//        //check if authority is clear 4 blocks ahead.
+//        for(int i = trainList.get(trainIndex).get_Current_Block()+1; i < trainList.get(trainIndex).get_Current_Block()+5; i++){
+//            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
+//                clear = false;
+//            }
+//            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
+//                clear = false;
+//            }
+//        }
 
-        if(clear) {//move if track is clear
+       // if(clear) {//move if track is clear
 
 
             int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),trainList.get(trainIndex).get_Next_Infrastructure());
@@ -152,9 +152,9 @@ public class CTC_Back implements CTC_Interface {
 
 
 
-        }else{
-            trainList.get(trainIndex).set_Authority(1);
-        }
+        //}else{
+          //  trainList.get(trainIndex).set_Authority(1);
+       // }
 
 
 
@@ -175,7 +175,7 @@ public class CTC_Back implements CTC_Interface {
 
         System.out.println("TIME: " + time);
         double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
-
+        //TODO check against speed limits
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
     }
 
@@ -270,7 +270,7 @@ public class CTC_Back implements CTC_Interface {
 
             Train t = new Train("TR" + j);
             create_Train(t);
-            System.out.println("Created TR" + j);
+            //System.out.println("Created TR" + j);
         }
 
         //add times to train
@@ -288,13 +288,13 @@ public class CTC_Back implements CTC_Interface {
                     if(i< h.length)
                     if (h[i].contains(":")) {
                         trainList.get(i - 3).set_Current_Line(h[0]);
-                        System.out.println(h[0]);
+                        //System.out.println(h[0]);
                         //TODO TALK TO ADNAN WHAT YARD BLOCK NUMBER IS CURRENTLY SET TO 1, 0 in my code will return -1 as block 1 is index 0, unless i add a yard block for index 0
                         trainList.get(i - 3).set_Current_Block(0);
                         trainList.get(i-3).add_Infrastructure(h[2]);
-                        System.out.println(h[2]);
+                       // System.out.println(h[2]);
                         trainList.get(i-3).add_Time(LocalTime.parse(timeString.concat(h[i])));
-                        System.out.println(h[i]);
+                      //  System.out.println(h[i]);
                     }
                 }
             }
@@ -304,8 +304,8 @@ public class CTC_Back implements CTC_Interface {
             trainList.get(i).sort_Lists();
         }
 
-        System.out.println(trainList.get(0).get_Infrastructure_List());
-        System.out.println(trainList.get(0).get_Time_List());
+       // System.out.println(trainList.get(0).get_Infrastructure_List());
+       // System.out.println(trainList.get(0).get_Time_List());
 
     }
 
@@ -424,7 +424,7 @@ public class CTC_Back implements CTC_Interface {
         //assume it is open for now
 
         for(int i  = 0; i < lineList.size(); i++){
-            if(lineList.get(i).get_Line().equals(line)){
+            if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
                 lineIndex = i;
             }
         }
@@ -456,7 +456,7 @@ public class CTC_Back implements CTC_Interface {
         //assume it is open for now
 
         for(int i  = 0; i < lineList.size(); i++){
-            if(lineList.get(i).get_Line().equals(line)){
+            if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
                 lineIndex = i;
             }
         }
@@ -475,13 +475,14 @@ public class CTC_Back implements CTC_Interface {
     public void open_Block(String line, int block) throws RemoteException{
         //System.out.println("OPEN BLOCK: " + line + ", " + block);
         for(int i = 0 ; i < lineList.size(); i++) {
-            if(line == lineList.get(i).get_Line()){
+            if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
                 lineList.get(i).open_Block(block);
             }
         }
     }
 
     public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException {
+        System.out.println("==============================================================================");
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
         //have train be on block
         trainList.get(trainNum).set_Current_Block(block);
@@ -504,22 +505,22 @@ public class CTC_Back implements CTC_Interface {
         //occupy next block
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
-        boolean clear = true;
-        //check if authority is clear 4 blocks ahead.
-        for(int i = trainList.get(trainNum).get_Current_Block()+1; i < trainList.get(trainNum).get_Current_Block()+5; i++){
-            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
-                clear = false;
-            }
-            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
-                clear = false;
-            }
-        }
+//        boolean clear = true;
+//        //check if authority is clear 4 blocks ahead.
+//        for(int i = trainList.get(trainNum).get_Current_Block()+1; i < trainList.get(trainNum).get_Current_Block()+5; i++){
+//            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
+//                clear = false;
+//            }
+//            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
+//                clear = false;
+//            }
+//        }
 
-        if(clear) {//move if track is clear
+        //if(clear) {//move if track is clear
             trainList.get(trainNum).train_Moved();
-        }else{
-            trainList.get(trainNum).set_Authority(1);
-        }
+      //  }else if(){
+          //  trainList.get(trainNum).set_Authority(1);
+        //}
 
 
         //TODO NEEDS TO NOT DISPATCH IF IN MANUAL AND AT STATION
@@ -529,9 +530,11 @@ public class CTC_Back implements CTC_Interface {
 
             Task task = new Task<Void>() {
                 @Override public Void call() throws InterruptedException, RemoteException {
-                    long hold = simTime + 30; //60 seconds wait
-                    while(simTime < hold ){}//do nothing
-                        dispatch(trainNum);
+                    long hold = simTime + 31; //~31 seconds wait
+                    while(simTime < hold ){
+                        Thread.sleep(1);
+                    }//do nothing
+                    dispatch(trainNum);
                     return null;
                 }
             };
@@ -613,7 +616,22 @@ public class CTC_Back implements CTC_Interface {
 
     }
 
+    public void change_Lights(String line, int block, boolean state){
+        for(int i = 0 ; i < lineList.size(); i++) {
+            if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
+                lineList.get(i).set_Lights(block,state);
+            }
+        }
+    }
 
+    public void change_CrossBar(String line, int block, boolean state){
+        for(int i = 0 ; i < lineList.size(); i++) {
+            if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
+                lineList.get(i).set_Crossbar(block,state);
+            }
+        }
+
+    }
 
 }
 

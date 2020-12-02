@@ -160,6 +160,7 @@ public class Main extends Application {
         TextField line = new TextField();
         set_Text_Settings(line);
 
+        //TODO make current section update or remove it
         Label sectionLabel = new Label("Current Section:");
         TextField section = new TextField();
         set_Text_Settings(section);
@@ -186,6 +187,7 @@ public class Main extends Application {
                 destination.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Next_Infrastructure());
                 tickets.setText(String.valueOf(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Tickets_Per_Hour()));
                 numberCars.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Number_Of_Cars().toString());
+                block.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Current_Block().toString());
                 line.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Current_Line());
             }
         });
@@ -214,6 +216,7 @@ public class Main extends Application {
 
         trainIDSet.setOnShowing(e->{
             fill_Train_ChoiceBox(trainIDSet);
+            trainIDSet.getItems().addAll("NEW TRAIN TR" + Network.server_Object.get_Train_List().size());
         });
 
 
@@ -221,6 +224,7 @@ public class Main extends Application {
         Label stopLabel = new Label("Next Stop: ");
         ChoiceBox stops = new ChoiceBox();
 
+        //TODO this updates wrong when dispatching after arriving. because i'm reseting the array lists when manual dispatching.
         stops.setOnShowing(e->{
             if(trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
                 stops.getItems().clear();
@@ -239,7 +243,7 @@ public class Main extends Application {
         rootTrainSetBox.setSpacing(5);
 
 
-
+        //TODO make this handle new train.
         setButton.setOnAction(e-> {
                if (trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
                    if (Network.server_Object != null) {
@@ -330,14 +334,22 @@ public class Main extends Application {
         TextField blockCondition = new TextField();
         set_Text_Settings(blockCondition);
 
+        Label lightsLabel = new Label("Lights");
+        TextField lights = new TextField();
+        set_Text_Settings(lights);
 
-        rootTrackInfoBox.setPadding(new Insets(10,10,10,10));
-        rootTrackInfoBox.setSpacing(10);
+        Label crossBarLabel = new Label("Cross Bar");
+        TextField crossBar = new TextField();
+        set_Text_Settings(crossBar);
+
+
+        rootTrackInfoBox.setPadding(new Insets(5,10,2,10));
+        rootTrackInfoBox.setSpacing(2);
         rootTrackInfoBox.getChildren().addAll(trackInfoBoxLabel,trackLineLabelInfo,trackLineInfo,trackSectionLabelInfo,
                 trackSectionInfo, trackBlockLabelInfo,trackBlockInfo,displayTrackInfo,blockLengthLabel,blockLength,
                 blockGradeLabel,blockGrade, speedLimitLabel,speedLimit,infrastructureLabel,infrastructure,
                 elevationLabel,elevation,cumulativeElevationLabel,cumulativeElevation,blockOccupancyLabel,
-                blockOccupancy,blockConditionLabel,blockCondition);
+                blockOccupancy,blockConditionLabel,blockCondition,lightsLabel,lights,crossBarLabel,crossBar);
 
         displayTrackInfo.setOnAction(e->{
             blockLength.setText("N/A");

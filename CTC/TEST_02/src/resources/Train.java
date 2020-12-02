@@ -1,6 +1,7 @@
 package resources;
 
 
+import java.rmi.RemoteException;
 import java.time.LocalTime;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -132,8 +133,8 @@ public class Train {
         LocalTime second = LocalTime.parse("00:00",formatter);
         System.out.println("WHY IS THIS START? ->> " + start);
         System.out.println("WHY IS THIS END? ->> " + end);
-        System.out.println(infrastructureList);
-        System.out.println(timeList);
+       // System.out.println(infrastructureList);
+       // System.out.println(timeList);
         for(int i = 0; i < infrastructureList.size(); i ++){
             if(infrastructureList.get(i).contains(start)){
                 first = timeList.get(i);
@@ -181,7 +182,9 @@ public class Train {
 
     public void set_Suggest_Speed(Double sugSpeed) { suggestSpeed = sugSpeed;}
 
-    public void set_Authority(Integer auth){ authority = auth; }
+    public void set_Authority(Integer auth){
+        System.out.println("Authority Setting To : " + auth);
+        authority = auth; }
 
     public void set_Tickets_Per_Hour(Long tickets) { ticketsPerHour = tickets; }
 
@@ -238,12 +241,14 @@ public class Train {
 
 
     public void train_Moved(){
+        System.out.println("Authority--");
         authority--;
-
     }
 
 
-    public void arrived(){
+    public void arrived() throws RemoteException, InterruptedException {
+        Network.tcsw_Interface.send_Speed_Authority(Integer.valueOf(name.substring(2)),suggestSpeed,0);
+        System.out.println("TRAIN ARRIVED AT :" + get_Next_Infrastructure());
         currentIndex ++;
     }
 
