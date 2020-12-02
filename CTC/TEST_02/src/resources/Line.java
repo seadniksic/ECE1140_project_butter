@@ -211,6 +211,9 @@ public class Line {
         return distance;
     }
 
+    public boolean get_Block_Condition(int b){
+       return blocksList.get(b-1).get_Condition();
+    }
 
     public void close_Line(){
         for(Block b: blocksList){
@@ -246,6 +249,9 @@ public class Line {
             adj.add(new ArrayList<Integer>());
         }
 
+
+
+
         for(int i = 0; i < v - 2; i ++){
             Block cb = blocksList.get(i);
             Block nb = blocksList.get(i+1);
@@ -262,6 +268,7 @@ public class Line {
                 routeGraph.addEdge(adj, cb.get_Number(), nb.get_Number());
             }
         }
+        //TODO change this or file so that 57->0 and 0->63
 
         routeGraph.addEdge(adj,150,29);
 

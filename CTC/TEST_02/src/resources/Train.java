@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
+import networking.Network;
+import resources.CTC_Back;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,6 +124,7 @@ public class Train {
 
         return second;
     }
+
     public long get_Time_Between(String start, String end){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         long timeInMinutes = 0;
@@ -236,9 +239,10 @@ public class Train {
 
     public void train_Moved(){
         authority--;
+
     }
 
-    //TODO make sure arrived() is getting called. adjust train.arrived for index out of range error
+
     public void arrived(){
         currentIndex ++;
     }

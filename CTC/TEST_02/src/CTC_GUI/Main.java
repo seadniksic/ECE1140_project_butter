@@ -27,6 +27,7 @@ import resources.*;
 
 
 public class Main extends Application {
+
     public static TextField simulationTime = new TextField("00");
 
 
@@ -531,13 +532,11 @@ public class Main extends Application {
         MenuItem simStart       = new MenuItem("_Start Simulation Time");
         MenuItem simSetMult1 = new MenuItem("Multiplier Set to 1");
         MenuItem simSetMult10 = new MenuItem("Multiplier Set to 10");
-        MenuItem simSetMult25 = new MenuItem( "Multiplier Set to 25");
-        MenuItem simSetMult50 = new MenuItem("Multiplier Set to 50");
-        MenuItem simSetMult100 = new MenuItem("Multiplier Set to 100");
+        MenuItem simSetMult20 = new MenuItem( "Multiplier Set to 20");
         MenuItem simPause = new MenuItem("_Pause Simulation Time");
         MenuItem simResume = new MenuItem("_Resume Simulation Time");
         MenuItem simReset = new MenuItem("Reset Simulation Time");
-        timeMenu.getItems().addAll(simStart,simSetMult1,simSetMult10,simSetMult25,simSetMult50,simSetMult100, simPause, simResume,simReset);
+        timeMenu.getItems().addAll(simStart,simSetMult1,simSetMult10,simSetMult20, simPause, simResume,simReset);
 
 
         rootMenuBarLeft.setMaxHeight(5);
@@ -656,7 +655,7 @@ public class Main extends Application {
         });
 
         simStart.setOnAction(e->{
-            /*
+
             if(Network.Simulation_Interface != null) {
                 try {
                     Network.Simulation_Interface.start_Simulation_Time(1);
@@ -668,8 +667,8 @@ public class Main extends Application {
             }else{
                 show_No_Sim_Connection();
             }
+            /*
 
-             */
             Task task = new Task<Void>() {
                 @Override public Void call() throws InterruptedException {
 
@@ -686,7 +685,7 @@ public class Main extends Application {
                     return null;
                 }
             };
-            new Thread(task).start();
+            new Thread(task).start(); */
 
         });
 
@@ -718,34 +717,10 @@ public class Main extends Application {
 
         });
 
-        simSetMult25.setOnAction(e->{
+        simSetMult20.setOnAction(e->{
             if(Network.Simulation_Interface != null){
                 try {
-                    Network.Simulation_Interface.update_Multiplier(25);
-                } catch (RemoteException remoteException) {
-                    remoteException.printStackTrace();
-                }
-            }else{
-                show_No_Sim_Connection();
-            }
-        });
-
-        simSetMult50.setOnAction(e->{
-            if(Network.Simulation_Interface != null){
-                try {
-                    Network.Simulation_Interface.update_Multiplier(50);
-                } catch (RemoteException remoteException) {
-                    remoteException.printStackTrace();
-                }
-            }else{
-                show_No_Sim_Connection();
-            }
-        });
-
-        simSetMult100.setOnAction(e->{
-            if(Network.Simulation_Interface != null){
-                try {
-                    Network.Simulation_Interface.update_Multiplier(100);
+                    Network.Simulation_Interface.update_Multiplier(20);
                 } catch (RemoteException remoteException) {
                     remoteException.printStackTrace();
                 }

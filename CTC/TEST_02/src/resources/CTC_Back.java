@@ -22,7 +22,7 @@ public class CTC_Back implements CTC_Interface {
     static private File trackFile;
     static private List<Line> lineList = new ArrayList<>();
     static private List<Train> trainList = new ArrayList<>();
-    static private boolean automatic = false;
+    static private boolean automatic = false; // should be set to false because gui starts in manual mode
     static private long simTime = 0;
 
 
@@ -114,6 +114,7 @@ public class CTC_Back implements CTC_Interface {
 
     public void calculate_Authority(Integer trainIndex){
         System.out.println("CALC AUTH HIT:");
+
         //first find the index of the line the train is on.
         int lineIndex = -1;
         for(int i  = 0; i < lineList.size(); i++){
@@ -123,29 +124,41 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-        //TODO don't hit dispacth... ie this function if train has arrived at station
-//
-//        //System.out.println("Line Index: " + lineIndex);
-//
-//        for (int i = 0; i <= 5; i++) {
-//            String infrastructureHolder = "";
-//                infrastructureHolder = lineList.get(lineIndex).get_Block_Infrastructure(trainList.get(trainIndex).get_Current_Block() + i );
-//            //System.out.println("Station output " + infrastructureHolder);
-//            if (infrastructureHolder.contains("Station")) {
-//                trainList.get(trainIndex).set_Authority(i);
-//                break;
-//            } else {
-//                trainList.get(trainIndex).set_Authority(i);
-//            }
-//        }
 
-        //get number of blocks between current infra and next infra
+        //TODO check occupancy and open or close of blocks infront of it
 
-        //if this number number is greater than current current authority do nothing
-        int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),trainList.get(trainIndex).get_Next_Infrastructure());
-        if(trainList.get(trainIndex).get_Authority() == 0){
-            trainList.get(trainIndex).set_Authority(numberOfBlocks);
+        boolean clear = true;
+        //check if authority is clear 4 blocks ahead.
+        for(int i = trainList.get(trainIndex).get_Current_Block()+1; i < trainList.get(trainIndex).get_Current_Block()+5; i++){
+            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
+                clear = false;
+            }
+            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
+                clear = false;
+            }
         }
+
+        if(clear) {//move if track is clear
+
+
+            int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),trainList.get(trainIndex).get_Next_Infrastructure());
+            if(trainList.get(trainIndex).get_Authority() == 0){
+                if(trainList.get(trainIndex).get_Current_Infrastructure().toLowerCase().contains("switch from yard")) {
+                    trainList.get(trainIndex).set_Authority(numberOfBlocks -1);
+                }else{
+                    trainList.get(trainIndex).set_Authority(numberOfBlocks);
+                }
+            }
+
+
+
+        }else{
+            trainList.get(trainIndex).set_Authority(1);
+        }
+
+
+
+
 
     }
 
@@ -156,9 +169,9 @@ public class CTC_Back implements CTC_Interface {
 
         long scheduletime = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
                 trainList.get(trainIndex).get_Next_Infrastructure());//this is in minutes
-        long simDiffTime = MINUTES.between( get_SimTime_As_LocalTime() ,trainList.get(trainIndex).get_Arrival_Time_Of_Next_INFR());
+        //long simDiffTime = MINUTES.between( get_SimTime_As_LocalTime() ,trainList.get(trainIndex).get_Arrival_Time_Of_Next_INFR());
 
-        long time = Math.min(scheduletime, simDiffTime);
+        long time = scheduletime; //Math.min(scheduletime, simDiffTime);
 
         System.out.println("TIME: " + time);
         double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
@@ -230,7 +243,7 @@ public class CTC_Back implements CTC_Interface {
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
-        System.out.println("authoirty send: " + trainList.get(trainIndex).get_Authority());
+        System.out.println("authority send: " + trainList.get(trainIndex).get_Authority());
 
         if(Network.tcsw_Interface != null)
         Network.tcsw_Interface.send_Speed_Authority(trainIndex, trainList.get(trainIndex).get_Suggest_Speed(),
@@ -274,23 +287,17 @@ public class CTC_Back implements CTC_Interface {
                     String timeString = "0";//used for adjusting time to parse into LOCALTIME
                     if(i< h.length)
                     if (h[i].contains(":")) {
-
                         trainList.get(i - 3).set_Current_Line(h[0]);
                         System.out.println(h[0]);
-
                         //TODO TALK TO ADNAN WHAT YARD BLOCK NUMBER IS CURRENTLY SET TO 1, 0 in my code will return -1 as block 1 is index 0, unless i add a yard block for index 0
-                        trainList.get(i - 3).set_Current_Block(1);
-
-
+                        trainList.get(i - 3).set_Current_Block(0);
                         trainList.get(i-3).add_Infrastructure(h[2]);
-                       System.out.println(h[2]);
+                        System.out.println(h[2]);
                         trainList.get(i-3).add_Time(LocalTime.parse(timeString.concat(h[i])));
                         System.out.println(h[i]);
                     }
                 }
-
             }
-
         }
 
         for(int i = 0; i < trainList.size(); i++){
@@ -476,8 +483,8 @@ public class CTC_Back implements CTC_Interface {
 
     public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException {
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
-
-         trainList.get(trainNum).set_Current_Block(block);
+        //have train be on block
+        trainList.get(trainNum).set_Current_Block(block);
 
 //        trainList.get(trainNum).moved_Block();
 //
@@ -494,18 +501,37 @@ public class CTC_Back implements CTC_Interface {
             lineList.get(lineIndex).toggle_Block_Occupancy(block - 2);
         }
 
-
+        //occupy next block
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
+        boolean clear = true;
+        //check if authority is clear 4 blocks ahead.
+        for(int i = trainList.get(trainNum).get_Current_Block()+1; i < trainList.get(trainNum).get_Current_Block()+5; i++){
+            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
+                clear = false;
+            }
+            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
+                clear = false;
+            }
+        }
 
+        if(clear) {//move if track is clear
+            trainList.get(trainNum).train_Moved();
+        }else{
+            trainList.get(trainNum).set_Authority(1);
+        }
+
+
+        //TODO NEEDS TO NOT DISPATCH IF IN MANUAL AND AT STATION
         //TODO DOES THIS WORK?
         if(trainList.get(trainNum).get_Authority() == 0 && automatic ){
             trainList.get(trainNum).arrived();
+
             Task task = new Task<Void>() {
                 @Override public Void call() throws InterruptedException, RemoteException {
-                    long hold = simTime + 60; //60 seconds wait
+                    long hold = simTime + 30; //60 seconds wait
                     while(simTime < hold ){}//do nothing
-                    dispatch(trainNum);
+                        dispatch(trainNum);
                     return null;
                 }
             };
@@ -514,7 +540,6 @@ public class CTC_Back implements CTC_Interface {
             trainList.get(trainNum).arrived();
             return;
         }else if(trainList.get(trainNum).get_Authority() > 0){
-            trainList.get(trainNum).train_Moved();
             dispatch(trainNum);
         }
     }
@@ -563,6 +588,7 @@ public class CTC_Back implements CTC_Interface {
                         Task task = new Task<Void>() {
                             @Override public Void call() {
                                 try {
+                                   // Network.tcsw_Interface.create_Train(tr.get_Number_Of_Cars(),tr.get_Current_Line(),tr.get_Current_Block());
                                     dispatch(finalTrainIndex);
                                 } catch (RemoteException | InterruptedException e) {
                                     e.printStackTrace();

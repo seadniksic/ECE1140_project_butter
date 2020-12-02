@@ -90,73 +90,53 @@ public class Test_CTCBack {
     //Test that the import track function works
     //function reads from file and files list
     //test that list is greater than zero
-
     @Test
-    void test_Determine_Authority() throws FileNotFoundException {
-        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\blue_track");
-        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\blue_schedule");
+    void test_Updating_Authority() throws FileNotFoundException, RemoteException, InterruptedException {
+        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\track_thursday");
+        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\schedule_thursday");
 
         tester.import_Train_Schedule();
         tester.import_Track_File();
 
-        System.out.println("CALC AUTH HIT:");
-        Integer blocks_between = 10;
+        tester.dispatch(0); // dispatch train 0
 
-        int lineIndex = -1;
-        boolean open = true;
-        //First check if path is open
-        //assume it is open for now
-
-        int j = 0;
-
-        while(j < 10){
+        System.out.println("------------------------------------------------------------------------------------------");
+        tester.train_Moved(0,63);
+        System.out.println("------------------------------------------------------------------------------------------");
+        tester.train_Moved(0,64);
+        System.out.println("------------------------------------------------------------------------------------------");
+        tester.train_Moved(0,65);
 
 
-
-
-            for (int i = 0; i < tester.get_Line_List().size(); i++) {
-                if (tester.get_Line_List().get(i).get_Line().equals(tester.get_Train_List().get(0).get_Current_Line())) {
-                    lineIndex = i;
-                    break;
-                }
-            }
-
-
-
-            System.out.println("Line Index: " + lineIndex);
-            //check line occupancy after current
-            int nextBlock = tester.get_Train_List().get(0).get_Current_Block() + 1;
-            System.out.println(" ----------------");
-
-            for (int i = 1; i <= 5; i++) {
-
-                //if(lineList.get(lineIndex).get_Block_Occupancy(nextBlock + i) == true){
-                // trainList.get(trainIndex).set_Authority(0);
-                // break;
-                // }else
-
-                String infrastructureHolder = tester.get_Line_List().get(0).get_Block_Infrastructure(nextBlock + i );
-                System.out.println("Station output " + infrastructureHolder);
-                if (infrastructureHolder.contains("Station")) {
-                    tester.get_Train_List().get(0).set_Authority(i);
-
-                    break;
-                } else {
-                    tester.get_Train_List().get(0).set_Authority(i);
-                }
-
-            }
-
-            if(tester.get_Line_List().get(0).get_Block_Infrastructure(nextBlock).contains("Station")){
-                tester.get_Train_List().get(0).set_Authority(0);
-            }
-
-            System.out.println("Authority = " + tester.get_Train_List().get(0).get_Authority());
-            tester.get_Train_List().get(0).set_Current_Block( tester.get_Train_List().get(0).get_Current_Block() + 1 );
-            j++;
-        }
     }
 
+
+    @Test
+    void test_Determine_Authority() throws FileNotFoundException {
+        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\track_thursday");
+        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\schedule_thursday");
+
+        tester.import_Train_Schedule();
+        tester.import_Track_File();
+
+        tester.calculate_Authority(0);
+
+        System.out.println("Authority for first dispatch of train 0 = " + tester.get_Train_List().get(0).get_Authority());
+
+    }
+
+    @Test
+    void test_Suggested_Speed() throws FileNotFoundException{
+        tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\track_thursday");
+        tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\schedule_thursday");
+
+        tester.import_Train_Schedule();
+        tester.import_Track_File();
+
+
+        tester.calculate_Suggested_Speed(0);
+        System.out.println(tester.get_Train_List().get(0).get_Suggest_Speed());
+    }
 
     @Test
     void test_Determine_Path() throws FileNotFoundException {
@@ -167,7 +147,6 @@ public class Test_CTCBack {
         tester.import_Track_File();
 
         System.out.println("Number of Lines = " +tester.get_Line_List().size());
-        tester.get_Line_List().get(0).create_Graph();
 
 
         System.out.println(" ");
@@ -200,9 +179,7 @@ public class Test_CTCBack {
         System.out.println("PIONEER to STATION");
         tester.get_Line_List().get(0).get_Path(1, 9);
 
-        tester.calculate_Suggested_Speed(0);
 
-        System.out.println(tester.get_Train_List().get(0).get_Suggest_Speed());
     }
 }
 
