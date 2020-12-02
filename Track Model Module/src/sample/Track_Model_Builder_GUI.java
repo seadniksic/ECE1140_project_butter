@@ -263,7 +263,7 @@ public class Track_Model_Builder_GUI {
                 for (Block[] blocks : line_Arr_List.get(i).block_Arr){
                     for (Block block : blocks) {
                         if(block.blockNumber != -1){
-                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.next_Block_Number_2 + ", " + block.previous_Block_Number + ", " + block.is_Yard + ", " + block.is_Switch + ", " + block.is_Station + ", " + block.station_Name + "\n";
+                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.next_Block_Number_2 + ", " + block.previous_Block_Number + ", " + block.is_Yard + ", " + block.is_Switch + ", " + block.is_Alpha + ", " + block.is_Beta + ", " + block.is_Gamma + ", " + block.is_Station + ", " + block.station_Name + "\n";
                         }
                     }
                 }
@@ -354,8 +354,13 @@ public class Track_Model_Builder_GUI {
                     int extracted_Previous_Block_Number = Integer.parseInt(block_Line_Elements.get(7));
                     Boolean extracted_is_Yard = Boolean.parseBoolean(block_Line_Elements.get(8));
                     Boolean extracted_is_Switch = Boolean.parseBoolean(block_Line_Elements.get(9));
-                    Boolean extracted_is_Station = Boolean.parseBoolean(block_Line_Elements.get(10));
-                    String extracted_Station_Name = block_Line_Elements.get(11);
+
+                    Boolean extracted_is_Alpha = Boolean.parseBoolean(block_Line_Elements.get(10));
+                    Boolean extracted_is_Beta = Boolean.parseBoolean(block_Line_Elements.get(11));
+                    Boolean extracted_is_Gamma = Boolean.parseBoolean(block_Line_Elements.get(12));
+
+                    Boolean extracted_is_Station = Boolean.parseBoolean(block_Line_Elements.get(13));
+                    String extracted_Station_Name = block_Line_Elements.get(14);
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
@@ -369,6 +374,11 @@ public class Track_Model_Builder_GUI {
                                 block.previous_Block_Number = extracted_Previous_Block_Number;
                                 block.is_Yard = extracted_is_Yard;
                                 block.is_Switch = extracted_is_Switch;
+
+                                block.is_Alpha = extracted_is_Alpha;
+                                block.is_Beta = extracted_is_Beta;
+                                block.is_Gamma = extracted_is_Gamma;
+
                                 block.is_Station = extracted_is_Station;
                                 block.station_Name = extracted_Station_Name;
                                 if(block.blockNumber != -1){//TODO: May need to revise this

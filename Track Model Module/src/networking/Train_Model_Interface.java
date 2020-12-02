@@ -14,8 +14,8 @@ public interface Train_Model_Interface extends Remote {
     public void set_Ext_Lights(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Left_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Right_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
-    public void set_Announcements(int train_Num, String announcements) throws RemoteException;
-    public void update_Temperature(int train_Num, int temp) throws RemoteException; // train controller -> train model
+    public void set_Announcements(int train_Num, boolean announcements) throws RemoteException;
+    public double update_Temperature(int train_Num, double heating_Power, double cooling_Power) throws RemoteException, InterruptedException; // train controller -> train model
     public void set_Brake_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Advertisements(int train_Num, boolean state) throws RemoteException; // train controller -> train model
@@ -25,7 +25,7 @@ public interface Train_Model_Interface extends Remote {
     public boolean get_Ext_Lights(int train_Num) throws RemoteException;
     public boolean get_Left_Door_Status(int train_Num) throws RemoteException;
     public boolean get_Right_Door_Status(int train_Num) throws RemoteException;
-    public int get_Temperature(int train_Num) throws RemoteException;
+    public double get_Temperature(int train_Num) throws RemoteException;
     public boolean get_Brake_Status(int train_Num) throws RemoteException;
     public boolean get_Emergency_Brake_Status(int train_Num) throws RemoteException;
     public double get_Engine_Power(int train_Num) throws RemoteException;
@@ -34,4 +34,5 @@ public interface Train_Model_Interface extends Remote {
     public void update_Time(double time) throws RemoteException;
     public void remove_Failure_Status(int train_Num) throws RemoteException;
     public void update_Multiplier(int m) throws RemoteException;
+
 }
