@@ -26,13 +26,14 @@ public class Block_GUI {
     Block parent_Block;
 
     // Variables dealing with appearance
+    Stage block_Stage;
     public Button this_Button;
     public ImageView this_Image_View;
     public Image this_Image;
     public FileInputStream this_FileInputStream;
     static public HashMap<String, String> color_Map;
 
-
+    // TextFields
     TextField block_Num_TF;
     TextField line_TF;
     TextField section_TF;
@@ -45,16 +46,15 @@ public class Block_GUI {
 
     Label error_Label;
 
+    // Checkboxes and Radio Buttons
     CheckBox is_Yard_CheckBox;
-
     CheckBox is_Switch_CheckBox;
+    CheckBox is_Station_CheckBox;
     RadioButton is_Alpha_RB;
     RadioButton is_Beta_RB;
     RadioButton is_Gamma_RB;
 
-    CheckBox is_Station_CheckBox;
 
-    Stage block_Stage;
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Block_GUI(Block param_Parent_Block){
         this_Button = new Button();
@@ -66,35 +66,13 @@ public class Block_GUI {
         changeColor(color_Map.get("Grey"));
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
-    private void set_Up_Color_Map(){
-        color_Map = new HashMap<String,String>();
-        String folder = "E:\\Fat Documents\\Pitt\\Junior Year\\1140 - Systems and Project Engineering\\Project Repository\\ECE1140_project_butter\\Track Model Module\\src\\sample\\";
-        color_Map.put("Blue", folder + "Blue.png");
-        color_Map.put("Green", folder + "Green.png");
-        color_Map.put("Mustard", folder + "Mustard.png");
-        color_Map.put("Purple", folder + "Purple.png");
-        color_Map.put("Grey", folder + "Grey.png");
-        color_Map.put("Red", folder + "Red.png");
-    }
-    public void changeColor(String param_Path) {
-        try {
-            this_FileInputStream = new FileInputStream(param_Path);
-            this_Image = new Image(this_FileInputStream);
-            this_Image_View = new ImageView(this_Image);
-            this_Image_View.setFitWidth(20);
-            this_Image_View.setFitHeight(20);
-            this_Button.setGraphic(this_Image_View);
-            this_Button.setPadding(new Insets(0));
-        } catch (FileNotFoundException f) {
-            System.out.println("ERROR! File not found");
-        }
 
-    }
-
+    // Mapping buttons, checkboxes and radio buttons
     private void map_This_Button(Button param_Button){
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                System.out.println("isBuilder: " + parent_Block.is_Builder);
                 summon_Block_Editor(false, parent_Block.is_Builder);
                 System.out.println(to_String());
             }
@@ -117,15 +95,20 @@ public class Block_GUI {
                     parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
                     parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
                     parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
+
                     if(parent_Block.is_Switch){
                         parent_Block.is_Alpha = (is_Alpha_RB.isSelected() != false ? true : is_Alpha_RB.isSelected());
                         parent_Block.is_Beta = (is_Beta_RB.isSelected() != false ? true : is_Beta_RB.isSelected());
                         parent_Block.is_Gamma = (is_Gamma_RB.isSelected() != false ? true : is_Gamma_RB.isSelected());
-
+                        if(set_Next_2_TF != null){
+                            parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt(set_Next_2_TF.getText()) : parent_Block.next_Block_Number_2);
+                        }
                     }
+
                     if(parent_Block.is_Station){
                         parent_Block.station_Name = (station_Name_TF.getText() != "" ? station_Name_TF.getText() : parent_Block.station_Name);
                     }
+
                     parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
                     parent_Block.is_Yard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
                     parent_Block.is_Switch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
@@ -210,6 +193,7 @@ public class Block_GUI {
         param_Checkbox.setOnAction(event);
     }
 
+    // Returning scenes
     private Scene return_Builder_Block_Editor_Scene(){
 
         Label description_label = new Label("Welcome to the block editor!");
@@ -239,10 +223,11 @@ public class Block_GUI {
 
         // Only add the settings if they are selected as such
         HBox temp_Set_Next_2_HBox = new HBox();
-        if(is_Alpha_RB != null){
-            if(is_Switch_CheckBox.isSelected() && is_Alpha_RB.isSelected()){
+        if(parent_Block.is_Alpha){
+            System.out.println("Here!");
+           // if(is_Switch_CheckBox.isSelected() && is_Alpha_RB.isSelected()){
                 temp_Set_Next_2_HBox = return_Set_Next_2_HBox();
-            }
+            //}
         }
 
         // Station HBox
@@ -326,17 +311,8 @@ public class Block_GUI {
 
         return new Scene(this_VBox, 500, 600);
     }
-    private void summon_Block_Editor(Boolean param_Is_Summoned_Again, Boolean param_Is_Builder){
-        if(param_Is_Summoned_Again){
-            block_Stage.close();
-        }
-        if(param_Is_Builder){
-            block_Stage.setScene(return_Builder_Block_Editor_Scene());
-        }else{
-            block_Stage.setScene(return_Murphy_Block_Editor_Scene());
-        }
-        block_Stage.show();
-    }
+
+    // Returning HBoxes
     private HBox return_block_Num_HBox(){
         Label block_Num_Label = new Label("Block Number: ");
         block_Num_TF = new TextField(String.valueOf(parent_Block.blockNumber));
@@ -411,6 +387,41 @@ public class Block_GUI {
         return set_Previous_HBox;
     }
 
+    public void changeColor(String param_Path) {
+        try {
+            this_FileInputStream = new FileInputStream(param_Path);
+            this_Image = new Image(this_FileInputStream);
+            this_Image_View = new ImageView(this_Image);
+            this_Image_View.setFitWidth(20);
+            this_Image_View.setFitHeight(20);
+            this_Button.setGraphic(this_Image_View);
+            this_Button.setPadding(new Insets(0));
+        } catch (FileNotFoundException f) {
+            System.out.println("ERROR! File not found");
+        }
+
+    }
+    private void summon_Block_Editor(Boolean param_Is_Summoned_Again, Boolean param_Is_Builder){
+        if(param_Is_Summoned_Again){
+            block_Stage.close();
+        }
+        if(param_Is_Builder){
+            block_Stage.setScene(return_Builder_Block_Editor_Scene());
+        }else{
+            block_Stage.setScene(return_Murphy_Block_Editor_Scene());
+        }
+        block_Stage.show();
+    }
+    private void set_Up_Color_Map(){
+        color_Map = new HashMap<String,String>();
+        String folder = "E:\\Fat Documents\\Pitt\\Junior Year\\1140 - Systems and Project Engineering\\Project Repository\\ECE1140_project_butter\\Track Model Module\\src\\sample\\";
+        color_Map.put("Blue", folder + "Blue.png");
+        color_Map.put("Green", folder + "Green.png");
+        color_Map.put("Mustard", folder + "Mustard.png");
+        color_Map.put("Purple", folder + "Purple.png");
+        color_Map.put("Grey", folder + "Grey.png");
+        color_Map.put("Red", folder + "Red.png");
+    }
     private Boolean switch_RB_Group_isSelected(){
         Boolean to_Return = false;
 
@@ -421,7 +432,6 @@ public class Block_GUI {
         }
         return to_Return;
     }
-
     private String to_String(){
         String output = "";
         output += "Block Properties:" + "\n";

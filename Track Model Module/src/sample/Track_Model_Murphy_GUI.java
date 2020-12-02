@@ -1,12 +1,10 @@
 package sample;
 
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -41,6 +39,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
 
+    // Returning Scenes
     private Scene return_Start_Scene(){
         MenuBar start_MenuBar = new MenuBar();
         configureMenuBar(start_MenuBar);
@@ -123,7 +122,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
         return new Scene(this_VBox, 800, 800);
     }
-
+    // Mapping Buttons
     private void map_Line_Button(Button param_Button, int param_Line_Index){
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
@@ -149,7 +148,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             @Override
             public void handle(ActionEvent actionEvent) {
                     if(simulate_Was_Clicked){
-                        outer_Update_Occupancy(0, 20.0);
+                        outer_Update_Occupancy(0, 50.0);
                     }else{
                         try {
                             spawn_Train_In_Yard(2, working_Line_Index, 0);
@@ -188,33 +187,177 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     }
 
 
-    public void outer_Update_Occupancy(int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
-        System.out.println();
-        System.out.println("Running outer_Update_Occupancy");
-        System.out.println("param_Line_Index: " + working_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick + " || " + "simulate: " + simulate_Was_Clicked);
+    private void update_Occupancy(int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
+        // Print statements are concatenated into ...
+        System.out.println("\nUpdating occupancy...");
+        // For every row in the line
+        for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
+            // For every block in the current row
+            for (Block block : blocks) {
+                // Check if the block has an occupancy and is recorded in the occupancy tracker
+                if(!this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.isEmpty()){
+                    if(block.blockNumber == this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.get(param_Occupancy_Index) && block.isOccupied){
+                        System.out.println(block.blockNumber + " is occupied");
+                        // If so, add the distance to the matching distance array
+                        double temp = this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.get(param_Occupancy_Index);
+                        temp += param_Distance_Traveled_In_Tick;
+                        System.out.println("Added distance: " + temp);
+                        System.out.println("Block.length: " + block.length);
+                        // Compare distance to block length
+                        if(temp >= block.length){
+                            // Subtracting block length from distance and updating distances/occupancies
+                            temp -= block.length;
+                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.set(param_Occupancy_Index, temp);
 
-                // Sead - update_Occ
-                backgroundThread = new Service<Void>() {
-                    @Override
-                    protected Task<Void> createTask() {
-                        return new Task<Void>() {
-                            protected Void call() throws Exception {
-                                // Actions
-                                    Platform.runLater( ()->{
-                                        System.out.println();
-                                        System.out.println("Running the Platform.runLater for outer_Update_Occupancy - update_Occupancy");
-                                        update_Occupancy(param_Occupancy_Index, param_Distance_Traveled_In_Tick);
-                                    });
-                                return null;
+                            // Swap the next and previous blocks if the next block happens to be the previous block
+                            if(!this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
+                                if(block.next_Block_Number == this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.get(param_Occupancy_Index)){
+                                    System.out.println("Swapping next: " + block.next_Block_Number + " and previous: " + block.previous_Block_Number);
+                                    int dummy = 0;
+                                    dummy = block.next_Block_Number;
+                                    block.next_Block_Number = block.previous_Block_Number;
+                                    block.previous_Block_Number = dummy;
+                                }
                             }
-                        };
-                    }
-                };
-                // Sead - GetUpdatedOccupancyService
-                //final GetUpdatedOccupancyService service = new GetUpdatedOccupancyService();
 
-                // Sead - backgroundThread.restart
-                backgroundThread.restart();
+                            // Perform different actions if the block is a switch
+                            if(block.is_Switch && block.is_Alpha){
+                                System.out.println("This block: " + block.blockNumber + " is a switch");
+                                System.out.println("Block number 1: " + block.next_Block_Number);
+                                System.out.println("Block number 2: " + block.next_Block_Number_2);
+                                System.out.println("Block is switched: " + block.is_Switched);
+                                // For every row in the line
+                                for (Block[] blocks1 : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
+                                    // For every block in the row
+                                    for (Block block1 : blocks1) {
+                                        // If block is stated as the next block of the block from before and the switch is set to false
+                                        if(block.next_Block_Number == block1.blockNumber && !block.is_Switched){
+                                            System.out.println("New occupancy at block for not switched: " + block1.blockNumber);
+                                            System.out.println("Block number 2: " + block.next_Block_Number_2);
+                                            System.out.println("Block is switched: " + block.is_Switched);
+
+                                            //TODO: Must be set to false once all cars have left
+                                            block.set_Occupancy(false);
+
+                                            // Add the block from before as a past occupancy
+                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(param_Occupancy_Index, block.blockNumber);
+                                            }else{
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
+                                            }
+                                            // Update the occupancy array with the new block
+                                            block1.set_Occupancy(true);
+
+                                            call_Network_Train_Moved(block1);
+
+                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
+                                            // Destroy the train if the new occupancy is a yard
+                                            if(block1.is_Yard){
+                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
+
+                                                //TODO: Must be set to false once all cars have left
+                                                block1.set_Occupancy(false);
+
+                                                return;
+                                            }
+                                        }
+                                        // If block is stated as the next block of the block from before and switch is set to true
+                                        else if(block.next_Block_Number_2 == block1.blockNumber && block.is_Switched){
+                                            System.out.println("New occupancy at block for switched: " + block1.blockNumber);
+
+                                            //TODO: Must be set to false once all cars have left
+                                            block.set_Occupancy(false);
+
+                                            // Add the block from before as a past occupancy
+                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(param_Occupancy_Index, block.blockNumber);
+                                            }else{
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
+                                            }
+
+                                            // Update the occupancy array with the new block
+                                            block1.set_Occupancy(true);
+
+                                            call_Network_Train_Moved(block1);
+
+                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
+                                            // Destroy the train if the new occupancy is a yard
+                                            if(block1.is_Yard){
+                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
+
+                                                //TODO: Must be set to false once all cars have left
+                                                block1.set_Occupancy(false);
+
+                                                print_Update_Occupancy("Moved and block is switch and next block is yard");
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                                print_Update_Occupancy("Moved and block is switch");
+                                return;
+                                // Perform different actions if the block is not a switch
+                            }else{
+                                // For every row in the line
+                                for (Block[] blocks1 : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
+                                    // For every block in the row
+                                    for (Block block1 : blocks1) {
+                                        // If the block is stated as the next block of the block from before
+                                        if(block.next_Block_Number == block1.blockNumber){
+                                            System.out.println("New occupancy at block: " + block1.blockNumber);
+
+
+                                            //TODO: Must be set to false once all cars have left
+                                            block.set_Occupancy(false);
+
+                                            // Add the block from before to the list of past occupancies
+                                            System.out.println("Is empty: " + this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty());
+                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(block.blockNumber);
+                                            }else{
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
+                                            }
+                                            // Update the occupancy array with the new block
+                                            block1.set_Occupancy(true);
+
+                                            call_Network_Train_Moved(block1);
+
+                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
+                                            // Destroy the train if the new occupancy is a yard
+                                            if(block1.is_Yard){
+                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
+                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
+
+                                                //TODO: Must be set to false once all cars have left
+                                                block1.set_Occupancy(false);
+
+                                                print_Update_Occupancy("Moved and next block is yard");
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                                print_Update_Occupancy("Moved and block is not switch");
+                                return;
+                            }
+                        }
+                        // If smaller, just add to the corresponding distance in the distance array
+                        else{
+                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.set(param_Occupancy_Index, temp);
+                        }
+                    }
+                }
+            }
+        }
+        print_Update_Occupancy("Did not move");
+
+        // Second call
+        swap_To_Line_Scene(working_Line_Index);
     }
 
     private void configureMenuBar(MenuBar param_MenuBar){
@@ -385,6 +528,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
 
+    // Swap to Scene
     public void swap_to_Start_Scene(){
         murphy_Stage.setScene(return_Start_Scene());
         murphy_Stage.show();
@@ -401,6 +545,37 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         murphy_Stage.show();
     }
 
+    // Interface functions
+
+    // Called by Train Model
+    public void outer_Update_Occupancy(int param_Occupancy_Index, double param_Distance_Traveled_In_Tick){
+        System.out.println();
+        System.out.println("Running outer_Update_Occupancy");
+        System.out.println("param_Line_Index: " + working_Line_Index + ", " + "param_Occ: " + param_Occupancy_Index + ", " +  "distance: " + param_Distance_Traveled_In_Tick + " || " + "simulate: " + simulate_Was_Clicked);
+
+        // Sead - update_Occ
+        backgroundThread = new Service<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    protected Void call() throws Exception {
+                        // Actions
+                        Platform.runLater( ()->{
+                            System.out.println();
+                            System.out.println("Running the Platform.runLater for outer_Update_Occupancy - update_Occupancy");
+                            update_Occupancy(param_Occupancy_Index, param_Distance_Traveled_In_Tick);
+                        });
+                        return null;
+                    }
+                };
+            }
+        };
+        // Sead - GetUpdatedOccupancyService
+        //final GetUpdatedOccupancyService service = new GetUpdatedOccupancyService();
+
+        // Sead - backgroundThread.restart
+        backgroundThread.restart();
+    }
     public void spawn_Train_In_Yard(int param_Cars, int param_Line_Index, int param_Block_Number) throws RemoteException {
         System.out.println();
         System.out.println("Running spawn_Train_In_Yard: " + "param_Cars: " + param_Cars + ", " + "param_Line_Index: " + param_Line_Index + ", " + "param_Block_Number: " + param_Block_Number);
@@ -411,11 +586,10 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                 if(block.blockNumber == param_Block_Number && block.is_Yard){
                     System.out.println("Spawning train at block: " + block.blockNumber);
 
-
                     // Sead
-                    if(Network.tm_Interface != null){
+                   if(Network.tm_Interface != null){
                         Network.tm_Interface.create_Train(2);
-                    }
+                   }
 
                     System.out.println("Block block blocks");
 
@@ -433,7 +607,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                             working_Line.occupancies.add(block.blockNumber);
                                             System.out.println("Running the Platform.runLater for spawn_Train_In_Yard - train_Moved");
 
-                                            //call_Network_Train_Moved(block);
+                                            call_Network_Train_Moved(block);
 
                                             working_Line.distances.add(0.0);
                                         });
@@ -465,178 +639,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             }
         };
     }
-    public void update_Occupancy(int param_Occupancy_Index, Double param_Distance_Traveled_In_Tick){
-        // Print statements are concatenated into ...
-        System.out.println("\nUpdating occupancy...");
-        // For every row in the line
-        for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
-            // For every block in the current row
-            for (Block block : blocks) {
-                // Check if the block has an occupancy and is recorded in the occupancy tracker
-                if(!this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.isEmpty()){
-                    if(block.blockNumber == this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.get(param_Occupancy_Index) && block.isOccupied){
-                        System.out.println(block.blockNumber + " is occupied");
-                        // If so, add the distance to the matching distance array
-                        double temp = this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.get(param_Occupancy_Index);
-                        temp += param_Distance_Traveled_In_Tick;
-                        System.out.println("Added distance: " + temp);
-                        System.out.println("Block.length: " + block.length);
-                        // Compare distance to block length
-                        if(temp >= block.length){
-                            // Subtracting block length from distance and updating distances/occupancies
-                            temp -= block.length;
-                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.set(param_Occupancy_Index, temp);
 
-                            // Swap the next and previous blocks if the next block happens to be the previous block
-                            if(!this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
-                                if(block.next_Block_Number == this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.get(param_Occupancy_Index)){
-                                    System.out.println("Swapping next: " + block.next_Block_Number + " and previous: " + block.previous_Block_Number);
-                                    int dummy = 0;
-                                    dummy = block.next_Block_Number;
-                                    block.next_Block_Number = block.previous_Block_Number;
-                                    block.previous_Block_Number = dummy;
-                                }
-                            }
-
-                            // Perform different actions if the block is a switch
-                            if(block.is_Switch /*&& block.is_Alpha*/){
-                                System.out.println("This block: " + block.blockNumber + " is a switch");
-                                System.out.println("Block number 1: " + block.next_Block_Number);
-                                System.out.println("Block number 2: " + block.next_Block_Number_2);
-                                System.out.println("Block is switched: " + block.is_Switched);
-                                // For every row in the line
-                                for (Block[] blocks1 : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
-                                    // For every block in the row
-                                    for (Block block1 : blocks1) {
-                                        // If block is stated as the next block of the block from before and the switch is set to false
-                                        if(block.next_Block_Number == block1.blockNumber && !block.is_Switched){
-                                            System.out.println("New occupancy at block for not switched: " + block1.blockNumber);
-                                            System.out.println("Block number 2: " + block.next_Block_Number_2);
-                                            System.out.println("Block is switched: " + block.is_Switched);
-
-                                            //TODO: Must be set to false once all cars have left
-                                            block.set_Occupancy(false);
-
-                                            // Add the block from before as a past occupancy
-                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(param_Occupancy_Index, block.blockNumber);
-                                            }else{
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
-                                            }
-                                            // Update the occupancy array with the new block
-                                            block1.set_Occupancy(true);
-
-                                            call_Network_Train_Moved(block1);
-
-                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
-                                            // Destroy the train if the new occupancy is a yard
-                                            if(block1.is_Yard){
-                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
-
-                                                //TODO: Must be set to false once all cars have left
-                                                block1.set_Occupancy(false);
-
-                                                return;
-                                            }
-                                        }
-                                        // If block is stated as the next block of the block from before and switch is set to true
-                                        else if(block.next_Block_Number_2 == block1.blockNumber && block.is_Switched){
-                                            System.out.println("New occupancy at block for switched: " + block1.blockNumber);
-
-                                            //TODO: Must be set to false once all cars have left
-                                            block.set_Occupancy(false);
-
-                                            // Add the block from before as a past occupancy
-                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(param_Occupancy_Index, block.blockNumber);
-                                            }else{
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
-                                            }
-
-                                            // Update the occupancy array with the new block
-                                            block1.set_Occupancy(true);
-
-                                           call_Network_Train_Moved(block1);
-
-                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
-                                            // Destroy the train if the new occupancy is a yard
-                                            if(block1.is_Yard){
-                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
-
-                                                //TODO: Must be set to false once all cars have left
-                                                block1.set_Occupancy(false);
-
-                                                print_Update_Occupancy("Moved and block is switch and next block is yard");
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                                print_Update_Occupancy("Moved and block is switch");
-                                return;
-                                // Perform different actions if the block is not a switch
-                            }else{
-                                // For every row in the line
-                                for (Block[] blocks1 : this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).block_Arr) {
-                                    // For every block in the row
-                                    for (Block block1 : blocks1) {
-                                        // If the block is stated as the next block of the block from before
-                                        if(block.next_Block_Number == block1.blockNumber){
-                                            System.out.println("New occupancy at block: " + block1.blockNumber);
-
-
-                                            //TODO: Must be set to false once all cars have left
-                                            block.set_Occupancy(false);
-
-                                            // Add the block from before to the list of past occupancies
-                                            System.out.println("Is empty: " + this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty());
-                                            if(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.isEmpty()){
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.add(block.blockNumber);
-                                            }else{
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.set(param_Occupancy_Index, block.blockNumber);
-                                            }
-                                            // Update the occupancy array with the new block
-                                            block1.set_Occupancy(true);
-
-                                            call_Network_Train_Moved(block1);
-
-                                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
-                                            // Destroy the train if the new occupancy is a yard
-                                            if(block1.is_Yard){
-                                                System.out.println("Absorbing train at block 1: " + block1.blockNumber);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.remove(param_Occupancy_Index);
-                                                this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.remove(param_Occupancy_Index);
-
-                                                //TODO: Must be set to false once all cars have left
-                                                block1.set_Occupancy(false);
-
-                                                print_Update_Occupancy("Moved and next block is yard");
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                                print_Update_Occupancy("Moved and block is not switch");
-                                return;
-                            }
-                        }
-                        // If smaller, just add to the corresponding distance in the distance array
-                        else{
-                            this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).distances.set(param_Occupancy_Index, temp);
-                        }
-                    }
-                }
-            }
-        }
-        print_Update_Occupancy("Did not move");
-
-        // Second call
-        swap_To_Line_Scene(working_Line_Index);
-    }
     public void set_Switch_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched){
         System.out.println("Running set_Switch_At_Block: " + "param_Line_Index: " + param_Line_Index + ", " + "param_Block_Number: " + param_Block_Number + ", " + "param_Is_Switched: " + param_Is_Switched);
         for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
@@ -648,16 +651,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         }
     }
 
-    //TODO: Tony
-    @Override
-    public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
 
-    }
-
-    @Override
-    public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
-
-    }
 
     void print_Update_Occupancy(String param_Where_Called){
         System.out.println("Called at: " + param_Where_Called);
@@ -676,10 +670,10 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     }
 
     public void send_Speed_Authority(int train_Num, double speed, int authority) throws RemoteException, InterruptedException {
-        if(Network.tm_Interface != null){
+       if(Network.tm_Interface != null){
             Network.tm_Interface.send_Speed_Authority(train_Num, speed, authority, 0.0);
             System.out.println("Sending speed and authority to train model");
-        }
+      }
     }
 
     private void call_Network_Train_Moved(Block param_Block){
@@ -695,6 +689,19 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+       }
+    }
+
+
+
+    //TODO: Tony
+    @Override
+    public void set_Light_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
+
+    }
+
+    @Override
+    public void set_Crossbar_At_Block(int param_Line_Index, int param_Block_Number, Boolean param_Is_Switched) {
+
     }
 }
