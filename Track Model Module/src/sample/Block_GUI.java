@@ -43,8 +43,15 @@ public class Block_GUI {
     TextField set_Next_2_TF;
     TextField station_Name_TF;
 
+    Label error_Label;
+
     CheckBox is_Yard_CheckBox;
+
     CheckBox is_Switch_CheckBox;
+    RadioButton is_Alpha_RB;
+    RadioButton is_Beta_RB;
+    RadioButton is_Gamma_RB;
+
     CheckBox is_Station_CheckBox;
 
     Stage block_Stage;
@@ -98,36 +105,49 @@ public class Block_GUI {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                parent_Block.blockNumber = (block_Num_TF.getText() != "" ? Integer.parseInt(block_Num_TF.getText()) : parent_Block.blockNumber);
-                parent_Block.section = (section_TF.getText() != "" ? section_TF.getText() : parent_Block.section);
-                parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
-                parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
-                parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
-                if(parent_Block.is_Switch){
-                    parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
-                }
-                if(parent_Block.is_Station){
-                    parent_Block.station_Name = (station_Name_TF.getText() != "" ? station_Name_TF.getText() : parent_Block.station_Name);
-                }
-                parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
-                parent_Block.is_Yard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
-                parent_Block.is_Switch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
-                parent_Block.is_Station = (is_Station_CheckBox.isSelected() != false ? true : is_Station_CheckBox.isSelected());
 
-                //TODO: Only change color if the block number is not -1, (declared)
-                if(parent_Block.blockNumber != -1){
-                    changeColor(color_Map.get("Green"));
-                    if(parent_Block.is_Yard){
-                        changeColor(color_Map.get("Mustard"));
-                    }
+                // Perform checks for proper input
+                System.out.println("Parent: " + parent_Block.is_Switch + ", " + "Switch group: " + switch_RB_Group_isSelected());
+                if(parent_Block.is_Switch && !switch_RB_Group_isSelected()){
+                    // Change error label
+                    error_Label.setText("ERROR: Please select an option for the switch.");
+                }else{
+                    parent_Block.blockNumber = (block_Num_TF.getText() != "" ? Integer.parseInt(block_Num_TF.getText()) : parent_Block.blockNumber);
+                    parent_Block.section = (section_TF.getText() != "" ? section_TF.getText() : parent_Block.section);
+                    parent_Block.length = (length_TF.getText() != "" ? Double.parseDouble(length_TF.getText()) : parent_Block.length);
+                    parent_Block.grade = (grade_TF.getText() != "" ? Double.parseDouble(grade_TF.getText()) : parent_Block.grade);
+                    parent_Block.next_Block_Number = (set_Next_TF.getText() != "" ? Integer.parseInt(set_Next_TF.getText()) : parent_Block.next_Block_Number);
                     if(parent_Block.is_Switch){
-                        changeColor(color_Map.get("Blue"));
+                        parent_Block.next_Block_Number_2 = (set_Next_2_TF.getText() != "" ? Integer.parseInt((set_Next_2_TF.getText())) : parent_Block.next_Block_Number_2);
+                        parent_Block.is_Alpha = (is_Alpha_RB.isSelected() != false ? true : is_Alpha_RB.isSelected());
+                        parent_Block.is_Beta = (is_Beta_RB.isSelected() != false ? true : is_Beta_RB.isSelected());
+                        parent_Block.is_Gamma = (is_Gamma_RB.isSelected() != false ? true : is_Gamma_RB.isSelected());
                     }
                     if(parent_Block.is_Station){
-                        changeColor(color_Map.get("Purple"));
+                        parent_Block.station_Name = (station_Name_TF.getText() != "" ? station_Name_TF.getText() : parent_Block.station_Name);
                     }
+                    parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
+                    parent_Block.is_Yard = (is_Yard_CheckBox.isSelected() != false ? true : is_Yard_CheckBox.isSelected());
+                    parent_Block.is_Switch = (is_Switch_CheckBox.isSelected() != false ? true : is_Switch_CheckBox.isSelected());
+
+
+                    parent_Block.is_Station = (is_Station_CheckBox.isSelected() != false ? true : is_Station_CheckBox.isSelected());
+
+                    //TODO: Only change color if the block number is not -1, (declared)
+                    if(parent_Block.blockNumber != -1){
+                        changeColor(color_Map.get("Green"));
+                        if(parent_Block.is_Yard){
+                            changeColor(color_Map.get("Mustard"));
+                        }
+                        if(parent_Block.is_Switch){
+                            changeColor(color_Map.get("Blue"));
+                        }
+                        if(parent_Block.is_Station){
+                            changeColor(color_Map.get("Purple"));
+                        }
+                    }
+                    block_Stage.close();
                 }
-                block_Stage.close();
             }
         };
         param_Button.setOnAction(event);
@@ -141,6 +161,34 @@ public class Block_GUI {
             }
         };
         param_Checkbox.setOnAction(event);
+    }
+    private void map_Is_Alpha_RB(RadioButton param_Radio_Button){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.out.println("alpha button: " + is_Alpha_RB.isSelected());
+                parent_Block.is_Alpha = is_Alpha_RB.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+            }
+        };
+        param_Radio_Button.setOnAction(event);
+    }
+    private void map_Is_Beta_RB(RadioButton param_Radio_Button){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.is_Beta = is_Beta_RB.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+            }
+        };
+        param_Radio_Button.setOnAction(event);
+    }
+    private void map_Is_Gamma_RB(RadioButton param_Radio_Button){
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                parent_Block.is_Gamma = is_Gamma_RB.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+            }
+        };
+        param_Radio_Button.setOnAction(event);
     }
     private void map_is_Station_CheckBox(CheckBox param_Checkbox){
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
@@ -173,12 +221,13 @@ public class Block_GUI {
         checkBox_HBox.setAlignment(Pos.TOP_CENTER);
         checkBox_HBox.setSpacing(20);
 
+
         Button save_Button = new Button("Save and Close");
         map_Save_Button(save_Button);
 
         VBox this_VBox = new VBox();
 
-        // Only add the settings for special blocks if they are selected as such
+        // Only add the settings if they are selected as such
         HBox temp_Set_Next_2_HBox = new HBox();
         if(is_Switch_CheckBox.isSelected()){
             temp_Set_Next_2_HBox = return_Set_Next_2_HBox();
@@ -187,33 +236,69 @@ public class Block_GUI {
         if(is_Station_CheckBox.isSelected()){
             temp_Station_Name_HBox = return_Station_name_HBox();
         }
+        HBox temp_Switch_HBox = new HBox();
+        if(is_Switch_CheckBox.isSelected()){
+            // Make all check boxes
+            is_Alpha_RB = new RadioButton("Alpha");
+
+            is_Alpha_RB.setSelected(parent_Block.is_Alpha);
+            map_Is_Alpha_RB(is_Alpha_RB);
+
+            is_Beta_RB = new RadioButton("Beta");
+            is_Beta_RB.setSelected(parent_Block.is_Beta);
+            map_Is_Beta_RB(is_Beta_RB);
+
+            is_Gamma_RB = new RadioButton("Gamma");
+            is_Gamma_RB.setSelected(parent_Block.is_Gamma);
+            map_Is_Gamma_RB(is_Gamma_RB);
+
+            final ToggleGroup switch_TG = new ToggleGroup();
+            is_Alpha_RB.setToggleGroup(switch_TG);
+            is_Beta_RB.setToggleGroup(switch_TG);
+            is_Gamma_RB.setToggleGroup(switch_TG);
 
 
+            temp_Switch_HBox.getChildren().addAll(is_Alpha_RB, is_Beta_RB, is_Gamma_RB);
+            temp_Switch_HBox.setAlignment(Pos.TOP_CENTER);
+            temp_Switch_HBox.setSpacing(20);
+        }
+
+        //
+
+        // Holds columns
         HBox columns_HBox = new HBox();
 
+        // Column one
         VBox ints_VBox = new VBox();
         ints_VBox.getChildren().addAll(return_block_Num_HBox(), return_Set_Previous_HBox(), return_Set_Next_HBox(), temp_Set_Next_2_HBox);
         ints_VBox.setSpacing(20);
         ints_VBox.setAlignment(Pos.CENTER_RIGHT);
 
+        // Column two
         VBox text_VBox = new VBox();
         text_VBox.getChildren().addAll(return_section_HBox(), temp_Station_Name_HBox);
         text_VBox.setSpacing(20);
 
+        // Column three
         VBox double_VBox = new VBox();
         double_VBox.getChildren().addAll(return_grade_HBox(), return_length_HBox());
         double_VBox.setSpacing(20);
 
+        // Adding columns to column box
         columns_HBox.getChildren().addAll(text_VBox, ints_VBox, double_VBox);
         columns_HBox.setSpacing(20);
         columns_HBox.setAlignment(Pos.CENTER);
 
-        this_VBox.getChildren().addAll(description_label, checkBox_HBox, columns_HBox, save_Button);
+        // Error label
+        error_Label = new Label("");
+
+        // Adding column box and additional elements to total vbox
+        this_VBox.getChildren().addAll(description_label, checkBox_HBox, temp_Switch_HBox, columns_HBox, save_Button, error_Label);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
         this_VBox.setAlignment(Pos.CENTER);
 
-        return new Scene(this_VBox, 900, 300);
+        return new Scene(this_VBox, 900, 400);
     }
     private Scene return_Murphy_Block_Editor_Scene(){
         Label description_label = new Label("Welcome to the block editor!");
@@ -307,6 +392,17 @@ public class Block_GUI {
         set_Previous_HBox.setAlignment(Pos.CENTER);
 
         return set_Previous_HBox;
+    }
+
+    private Boolean switch_RB_Group_isSelected(){
+        Boolean to_Return = false;
+
+        if(is_Alpha_RB != null && is_Beta_RB != null && is_Gamma_RB != null){
+            if(is_Alpha_RB.isSelected() || is_Beta_RB.isSelected() || is_Gamma_RB.isSelected()){
+                to_Return = true;
+            }
+        }
+        return to_Return;
     }
 
     private String to_String(){

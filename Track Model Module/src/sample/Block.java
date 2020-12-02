@@ -25,6 +25,9 @@ public class Block {
     Boolean is_Switch;
     int next_Block_Number_2;
     Boolean is_Switched;
+    Boolean is_Alpha;
+    Boolean is_Beta;
+    Boolean is_Gamma;
 
     // Station only
     Boolean is_Station;
@@ -40,10 +43,10 @@ public class Block {
         is_Builder = true;
 
         // Core information
-        section = "!";
+        section = "A";
         blockNumber = -1;
-        length = -1.0;
-        grade = -1.0;
+        length = 50.0;
+        grade = 0.0;
         next_Block_Number = -1;
         previous_Block_Number = -1;
 
@@ -54,6 +57,10 @@ public class Block {
         is_Switch = false;
         next_Block_Number_2 = -1;
         is_Switched = false;
+        is_Alpha = false;
+        is_Beta = false;
+        is_Gamma = false;
+
 
         // Station only
         is_Station = false;
