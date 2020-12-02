@@ -20,6 +20,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -43,6 +46,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GUI extends Application {
@@ -67,6 +71,9 @@ public class GUI extends Application {
     static Property brake_Prop;
     static Property door_Prop;
     static int current_index;
+    static MenuButton destruction_Mode;
+    static HBox failure_Status_Container;
+    static ImageView e_brake_image;
     //static TableView<Property> current_State;
 
 
@@ -102,7 +109,8 @@ public class GUI extends Application {
                     new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
                     new Property("Power", df.format(train.get_Engine_Power()), "watts"),
                     new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
-                    new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
+                    new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", ""),
+                    new Property("Next Stop", train.get_Next_Stop(), "" )
             );
 
             ObservableList<Property> temp2 = FXCollections.observableArrayList(
@@ -118,7 +126,7 @@ public class GUI extends Application {
                     new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
                     new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
                     new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
-                    new Property("Cabin Temperature", train.get_Temperature(), "F"),
+                    new Property("Cabin Temperature", df.format(train.get_Temperature() * 9 /5 + 32), "F"),
                     new Property("Advertisements", train.get_Advertisements(), "")
             );
 
@@ -180,7 +188,7 @@ public class GUI extends Application {
 //
         Text label = new Text("Train Catalogue");
         label.setTextAlignment(TextAlignment.CENTER);
-        label.setStyle("-fx-font: 24 arial; -fx-padding: 10 10 10 10;");
+        label.setStyle("-fx-font: 24 Candara; -fx-padding: 10 10 25 10;");
 
         Button button = new Button("Spawn Train");
 
@@ -188,6 +196,7 @@ public class GUI extends Application {
         ListView<String> list = new ListView<String>();
         list.setPlaceholder(new Label("No Trains To Display"));
         list.setItems(Train_Model_Catalogue.name_List);
+        list.setPadding(new Insets(15,0,0,0));
 
         Menu menu = new Menu("Connect To Modules");
         MenuItem menuItem1 = new MenuItem("Track Model");
@@ -249,7 +258,7 @@ public class GUI extends Application {
             }
         });
 
-        main.getChildren().addAll(label,button,list);
+        main.getChildren().addAll(label,list);
         layout.getChildren().addAll(menuBar, main);
         Scene scene = new Scene(layout, CS_SCALE_FACTOR_X * screen_X,CS_SCALE_FACTOR_Y * screen_Y);
         return scene;
@@ -269,7 +278,7 @@ public class GUI extends Application {
                     System.out.println(i);
                     try {
                         Thread.sleep(500);
-                        Network.tm_Interface.outer_Update_Occupancy(1, index, i);
+                        Network.tm_Interface.outer_Update_Occupancy(index, i);
                     } catch (RemoteException | InterruptedException remoteException) {
                         remoteException.printStackTrace();
                     }
@@ -282,7 +291,8 @@ public class GUI extends Application {
                 new Property("Speed", df.format(train.get_Velocity() * 2.23694), "mph"),
                 new Property("Power", train.get_Engine_Power(), "watts"),
                 new Property("Brake", !train.get_Brake_Status() ? "off" : "on", ""),
-                new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", "")
+                new Property("Emergency Brake", !train.get_Emergency_Brake_Status() ? "off" : "on", ""),
+                new Property("Next Stop", train.get_Next_Stop(), "" )
         );
 
         advanced_data = FXCollections.observableArrayList(
@@ -298,7 +308,7 @@ public class GUI extends Application {
                 new Property("Right Doors", !train.get_Right_Door_Status() ? "closed" : "open", ""),
                 new Property("Internal Lights", train.get_Int_Lights() ? "on" : "off", ""),
                 new Property("External Lights", train.get_Ext_Lights() ? "on" : "off", ""),
-                new Property("Cabin Temperature", train.get_Temperature(), "F"),
+                new Property("Cabin Temperature", df.format(train.get_Temperature() * 9 /5 + 32), "F"),
                 new Property("Advertisements", train.get_Advertisements(), "")
         );
 
@@ -345,13 +355,18 @@ public class GUI extends Application {
         //title.setFont(f2);
         //title.setStyle("-fx-font: 40 arial");
 
+        failure_Status_Container = new HBox();
         Text failure = new Text("Giblets");
         failure.setFill(Color.RED);
-        failure.setFont(Font.font("Verdana", 30));
+        failure.setFont(Font.font("Candara", 30));
+        ImageView warning = new ImageView(new Image(new FileInputStream(asset_Location + "warning.png")));
+        failure_Status_Container.getChildren().addAll(warning, failure);
+//
         if (train.get_Failure().equals("None")) {
-            failure.setVisible(false);
+            failure_Status_Container.setVisible(false);
         } else {
             failure.setText(train.get_Failure() + " Failure");
+            failure_Status_Container.setVisible(true);
         }
 
         Button back_button = new Button();
@@ -371,14 +386,76 @@ public class GUI extends Application {
         //back_button.setPadding(new Insets(0,0,0,0));
 
         Button advanced_info = new Button("Advanced Information");
-        Button ebrake = new Button("Emergency brake");
-        ebrake.setLayoutX(500);
-        ebrake.setLayoutY(500);
+        advanced_info.setGraphic(new ImageView(new Image(new FileInputStream(asset_Location + "slide out arrow.png"))));
+        advanced_info.setScaleX(1.5);
+        advanced_info.setScaleY(1.5);
+        advanced_info.setTranslateX(10);
+        advanced_info.setTranslateY(20);
+
+        Button logs = new Button("Failure Logs");
+        logs.setTranslateX(950);
+        logs.setTranslateY(10);
+        logs.setScaleX(1.3);
+        logs.setScaleY(1.3);
+
+        logs.setOnMouseClicked( evt -> {
+
+            VBox structure = new VBox();
+            HBox temp1 = new HBox();
+            Text key1 = new Text("Time        |");
+            Text value1 = new Text("     Failure Type");
+            key1.setFont(new Font("Candara", 25));
+            value1.setFont(new Font("Candara", 25));
+            temp1.getChildren().addAll(key1, value1);
+            structure.getChildren().add(temp1);
+
+            for (Map.Entry mapElement : train.failures.entrySet()) {
+                HBox temp = new HBox();
+                double time = (double) mapElement.getKey();
+                int hours = (int) time / 3600;
+                int minutes = ( (int) time ) % 60;
+                int seconds = (int) time - hours * 3600 - minutes * 60;
+                Text key = new Text(hours + " : " + minutes + " : " + seconds + "    |     ");
+                Text value = new Text( (String) mapElement.getValue());
+                key.setFont(new Font("Candara", 25));
+                value.setFont(new Font("Candara", 25));
+                temp.getChildren().addAll(key,value);
+                structure.getChildren().add(temp);
+            }
+
+
+
+            Scene logs_Scene = new Scene(structure);
+            Stage logs_Stage = new Stage();
+            logs_Stage.setScene(logs_Scene);
+            logs_Stage.setMinHeight(500);
+            logs_Stage.setMinWidth(200);
+            logs_Stage.show();
+
+
+        });
+
+
+//        Button ebrake = new Button("Emergency brake");
+//        ebrake.setLayoutX(500);
+//        ebrake.setLayoutY(500);
 
         MenuItem singal_failure = new MenuItem("Signal Failure");
         MenuItem brake_failure = new MenuItem("Brake Failure");
         MenuItem engine_failure = new MenuItem("Engine Failure");
-        MenuButton destruction_Mode = new MenuButton("Destruction", null, singal_failure, brake_failure, engine_failure);
+//        singal_failure.setAccelerator(new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN));
+//        brake_failure.setAccelerator(new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN));
+//        engine_failure.setAccelerator(new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN));
+
+        ImageView destruction_image = new ImageView(new Image(new FileInputStream(asset_Location + "destruction_logo.png")));
+
+        destruction_Mode = new MenuButton("Destruction", destruction_image, singal_failure, brake_failure, engine_failure);
+        destruction_Mode.setScaleX(1.5);
+        destruction_Mode.setScaleY(1.5);
+
+        if (!train.get_Failure().equals("None")) {
+            destruction_Mode.setDisable(true);
+        }
 
         //Creating tables for data
         TableView<Property> main_table = new TableView();
@@ -388,7 +465,7 @@ public class GUI extends Application {
         main_table.setMaxSize(365, 250);
         main_table.setFixedCellSize(40);
         advanced_table.setFixedCellSize(80);
-        advanced_table.setMinSize(360, 800);
+        advanced_table.setMinSize(330, 880);
         non_vital_table.setMaxSize(365, 250);
         non_vital_table.setFixedCellSize(30);
         attributes_table.setMaxSize(365, 250);
@@ -478,30 +555,35 @@ public class GUI extends Application {
         center_bottom.getChildren().addAll(attributes_Label_Contatiner, main_Label_Contatiner, non_Vital_Label_Container);
         center_bottom.setTranslateX(-40);
         center_bottom.setTranslateY(30);
+//        VBox center_bottom_organizer = new VBox();
+//        center_bottom_organizer.getChildren().addAll(center_bottom, destruction_Mode);
         VBox menu = new VBox();
         System.out.println(Font.getFontNames());
 
 
         //menu.prefHeightProperty().bind(layout.heightProperty());
-        menu.setPrefWidth(330);
-        menu.setPrefHeight(700);
+        menu.setPrefWidth(320);
+        menu.setPrefHeight(680);
         menu.getChildren().addAll(advanced_table);
         menu.setTranslateX(-360);
-        menu.setTranslateY(-100);
+        menu.setTranslateY(20);
         AtomicBoolean advanced_menu_isopen = new AtomicBoolean(false);
         TranslateTransition menuTranslation = new TranslateTransition(Duration.millis(500), menu);
         menuTranslation.setFromX(-360);
         menuTranslation.setToX(0);
 
+        Alert failure_Alert = new Alert(Alert.AlertType.WARNING, "This will cause train malfunctions endangering the lives onboard");
+
 
         //Event handlers
-        ebrake.setOnMouseClicked(evt -> {
-            try {
-                train.set_Emergency_Brake_Status(true);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        });
+//        ebrake.setOnMouseClicked(evt -> {
+//            try {
+//                train.set_Emergency_Brake_Status(true);
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        });
 
         new_Speed.setOnMouseClicked(evt -> {
             String text = textField.getText();
@@ -516,31 +598,47 @@ public class GUI extends Application {
         });
 
         singal_failure.setOnAction(event -> {
-            try {
-                train.set_Failure("Signal");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            failure.setText("!Signal Failure");
-            failure.setVisible(true);
+            failure_Alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    System.out.println("here");
+                    try {
+                        train.set_Failure("Signal");
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    failure.setText("Signal Failure");
+                    failure_Status_Container.setVisible(true);
+                    destruction_Mode.setDisable(true);
+                }
+            });
         });
         brake_failure.setOnAction(event -> {
-            try {
-                train.set_Failure("Brake");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            failure.setText("!Brake Failure");
-            failure.setVisible(true);
+            failure_Alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        train.set_Failure("Brake");
+                        failure.setText("Brake Failure");
+                        failure_Status_Container.setVisible(true);
+                        destruction_Mode.setDisable(true);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         });
         engine_failure.setOnAction(event -> {
-            try {
-                train.set_Failure("Engine");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            failure.setText("!Engine Failure");
-            failure.setVisible(true);
+            failure_Alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        train.set_Failure("Engine");
+                        failure.setText("Engine Failure");
+                        failure_Status_Container.setVisible(true);
+                        destruction_Mode.setDisable(true);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         });
 
         back_button.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -551,7 +649,7 @@ public class GUI extends Application {
 
 
         Image e_image;
-        ImageView e_brake_image = new ImageView();
+        e_brake_image = new ImageView();
         if (!train.get_Emergency_Brake_Status()) {
             try {
                 Image temp_img = new Image(new FileInputStream(asset_Location + "lever_off.png"));
@@ -573,43 +671,54 @@ public class GUI extends Application {
         e_brake_image.setFitWidth(100);
         //e_brake_image.setTranslateX(-80);
 
-        e_brake_image.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent mouseEvent) {
-                if (!train.get_Emergency_Brake_Status()) {
-                    try {
-                        Image temp_img = new Image(new FileInputStream(asset_Location + "test_lever_3_2.png"));
-                        e_brake_image.setImage(temp_img);
-                        train.set_Emergency_Brake_Status(true);
-                    } catch (FileNotFoundException | RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
 
-
+        HBox logs_button = new HBox();
+//        logs_button.getChildren().add(logs);
+//        logs_button.setTranslateX();
         VBox ebrake_image_container = new VBox();
         Text ebrake_image_label = new Text("Passenger Emergency Brake");
         ebrake_image_container.getChildren().addAll(e_brake_image, ebrake_image_label);
         ebrake_image_container.setAlignment(Pos.CENTER);
-        ebrake_image_container.setPadding(new Insets(60,0,0,0));
+        //ebrake_image_container.setPadding(new Insets(60,0,0,0));
 
-        top_Top.getChildren().addAll(back_button, space, ebrake_image_container);
+
+        ebrake_image_container.setOnMouseClicked(evt -> {
+                System.out.println("yellow");
+                if (!train.get_Emergency_Brake_Status()) {
+                    try {
+                        System.out.println("Here");
+                        Image temp_img = new Image(new FileInputStream(asset_Location + "lever_on.png"));
+                        e_brake_image.setImage(temp_img);
+                        train.__set_Emergency_Brake_Status(true);
+                    } catch (FileNotFoundException | RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+        });
+
+        top_Top.getChildren().addAll(back_button);
         top_Top.setAlignment(Pos.TOP_LEFT);
 
         top_Bottom.getChildren().addAll();
         top_Bottom.setAlignment(Pos.CENTER);
 
-        //bottom_Top.getChildren().addAll(e_brake_image);
+
         bottom_Top.setAlignment(Pos.CENTER);
-//        bottom_Top.setPadding(new Insets(0,0,0,200));
-        bottom_Middle.getChildren().add(destruction_Mode);
 
+        bottom_Middle.getChildren().addAll(destruction_Mode);
 
-        bottom_Bottom.getChildren().addAll(advanced_info, new_Speed, textField);
+        bottom_Middle.setAlignment(Pos.CENTER);
+        bottom_Middle.setTranslateX(-80);
+        bottom_Middle.setTranslateY(-100);
+
+        bottom_Bottom.getChildren().addAll(advanced_info, logs);
+        bottom_Bottom.setTranslateY(20);
+        bottom_Bottom.setTranslateX(45);
+
+        bottom_Bottom.setAlignment(Pos.TOP_LEFT);
 
         top.getChildren().addAll(top_Top, top_Middle, top_Bottom);
-        bottom.getChildren().addAll(bottom_Top, bottom_Middle, bottom_Bottom);
+        bottom.getChildren().addAll(bottom_Bottom, bottom_Middle);
 
         //Find and load main image
         //---------------------------------------------------------------//
@@ -626,27 +735,44 @@ public class GUI extends Application {
         }
 
 
-
-        center.getChildren().addAll(title, train_Im, center_bottom, failure);
+        HBox center_Top = new HBox();
+        center_Top.getChildren().addAll(ebrake_image_container);;
+        center_Top.setTranslateX(1200);
+        center.getChildren().addAll(center_Top, failure_Status_Container, title, train_Im, center_bottom);
         center.setAlignment(Pos.CENTER);
 
 
 
 
-        center.setTranslateX(-250);
-        center.setTranslateY(-75);
+        center.setTranslateX(-225);
+        center.setTranslateY(-85);
         TranslateTransition centerTranslation = new TranslateTransition(Duration.millis(500), center);
-        centerTranslation.setFromX(-250);
+        centerTranslation.setFromX(-225);
         centerTranslation.setToX(110);
         Pane p = new Pane();
-        ImageView image = null;
-        ImageView finalImage = image;
+
+
+        layout.setTop(top);
+        layout.setCenter(center);
+        layout.setBottom(bottom);
+        layout.setLeft(menu);
+
+
+        Image background = new Image(new FileInputStream(asset_Location + "test_background.png"));
+        ImageView image = new ImageView(background);
+        p.getChildren().addAll(image, layout);
+
+
+
         advanced_info.setOnMouseClicked(evt -> {
             if (advanced_menu_isopen.get() == false) {
                 menuTranslation.setRate(1);
                 center.setEffect(new GaussianBlur(6));
-                if (finalImage != null) {
-                    finalImage.setEffect(new GaussianBlur());
+                image.setEffect(new GaussianBlur(6));
+               //ebrake_image_container.setEffect(new GaussianBlur(6));
+                destruction_Mode.setEffect(new GaussianBlur(6));
+                if (image != null) {
+                    image.setEffect(new GaussianBlur());
                 }
                 centerTranslation.setRate(1);
                 menuTranslation.play();
@@ -656,7 +782,10 @@ public class GUI extends Application {
 
             } else {
                 menuTranslation.setRate(-1);
+                //ebrake_image_container.setEffect(null);
+                image.setEffect(null);
                 center.setEffect(null);
+                destruction_Mode.setEffect(null);
                 //bottom.setEffect(null);
                 centerTranslation.setRate(-1);
                 menuTranslation.play();
@@ -664,22 +793,6 @@ public class GUI extends Application {
                 advanced_menu_isopen.set(false);
             }
         });
-
-        //center.setAlignment(Pos.CENTER);
-        center.setPadding(new Insets(0,200,0,0));
-        layout.setTop(top);
-        layout.setCenter(center);
-        layout.setBottom(bottom);
-        layout.setLeft(menu);
-
-        try {
-            Image background = new Image(new FileInputStream(asset_Location + "test_background.png"));
-            image = new ImageView(background);
-            p.getChildren().addAll(image, layout);
-        }catch (Exception e) {
-            System.out.println("File Not Found");
-            p.getChildren().add(layout);
-        }
 
         return new Scene(p, TS_SCALE_FACTOR_X * screen_X, TS_SCALE_FACTOR_Y * screen_Y);
     }

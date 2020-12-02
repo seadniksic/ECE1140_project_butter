@@ -1,5 +1,6 @@
 package resources;
 
+import java.io.FileNotFoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import javafx.collections.FXCollections;
@@ -77,19 +78,19 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public void set_Right_Door_Status(int train_Num, boolean state) {
         trains.get(train_Num).set_Right_Door_Status(state);
     }
-    public void set_Announcements(int train_Num, String announcements){
+    public void set_Announcements(int train_Num, boolean announcements){
         trains.get(train_Num).set_Announcements(announcements);
     }
 
-    public double update_Temperature(int train_Num, double temp) throws InterruptedException, RemoteException {
-        return trains.get(train_Num).update_Temperature(temp);
+    public double update_Temperature(int train_Num, double heating_Power, double cooling_Power) throws InterruptedException, RemoteException {
+        return trains.get(train_Num).update_Temperature(heating_Power, cooling_Power);
     }
 
     public void set_Brake_Status(int train_Num, boolean state) {
         trains.get(train_Num).set_Brake_Status(state);
     }
 
-    public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException {
+    public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException, FileNotFoundException {
         trains.get(train_Num).set_Emergency_Brake_Status(state);
     }
 

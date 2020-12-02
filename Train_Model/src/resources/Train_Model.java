@@ -1,13 +1,20 @@
 package resources;
 
+import javafx.application.Platform;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import networking.Network;
 import networking.Train_Model_Interface;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.lang.Math;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Train_Model {
     static double car_Length = 32.2; // meters
@@ -24,7 +31,7 @@ public class Train_Model {
     private boolean ext_Lights = false;
     private boolean left_Door_Status = false;
     private boolean right_Door_Status = false;
-    private double temperature;
+    private double temperature = 20; // celsius
     private int wheel_Slippage;
     private int power_Consumption;
     private double engine_Power;
@@ -35,11 +42,12 @@ public class Train_Model {
     private double distance;
     private double time = 0;
     private boolean advertisements;
-    private String announcements;
+    private boolean announcements;
     private double grade;
     private int passengers = 0;
     private int crew = 3;
     private String failure = "None";
+    private String next_Stop;
     private int mass;
     private double acc;
     private double force;
@@ -52,6 +60,9 @@ public class Train_Model {
     private double temp_Power = 0;
     private double temp_Time;
     private double energy;
+    private double heater_Power;
+    private double ac_Power;
+    public HashMap<Double, String> failures = new HashMap<Double, String>();
 
     public Train_Model(int cars, int new_id) {
         this.id = new_id;
@@ -66,21 +77,23 @@ public class Train_Model {
     public void add_Passengers(int number) {
         this.passengers += number;
         update_Mass();
+        //Network.tc_Interface.send_Num_Passengers()
     }
 
     public void add_Crew(int number) {
         this.crew += number;
         update_Mass();
+        //Network.tc_Interface.send_Num_Crew()
     }
 
     public void set_Grade(double number) { this.grade = number; }
 
     public void send_Beacon_Information (String next_Stop, boolean door_Side) {  // 0 - left, 1 - right
 //        Network.tc_Interface.send_Beacon_Information(next_Stop, door_Side);
-//        Network.tc_Interface.send_Num_Passengers()
+        this.next_Stop = next_Stop;
     }
 
-    public void set_Announcements(String announcements) { this.announcements = announcements; }
+    public void set_Announcements(boolean announcements) { this.announcements = announcements; }
 
     public void set_Int_Lights(boolean state) {
         this.int_Lights = state;
@@ -102,7 +115,15 @@ public class Train_Model {
         this.brake_Status = state;
     }
 
-    public void set_Emergency_Brake_Status(boolean state) throws RemoteException {
+    public void set_Emergency_Brake_Status(boolean state) throws RemoteException, FileNotFoundException {
+        this.emergency_Brake_Status = state;
+        if (!state) {
+            GUI.e_brake_image = new ImageView(new Image(new FileInputStream(GUI.asset_Location + "lever_off.png")));
+        }
+
+    }
+
+    public void __set_Emergency_Brake_Status(boolean state) throws RemoteException {
         this.emergency_Brake_Status = state;
         Network.tc_Interface.update_E_Brake(id, state);
     }
@@ -112,6 +133,7 @@ public class Train_Model {
     public void set_Failure(String type) throws RemoteException {
         //Take appropriate action on failure
         this.failure = type;
+        failures.put(Network.server_Object.get_Current_Time(), type);
         Network.tc_Interface.set_Failure_Status(id, type);
     }
 
@@ -132,7 +154,12 @@ public class Train_Model {
     }
 
     public void remove_Failure_Status() {
-        failure = null;
+        failure = "None";
+        Platform.runLater(() -> {
+            GUI.destruction_Mode.setDisable(false);
+            GUI.failure_Status_Container.setVisible(false);
+        });
+
     }
 
     public ArrayList<Double> get_Force() {
@@ -147,6 +174,8 @@ public class Train_Model {
     public double get_Neg_Force() { return this.neg_Force; }
 
     public double get_Max_Force() { return this.max_Force; }
+
+    public String get_Next_Stop() { return this.next_Stop; }
 
     public boolean get_Left_Door_Status() {
         return this.left_Door_Status;
@@ -261,7 +290,7 @@ public class Train_Model {
         double new_Distance = current_Velocity * cycle_Time + distance;
 
         time = Network.server_Object.get_Current_Time();
-        //Network.tm_Interface.outer_Update_Occupancy(0, id, new_Distance - distance);
+        Network.tm_Interface.outer_Update_Occupancy(id, new_Distance - distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 
@@ -272,21 +301,47 @@ public class Train_Model {
 
         }
 
-    public double update_Temperature(double power) throws InterruptedException, RemoteException {
+    public double update_Temperature(double heating_Power, double cooling_Power) throws InterruptedException, RemoteException {
         //Write pid loop here
         //Volume of car - 291 m^3  Density of dry air - 1.2041  Mass of air 351.4 kg
         //specific heat capacity of air - 1.006 kJ/kgC
 //        Network.server_Object.get_Current_Time();
-        double temp_energy = power * (Network.server_Object.get_Current_Time() - temp_Time);
-        double increase = temp_energy - energy;
-        temperature += increase / 353.5;
-        temp_Power = power;
-        Network.tc_Interface.set_Temperature(id, temperature);
-        Thread.sleep(1000);
+
+        double cycle_Time;
+        if (Network.server_Object.get_Current_Time() - temp_Time > 2 * Train_Model_Catalogue.multiplier) {
+            temp_Time = Network.server_Object.get_Current_Time();
+            System.out.println();
+            System.out.println(Train_Model_Catalogue.multiplier);
+            cycle_Time = .001 * Train_Model_Catalogue.multiplier;
+        } else {
+            cycle_Time = Network.server_Object.get_Current_Time() - temp_Time;
+            System.out.println("Current Time: " + Network.server_Object.get_Current_Time());
+            System.out.println("Time: " + time);
+        }
+
+        if (cooling_Power == 0 && heating_Power != 0) {
+            double temp_energy = heating_Power * (cycle_Time);
+            double increase = temp_energy - energy;
+            temperature += increase / 353500 - .001;
+            System.out.println(temperature);
+            heater_Power = heating_Power;
+        } else if (cooling_Power != 0 && heating_Power == 0) {
+            double temp_energy = cooling_Power * (cycle_Time);
+            double increase = temp_energy - energy;
+            temperature -= increase / 353500 - .001;
+            System.out.println(temperature);
+            ac_Power = cooling_Power;
+        } else {
+            temperature -= .001;
+        }
+
+
+        Thread.sleep(100);
+        temp_Time = Network.server_Object.get_Current_Time();
 
         GUI.refresh_Table(id);
 
-        return temperature;
+        return temperature * 9 / 5 + 32;
     }
 
     public void update_Mass() {

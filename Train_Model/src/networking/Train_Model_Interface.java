@@ -1,5 +1,6 @@
 package networking;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -14,10 +15,10 @@ public interface Train_Model_Interface extends Remote {
     public void set_Ext_Lights(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Left_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void set_Right_Door_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
-    public void set_Announcements(int train_Num, String announcements) throws RemoteException;
-    public double update_Temperature(int train_Num, double temp) throws RemoteException, InterruptedException; // train controller -> train model
+    public void set_Announcements(int train_Num, boolean announcements) throws RemoteException;
+    public double update_Temperature(int train_Num, double heating_Power, double cooling_Power) throws RemoteException, InterruptedException; // train controller -> train model
     public void set_Brake_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
-    public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException; // train controller -> train model
+    public void set_Emergency_Brake_Status(int train_Num, boolean state) throws RemoteException, FileNotFoundException; // train controller -> train model
     public void set_Advertisements(int train_Num, boolean state) throws RemoteException; // train controller -> train model
     public void add_Passengers(int train_Num, int passengers) throws RemoteException;
     public void add_Crew(int train_Num, int number) throws RemoteException;
