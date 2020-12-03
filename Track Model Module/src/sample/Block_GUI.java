@@ -45,6 +45,7 @@ public class Block_GUI {
     TextField station_Name_TF;
     TextField prev_Station_Name_TF;
     TextField next_Station_Name_TF;
+    TextField track_Heater_TF;
 
 
     Label error_Label;
@@ -374,8 +375,12 @@ public class Block_GUI {
         fail_HBox.setAlignment(Pos.TOP_CENTER);
         fail_HBox.setSpacing(20);
 
+        String track_Heater_Status = parent_Block.track_Heater ? "On" : "Off";
+        Label track_Heater_Label = new Label("Track Heater Status: " + track_Heater_Status);
+
+
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(description_label,return_section_HBox(), return_block_Num_HBox(), fail_HBox);
+        this_VBox.getChildren().addAll(description_label,return_section_HBox(), return_block_Num_HBox(), fail_HBox, track_Heater_Label);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -474,9 +479,6 @@ public class Block_GUI {
 
         return next_Station_Name_HBox;
     }
-
-
-
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous Block: ");
         set_Previous_TF = new TextField(String.valueOf(parent_Block.previous_Block_Number));

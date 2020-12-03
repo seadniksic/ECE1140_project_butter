@@ -29,7 +29,7 @@ public interface Track_Controller_SW_Interface extends Remote {
 
     boolean set_Switch_Manual(String trackLine, int blockNum) throws RemoteException;
 
-    //static void add_Ticket(int trainNum) throws RemoteException;
+    void add_Ticket(int trainNum, int numTickets) throws RemoteException;
 
     void close_Block(String trackLine, int blockNum) throws RemoteException;
 
