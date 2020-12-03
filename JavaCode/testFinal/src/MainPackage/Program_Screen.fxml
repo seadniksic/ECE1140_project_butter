@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="506.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainPackage.ProgramController">
+  <children>
+    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="530.0" prefWidth="616.0" VBox.vgrow="ALWAYS">
+      <children>
+            <Text layoutX="223.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Track Controller Needs to be Programmed!" />
+            <Button fx:id="program_Arduino_button" disable="true" layoutX="518.0" layoutY="335.0" mnemonicParsing="false" onAction="#program_Arduino" text="Program" />
+            <TextField fx:id="line_input_box" layoutX="26.0" layoutY="48.0" prefHeight="26.0" prefWidth="97.0" />
+            <Text layoutX="64.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Line" />
+            <TextField fx:id="input_Start_box" layoutX="116.0" layoutY="114.0" prefHeight="26.0" prefWidth="97.0" />
+            <Text layoutX="122.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input Start Bock" />
+            <Text layoutX="441.0" layoutY="269.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Attribute" />
+            <ChoiceBox fx:id="attribute_select_box" disable="true" layoutX="390.0" layoutY="286.0" prefWidth="150.0" />
+            <TextField fx:id="input_End_box" layoutX="115.0" layoutY="189.0" prefHeight="26.0" prefWidth="97.0" />
+            <Text layoutX="122.0" layoutY="179.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input End Block" />
+            <Text layoutX="287.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NC Start Bock" />
+            <Text layoutX="289.0" layoutY="179.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NC End Bock" />
+            <Text layoutX="443.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NO Start Bock" />
+            <Text layoutX="446.0" layoutY="179.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NO End Bock" />
+            <TextField fx:id="NC_Start_box" layoutX="275.0" layoutY="114.0" prefHeight="26.0" prefWidth="97.0" />
+            <TextField fx:id="NO_Start_box" layoutX="432.0" layoutY="114.0" prefHeight="26.0" prefWidth="97.0" />
+            <TextField fx:id="NC_End_box" layoutX="274.0" layoutY="189.0" prefHeight="26.0" prefWidth="97.0" />
+            <TextField fx:id="NO_End_box" layoutX="432.0" layoutY="189.0" prefHeight="26.0" prefWidth="97.0" />
+            <Text layoutX="247.0" layoutY="66.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Write a PLC program to continute." />
+            <TextField fx:id="blockID_box" disable="true" layoutX="275.0" layoutY="286.0" prefHeight="26.0" prefWidth="97.0" />
+            <Text layoutX="309.0" layoutY="269.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Block" />
+            <ListView fx:id="listview" layoutX="65.0" layoutY="263.0" prefHeight="106.0" prefWidth="200.0" />
+            <Button fx:id="listAdd" disable="true" layoutX="389.0" layoutY="335.0" mnemonicParsing="false" onAction="#add_to_List" text="Add" />
+            <Button fx:id="listClear" disable="true" layoutX="443.0" layoutY="335.0" mnemonicParsing="false" onAction="#clear_list" text="Clear" />
+            <Button fx:id="set_button" layoutX="464.0" layoutY="224.0" mnemonicParsing="false" onAction="#set_press" text="Set" />
+            <ImageView fx:id="green_check" fitHeight="26.0" fitWidth="17.0" layoutX="443.0" layoutY="228.0" pickOnBounds="true" preserveRatio="true" visible="false">
+               <image>
+                  <Image url="@../green_check.PNG" />
+               </image>
+            </ImageView>
+            <Text layoutX="201.0" layoutY="410.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Alternatively, you can paste your PLC program here" />
+            <Button fx:id="program_Arduino_viaPLC_button" disable="true" layoutX="530.0" layoutY="466.0" mnemonicParsing="false" onAction="#program_Arduino_viaPLC" text="Program" />
+            <TextField fx:id="PLCPaste" layoutX="55.0" layoutY="429.0" onKeyPressed="#enable_PLCProgram" prefHeight="26.0" prefWidth="530.0" />
+      </children>
+    </AnchorPane>
+  </children>
+</VBox>
