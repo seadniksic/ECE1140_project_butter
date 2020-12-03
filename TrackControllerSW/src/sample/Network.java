@@ -17,7 +17,7 @@ public class Network extends TrackControllerCatalogue {
     static boolean connected_Module_3; // Track Controller HW
     static boolean hosting = false;
     static String module_1_IP = "73.79.47.187"; // Zach IP
-    static String module_2_IP = "69.80.136.151"; // Adnan IP
+    static String module_2_IP = "174.60.84.100"; // Adnan IP
     static String module_3_IP = "73.154.129.166"; // Lee IP
     static int module_1_Port = 1000; // Zach Port
     static int module_2_Port = 1300; // Adnan Port
@@ -26,31 +26,33 @@ public class Network extends TrackControllerCatalogue {
     public static CTC_Interface c_Interface; // CTC Interface
     public static Track_Model_Interface tm_Interface; // Track Model Interface
     public static Track_Controller_HW_Interface tchw_Interface; // Track Model Interface
-    public static TrackControllerCatalogue server_Object;
+    public static TrackControllerCatalogue serverObject;
 
 
     public static void start_Server() throws RemoteException {
         try {
             System.setProperty("java.rmi.server.hostname", "71.173.141.165");
             // Instantiating the implementation class
-            server_Object = new TrackControllerCatalogue();
+            serverObject = new TrackControllerCatalogue();
             // Exporting the object of implementation class
             // (here we are exporting the remote object to the stub)
 
-            Track_Controller_SW_Interface stub = (Track_Controller_SW_Interface) UnicastRemoteObject.exportObject(server_Object, 1100);
+            Track_Controller_SW_Interface stub = (Track_Controller_SW_Interface) UnicastRemoteObject.exportObject(serverObject, 1100);
 
             // Binding the remote object (stub) in the registry
             Registry registry = LocateRegistry.createRegistry(1100);
             registry.rebind("Track_Controller_SW_Interface", stub);
             System.err.println("Server ready");
             hosting = true;
+
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
+
     }
 
-    public static void connect_To_Modules() {
+    public static void connect_To_CTC() {
         if (!connected_Module_1) {
             try {
                 Registry registry = LocateRegistry.getRegistry(module_1_IP, module_1_Port);
@@ -62,6 +64,9 @@ public class Network extends TrackControllerCatalogue {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void connect_To_Track_Model() {
 
         if (!connected_Module_2) {
             try {
@@ -75,7 +80,11 @@ public class Network extends TrackControllerCatalogue {
             }
         }
 
-        /*if (!connected_Module_3) {
+
+    }
+
+    public static void connect_To_Track_Controller() {
+        if (!connected_Module_3) {
             try {
                 Registry registry = LocateRegistry.getRegistry(module_3_IP, module_3_Port);
                 tchw_Interface = (Track_Controller_HW_Interface) registry.lookup("Track_Controller_HW_Interface");
@@ -86,6 +95,6 @@ public class Network extends TrackControllerCatalogue {
                 System.err.println("Client exception: " + e.toString());
                 e.printStackTrace();
             }
-        }*/
+        }
     }
 }

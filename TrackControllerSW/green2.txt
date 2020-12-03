@@ -3,9 +3,9 @@ PROGRAM greenController2
 INITIALIZE
 
 SWITCH
-029 Default
-030 Static
-150 Other
+029 Alpha
+150 Beta
+030 Gamma
 END
 
 STATION
@@ -17,13 +17,9 @@ STATION
 141
 END
 
-SWITCH 0
-029
-031 Occupied
-
-SWITCH 1
-029
-028 Occupied
+SWITCH SET
+027
+032
 
 STATION LIGHT
 022
