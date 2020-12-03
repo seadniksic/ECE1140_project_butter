@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseDragOver="#updateTheStuff" onMouseMoved="#updateTheStuff" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+  <tabs>
+    <Tab text="Vital">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <RadioButton layoutX="29.0" layoutY="25.0" mnemonicParsing="false" onMouseClicked="#onMouseClickManMode" text="Manual Mode" />
+                  <RadioButton fx:id="brakeButton" layoutX="56.0" layoutY="317.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBrake" text="Brake" />
+                  <RadioButton fx:id="eBrakeButton" layoutX="447.0" layoutY="326.0" mnemonicParsing="false" onMouseClicked="#onMouseClickEBrake" text="Emergency Brake" />
+                  <Button fx:id="backButton" layoutX="504.0" layoutY="21.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBack" text="Back" />
+                  <GridPane layoutX="139.0" layoutY="46.0" prefHeight="48.0" prefWidth="316.0">
+                     <columnConstraints>
+                        <ColumnConstraints maxWidth="1.7976931348623157E308" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="65.0" minHeight="10.0" prefHeight="27.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="76.0" minHeight="10.0" prefHeight="76.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label prefHeight="66.0" prefWidth="110.0" text="Current Speed" />
+                        <Label text="Commanded Speed" GridPane.rowIndex="1" />
+                        <Label fx:id="currSpeedLabel" text="(speed)" GridPane.columnIndex="1" />
+                        <Label fx:id="commSpeedLabel" text="(sLim)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="speedIn" promptText="Enter Speed" visible="false" GridPane.columnIndex="2" />
+                        <Button fx:id="setSpeedButton" mnemonicParsing="false" onMouseClicked="#setSpeedOnClick" text="Set Speed" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+                  <GridPane layoutX="136.0" layoutY="127.0" prefHeight="72.0" prefWidth="191.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Authority" />
+                        <Label fx:id="authorityLabel" text="(Authority)" GridPane.columnIndex="1" />
+                        <Label text="Current Position" GridPane.rowIndex="1" />
+                        <Label fx:id="positionLabel" text="(Position)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+                  <GridPane layoutX="138.0" layoutY="222.0" prefHeight="46.0" prefWidth="344.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="ALWAYS" maxWidth="245.0" minWidth="10.0" prefWidth="125.0" />
+                      <ColumnConstraints hgrow="ALWAYS" maxWidth="330.0" minWidth="10.0" prefWidth="232.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Next Stop" />
+                        <Label fx:id="nextStopLabel" text="(NextStop)" GridPane.columnIndex="1" />
+                        <Label text="Last Setpoint Update" GridPane.rowIndex="1" />
+                        <Label fx:id="setpointLabel" text="(SetpointUpdate)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Non-Vital">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <RadioButton fx:id="brakeButtonNV" layoutX="50.0" layoutY="320.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBrakeNV" text="Brake" />
+                  <RadioButton fx:id="eBrakeButtonNV" layoutX="445.0" layoutY="320.0" mnemonicParsing="false" onMouseClicked="#onMouseClickEBrakeNV" text="Emergency Brake" />
+                  <Button fx:id="backButtonNV" layoutX="506.0" layoutY="27.0" mnemonicParsing="false" onMouseClicked="#onMouseClickBack" text="Back" />
+                  <RadioButton fx:id="doorsLeftRB" layoutX="76.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#doorsLeftClicked" text="Open Doors(Left)" />
+                  <RadioButton fx:id="inLightsRB" layoutX="352.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#intLightsOn" text="Turn on Internal Lights" />
+                  <RadioButton fx:id="extLightsRB" layoutX="76.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#extLightsOn" text="Turn on External Lights" />
+                  <RadioButton fx:id="advertisementsRB" layoutX="257.0" layoutY="124.0" mnemonicParsing="false" onMouseClicked="#advertisementsOn" text="Advertisements" />
+                  <RadioButton fx:id="announcementsRB" layoutX="76.0" layoutY="197.0" mnemonicParsing="false" onMouseClicked="#announcementsOn" text="Announcements" />
+                  <GridPane layoutX="257.0" layoutY="191.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Next Stop" />
+                        <Label fx:id="nextStopLabel" text="Label" GridPane.columnIndex="1" />
+                     </children>
+                  </GridPane>
+                  <GridPane layoutX="133.0" layoutY="261.0" maxWidth="1.7976931348623157E308" prefHeight="41.0" prefWidth="219.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label prefHeight="22.0" prefWidth="123.0" text="Current Temperature" />
+                        <Label fx:id="currTempLabel" text="(currTemp)" GridPane.columnIndex="1" />
+                     </children>
+                  </GridPane>
+                  <TextField fx:id="tempIn" layoutX="371.0" layoutY="273.0" promptText="Enter Temp" />
+                  <RadioButton fx:id="doorsRightRB" layoutX="207.0" layoutY="44.0" mnemonicParsing="false" onMouseClicked="#doorsRightClicked" text="Open Doors(Right)" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>

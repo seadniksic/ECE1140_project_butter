@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import sample.Network;
 import sample.OverallSoftware;
 import sample.TrackController;
 
@@ -131,6 +132,8 @@ public class trackControllerUI {
         xLabel.setText("NO RAILROAD CROSSING");
         load_Info();
 
+        plcField.setText(con.get_Track_Line() + con.get_Controller_Num() + ".txt");
+
         defaultRadio.setToggleGroup(tg);
         otherRadio.setToggleGroup(tg);
 
@@ -143,6 +146,7 @@ public class trackControllerUI {
         rotate.setPivotX(100);
 
         alert.setAlertType(Alert.AlertType.ERROR);
+        alert.setContentText("No PLC file in Track Controller");
     }
 
     public void load_Info() {
@@ -176,10 +180,14 @@ public class trackControllerUI {
             lights[i] = light;
         }
 
-        if (con.get_Switch_State()) {
-            switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to default");
+        if (!con.get_Switch_State()) {
+            if (con.get_Switch_Beta() == 0) {
+                switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to YARD");
+            } else {
+                switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to " + con.get_Switch_Beta());
+            }
         } else {
-            switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to detour");
+            switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to " + con.get_Switch_Gamma());
         }
         switchLabel.setStyle("-fx-font-size: 20px");
 
@@ -221,28 +229,14 @@ public class trackControllerUI {
             faults[i].setText("Block " + con.get_Block_ID(i) + ": " + con.get_Broken_Rail(i)  + ", " + con.get_Track_Fail(i) + ", " +con.get_Power_Fail(i));
         }
 
-        switch (con.get_Switch_ID()) {
-            case 58:
-                if (con.get_Switch_State()) {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to J");
-                } else {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to YARD");
-                }
-                break;
-            case 62:
-                if (con.get_Switch_State()) {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to J");
-                } else {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points from YARD");
-                }
-                break;
-            default:
-                if (con.get_Switch_State()) {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to default");
-                } else {
-                    switchLabel.setText("Switch at Block " + con.get_Switch_ID() + " points to detour");
-                }
-                break;
+        if (!con.get_Switch_State()) {
+            if (con.get_Switch_Beta() == 0) {
+                switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to YARD");
+            } else {
+                switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to " + con.get_Switch_Beta());
+            }
+        } else {
+            switchLabel.setText("Block " + con.get_Switch_ID() + " is connected to " + con.get_Switch_Gamma());
         }
 
         if (con.get_XBar_ID() > 0) {
@@ -260,30 +254,42 @@ public class trackControllerUI {
 
     //PANES
     public void set_Track_View(ActionEvent actionEvent) {
-        tabLabel.setText("Track View");
-        trackPane.setVisible(true);
-        signalPane.setVisible(false);
-        faultPane.setVisible(false);
-        plcPane.setVisible(false);
-        debugPane.setVisible(false);
+        if (!con.get_File().equalsIgnoreCase("no file")) {
+            tabLabel.setText("Track View");
+            trackPane.setVisible(true);
+            signalPane.setVisible(false);
+            faultPane.setVisible(false);
+            plcPane.setVisible(false);
+            debugPane.setVisible(false);
+        } else {
+            alert.show();
+        }
     }
 
     public void set_Signal_View(ActionEvent actionEvent) {
-        tabLabel.setText("Signal Control");
-        trackPane.setVisible(false);
-        signalPane.setVisible(true);
-        faultPane.setVisible(false);
-        plcPane.setVisible(false);
-        debugPane.setVisible(false);
+        if (!con.get_File().equalsIgnoreCase("no file")) {
+            tabLabel.setText("Signal Control");
+            trackPane.setVisible(false);
+            signalPane.setVisible(true);
+            faultPane.setVisible(false);
+            plcPane.setVisible(false);
+            debugPane.setVisible(false);
+        } else {
+            alert.show();
+        }
     }
 
     public void set_Fault_View(ActionEvent actionEvent) {
-        tabLabel.setText("Fault History");
-        trackPane.setVisible(false);
-        signalPane.setVisible(false);
-        faultPane.setVisible(true);
-        plcPane.setVisible(false);
-        debugPane.setVisible(false);
+        if (!con.get_File().equalsIgnoreCase("no file")) {
+            tabLabel.setText("Fault History");
+            trackPane.setVisible(false);
+            signalPane.setVisible(false);
+            faultPane.setVisible(true);
+            plcPane.setVisible(false);
+            debugPane.setVisible(false);
+        } else {
+            alert.show();
+        }
     }
 
     public void set_PLC_View(ActionEvent actionEvent) {
@@ -297,11 +303,15 @@ public class trackControllerUI {
 
 
     public void debug(ActionEvent actionEvent) throws FileNotFoundException {
-        trackPane.setVisible(false);
-        signalPane.setVisible(false);
-        faultPane.setVisible(false);
-        plcPane.setVisible(false);
-        debugPane.setVisible(true);
+        if (!con.get_File().equalsIgnoreCase("no file")) {
+            trackPane.setVisible(false);
+            signalPane.setVisible(false);
+            faultPane.setVisible(false);
+            plcPane.setVisible(false);
+            debugPane.setVisible(true);
+        } else {
+            alert.show();
+        }
     }
     //PANES
 
@@ -319,28 +329,30 @@ public class trackControllerUI {
     }
 
     //DEBUG BUTTONS
-    public void move_Train(ActionEvent actionEvent) throws FileNotFoundException, RemoteException {
+    public void move_Train(ActionEvent actionEvent) throws FileNotFoundException, RemoteException, InterruptedException {
         String moveBlock = trainMoveField.getText();
-        OverallSoftware.tc.train_Moved(0, Integer.parseInt(moveBlock));
+        Network.serverObject.train_Moved(0, Integer.parseInt(moveBlock));
     }
 
     public void reset_Blocks(ActionEvent actionEvent) {
         con.reset_Blocks();
     }
 
-    public void close_Block(ActionEvent actionEvent) {
+    public void close_Block(ActionEvent actionEvent) throws RemoteException {
         String block = closeField.getText();
-        con.set_Block_Closed(Integer.parseInt(block));
+        Network.serverObject.close_Block(con.get_Track_Line(), Integer.parseInt(block));
+        //con.set_Block_Closed(Integer.parseInt(block));
     }
 
-    public void open_Block(ActionEvent actionEvent) {
+    public void open_Block(ActionEvent actionEvent) throws RemoteException {
         String block = openField.getText();
-        con.set_Block_Open(Integer.parseInt(block));
+        Network.serverObject.open_Block(con.get_Track_Line(), Integer.parseInt(block));
+        //con.set_Block_Open(Integer.parseInt(block));
     }
 
     public void manual_Switch(ActionEvent actionEvent) throws RemoteException {
         String switchBlock = manualField.getText();
-        OverallSoftware.tc.set_Switch_Manual("green", Integer.parseInt(switchBlock), switchState);
+        Network.serverObject.set_Switch_Manual(con.get_Track_Line(), Integer.parseInt(switchBlock));
     }
 
     public void set_Default(ActionEvent actionEvent) {
@@ -389,23 +401,23 @@ public class trackControllerUI {
 
     public void set_Fail(ActionEvent actionEvent) throws RemoteException {
         String failBlock = faultField.getText();
-
+        int lineIndex = 0 ;
         if (brRadio.isSelected()) {
-            OverallSoftware.tc.set_Broken_Rail(0, Integer.parseInt(failBlock), brState);
+            Network.serverObject.set_Broken_Rail(lineIndex, Integer.parseInt(failBlock), brState);
         }
 
         if (tcfRadio.isSelected()) {
-            OverallSoftware.tc.set_Track_Circuit_Failure(0, Integer.parseInt(failBlock), tcfState);
+            Network.serverObject.set_Track_Circuit_Failure(lineIndex, Integer.parseInt(failBlock), tcfState);
         }
 
         if (powerRadio.isSelected()) {
-            OverallSoftware.tc.set_Power_Fail(0, Integer.parseInt(failBlock), powerState);
+            Network.serverObject.set_Power_Fail(lineIndex, Integer.parseInt(failBlock), powerState);
         }
 
         if (clearRadio.isSelected()) {
-            OverallSoftware.tc.set_Broken_Rail(0, Integer.parseInt(failBlock), brState);
-            OverallSoftware.tc.set_Track_Circuit_Failure(0, Integer.parseInt(failBlock), tcfState);
-            OverallSoftware.tc.set_Power_Fail(0, Integer.parseInt(failBlock), powerState);
+            Network.serverObject.set_Broken_Rail(lineIndex, Integer.parseInt(failBlock), brState);
+            Network.serverObject.set_Track_Circuit_Failure(lineIndex, Integer.parseInt(failBlock), tcfState);
+            Network.serverObject.set_Power_Fail(lineIndex, Integer.parseInt(failBlock), powerState);
         }
     }
 
