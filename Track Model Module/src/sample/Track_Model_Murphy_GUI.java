@@ -249,6 +249,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                             block1.set_Occupancy(true);
 
                                             call_Network_Train_Moved(block1);
+                                            //call_Beacon_Function_If_Station(block1.is_Station, param_Occupancy_Index, );
 
                                             this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                             // Destroy the train if the new occupancy is a yard
@@ -466,6 +467,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
                     Boolean extracted_is_Station = Boolean.parseBoolean(block_Line_Elements.get(13));
                     String extracted_Station_Name = block_Line_Elements.get(14);
+                    String extracted_Prev_Station_Name = block_Line_Elements.get(15);
+                    String extracted_Next_Station_Name = block_Line_Elements.get(16);
 
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
@@ -488,6 +491,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
 
                                 block.is_Station = extracted_is_Station;
                                 block.station_Name = extracted_Station_Name;
+                                block.prev_Station_Name = extracted_Prev_Station_Name;
+                                block.next_Station_Name = extracted_Next_Station_Name;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
                                     block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
                                     if(block.is_Yard){
@@ -539,6 +544,18 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         System.out.println("Past occupancies: ");
         for (int i = 0; i < this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.size(); i++){
             System.out.println(this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).past_Occupancies.get(i));
+        }
+    }
+
+    private void call_Beacon_Function_If_Station(Boolean param_Is_Station, int param_Train_Num, String param_Next_Stop, Boolean param_Door_Side){
+        if(param_Is_Station){
+            if(Network.tm_Interface != null){
+                try {
+                    Network.tm_Interface.send_Beacon_Information(param_Train_Num, param_Next_Stop, param_Door_Side);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

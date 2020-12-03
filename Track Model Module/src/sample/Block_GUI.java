@@ -43,6 +43,9 @@ public class Block_GUI {
     TextField set_Previous_TF;
     TextField set_Next_2_TF;
     TextField station_Name_TF;
+    TextField prev_Station_Name_TF;
+    TextField next_Station_Name_TF;
+
 
     Label error_Label;
 
@@ -111,6 +114,8 @@ public class Block_GUI {
 
                     if(parent_Block.is_Station){
                         parent_Block.station_Name = (station_Name_TF.getText() != "" ? station_Name_TF.getText() : parent_Block.station_Name);
+                        parent_Block.prev_Station_Name = (prev_Station_Name_TF.getText() != "" ? prev_Station_Name_TF.getText() : parent_Block.prev_Station_Name);
+                        parent_Block.next_Station_Name = (next_Station_Name_TF.getText() != "" ? next_Station_Name_TF.getText() : parent_Block.next_Station_Name);
                     }
 
                     parent_Block.previous_Block_Number = (set_Previous_TF.getText() != "" ? Integer.parseInt(set_Previous_TF.getText()) : parent_Block.previous_Block_Number);
@@ -266,8 +271,12 @@ public class Block_GUI {
 
         // Station HBox
         HBox temp_Station_Name_HBox = new HBox();
+        HBox temp_Prev_Station_Name_HBox = new HBox();
+        HBox temp_Next_Station_Name_HBox = new HBox();
         if(is_Station_CheckBox.isSelected()){
             temp_Station_Name_HBox = return_Station_name_HBox();
+            temp_Prev_Station_Name_HBox = return_Prev_Station_name_HBox();
+            temp_Next_Station_Name_HBox = return_Next_Station_name_HBox();
         }
 
         // Switch CheckBox semantics
@@ -312,7 +321,7 @@ public class Block_GUI {
 
         // Column two
         VBox text_VBox = new VBox();
-        text_VBox.getChildren().addAll(return_section_HBox(), temp_Station_Name_HBox);
+        text_VBox.getChildren().addAll(return_section_HBox(), temp_Station_Name_HBox, temp_Prev_Station_Name_HBox, temp_Next_Station_Name_HBox);
         text_VBox.setSpacing(20);
 
         // Column three
@@ -445,6 +454,29 @@ public class Block_GUI {
 
         return station_Name_HBox;
     }
+    private HBox return_Prev_Station_name_HBox(){
+        Label prev_Station_Name_Label = new Label("Previous Station Name: ");
+        prev_Station_Name_TF = new TextField(String.valueOf(parent_Block.prev_Station_Name));
+        prev_Station_Name_TF.setEditable(parent_Block.is_Builder);
+        HBox prev_Station_Name_HBox = new HBox();
+        prev_Station_Name_HBox.getChildren().addAll(prev_Station_Name_Label, prev_Station_Name_TF);
+        prev_Station_Name_HBox.setAlignment(Pos.CENTER);
+
+        return prev_Station_Name_HBox;
+    }
+    private HBox return_Next_Station_name_HBox(){
+        Label next_Station_Name_Label = new Label("Next Station Name: ");
+        next_Station_Name_TF = new TextField(String.valueOf(parent_Block.next_Station_Name));
+        next_Station_Name_TF.setEditable(parent_Block.is_Builder);
+        HBox next_Station_Name_HBox = new HBox();
+        next_Station_Name_HBox.getChildren().addAll(next_Station_Name_Label, next_Station_Name_TF);
+        next_Station_Name_HBox.setAlignment(Pos.CENTER);
+
+        return next_Station_Name_HBox;
+    }
+
+
+
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous Block: ");
         set_Previous_TF = new TextField(String.valueOf(parent_Block.previous_Block_Number));
