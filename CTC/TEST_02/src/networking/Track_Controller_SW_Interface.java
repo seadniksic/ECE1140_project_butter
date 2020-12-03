@@ -6,11 +6,10 @@ import java.rmi.RemoteException;
 
 public interface Track_Controller_SW_Interface extends Remote {
 
-
     //Track Model calls these methods
     void make_Controllers(String[] lines, int[][] blocks) throws RemoteException;
 
-    void train_Moved(int trainNum, int blockNum) throws RemoteException, FileNotFoundException; //Track Model -> Track Controller -> CTC
+    void train_Moved(int trainNum, int blockNum) throws RemoteException, FileNotFoundException, InterruptedException; //Track Model -> Track Controller -> CTC
 
     void set_Broken_Rail(int lineIndex, int blockNum, boolean state) throws RemoteException;
 
@@ -26,11 +25,11 @@ public interface Track_Controller_SW_Interface extends Remote {
 
     void send_Beacon_Information(int train_Num, String next_Stop) throws RemoteException;
 
-    void send_Speed_Authority(int trainNum, double speed, int authority) throws RemoteException; // CTC -> track controller -> track model -> train model
+    void send_Speed_Authority(int trainNum, double speed, int authority) throws RemoteException, InterruptedException; // CTC -> track controller -> track model -> train model
 
     boolean set_Switch_Manual(String trackLine, int blockNum) throws RemoteException;
 
-    //static void add_Ticket(int trainNum) throws RemoteException;
+    void add_Ticket(int trainNum, int numTickets) throws RemoteException;
 
     void close_Block(String trackLine, int blockNum) throws RemoteException;
 
@@ -42,4 +41,5 @@ public interface Track_Controller_SW_Interface extends Remote {
     //Hardware calls these methods
 
     void update_Time(double time) throws RemoteException;
+
 }

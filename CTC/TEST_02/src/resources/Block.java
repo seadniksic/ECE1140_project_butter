@@ -12,9 +12,8 @@ public class Block {
     private  double cumulativeElevation;
     private boolean occupancy;//true is occupied & false is not occupied
     private boolean condition;//true is open & false is closed
-    private boolean lights;
-
-//bind element to an observable list
+    private boolean lights ;//true is green & false is red
+    private boolean crossbar ;//true is down & false is up
 
     public Block(){
         section = ' ';
@@ -29,7 +28,8 @@ public class Block {
         condition = true;
     }
 
-    public Block(char sec, int num, double len, double gra, int speed, String inf, String stationSide, double ele,double cumEle){
+
+    public Block(char sec, int num, double len, double gra, int speed, String inf, String sSide, double ele,double cumEle){
         section = sec;
         number = num;
         length = len;
@@ -38,10 +38,13 @@ public class Block {
         infrastructure = inf;
         elevation = ele;
         cumulativeElevation = cumEle;
+        stationSide = sSide;
         occupancy = false;
         condition = true;
-        lights = false;
+        lights = true;
+        crossbar = false;
     }
+
 
     public Character get_Section(){
         return section;
@@ -71,6 +74,7 @@ public class Block {
         return elevation;
     }
 
+
     public Double get_Cumulative_Elevation() {
         return cumulativeElevation;
     }
@@ -83,13 +87,20 @@ public class Block {
 
     public void set_Condition(boolean b){condition = b;}
 
+
     public String get_Block_ID(){
         return section + String.valueOf(number);
     }
 
     public String get_stationSide(){return stationSide;}
 
-    public boolean get_lights(){return lights;}
+    public boolean get_Lights(){return lights;}
+
+    public void set_Lights(boolean b){ lights = b;}
+
+    public boolean get_Crossbar(){return crossbar;}
+
+    public void set_Crossbar(boolean b){crossbar = b;}
 
 
 

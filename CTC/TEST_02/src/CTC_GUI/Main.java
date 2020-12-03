@@ -1,6 +1,7 @@
 package CTC_GUI;
 
 import javafx.application.Application;
+import javafx.concurrent.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -27,7 +28,14 @@ import resources.*;
 
 public class Main extends Application {
 
+    public static TextField simulationTime = new TextField("00");
 
+
+    public static void update_GUI_Time(){
+        if(Network.server_Object != null)
+        simulationTime.setText(Network.server_Object.get_SimTime_As_LocalTime().toString());
+
+    }
 
     public void fill_Train_ChoiceBox(ChoiceBox cB){
         if( Network.server_Object != null ){
@@ -68,6 +76,14 @@ public class Main extends Application {
         tF.setEditable(false);
         tF.setStyle("-fx-background-color: grey;");
     }
+
+    public void show_Sorry_Automatic_Mode(){
+        Alert noServerObjectAlert = new Alert(Alert.AlertType.INFORMATION);
+        noServerObjectAlert.setHeaderText("CURRENTLY IN AUTOMATIC MODE");
+        noServerObjectAlert.setContentText("For safety reasons, you may not edit the schedule while in automatic mode.");
+        noServerObjectAlert.showAndWait();
+    }
+
 
     public void show_No_ServerObject(){
         Alert noServerObjectAlert = new Alert(Alert.AlertType.ERROR);
@@ -124,13 +140,10 @@ public class Main extends Application {
             fill_Train_ChoiceBox(trainIDInfo);
         });
 
+
         Label suggestSpeedLabel = new Label("Suggested Speed(MPH):");
         TextField suggestSpeed = new TextField();
         set_Text_Settings(suggestSpeed);
-
-        Label avgSpeedLabel = new Label("Avg Speed(MPH):");
-        TextField avgSpeed = new TextField();
-        set_Text_Settings(avgSpeed);
 
         Label authorityLabelInfo = new Label("Authority:");
         TextField authorityInfo = new TextField();
@@ -144,15 +157,13 @@ public class Main extends Application {
         TextField line = new TextField();
         set_Text_Settings(line);
 
-        Label sectionLabel = new Label("Current Section:");
-        TextField section = new TextField();
-        set_Text_Settings(section);
 
         Label blockLabel = new Label("Current Block:");
         TextField block = new TextField();
         set_Text_Settings(block);
 
-        Label ticketsLabel = new Label("Tickets per hour:");
+
+        Label ticketsLabel = new Label("Tickets Sold:");
         TextField tickets = new TextField();
         set_Text_Settings(tickets);
 
@@ -164,22 +175,23 @@ public class Main extends Application {
         trainIDInfo.setOnAction(e->{
             if(trainIDInfo.getSelectionModel().getSelectedIndex() != -1){
                 int selectedTrainIndexInfo = trainIDInfo.getSelectionModel().getSelectedIndex();
-                suggestSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Suggest_Speed().toString());
-                avgSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Avg_Speed().toString());
+                suggestSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Suggest_Speed_GUI().toString());
+
                 authorityInfo.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Authority().toString());
                 destination.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Next_Infrastructure());
                 tickets.setText(String.valueOf(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Tickets_Per_Hour()));
                 numberCars.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Number_Of_Cars().toString());
+                block.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Current_Block().toString());
                 line.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Current_Line());
             }
         });
 
-        rootTrainInfoBox.setPadding(new Insets(10,10,10,10));
-        rootTrainInfoBox.setSpacing(10);
+        rootTrainInfoBox.setPadding(new Insets(10,10,5,5));
+        rootTrainInfoBox.setSpacing(5);
 
         rootTrainInfoBox.getChildren().addAll(trainInfoBoxLabel,trainIDLabelInfo,trainIDInfo,suggestSpeedLabel,
-                suggestSpeed,avgSpeedLabel, avgSpeed,authorityLabelInfo,authorityInfo,destinationLabel,destination,
-                lineLabel,line,sectionLabel, section, blockLabel,block,ticketsLabel,tickets, numberCarsLabel,
+                suggestSpeed,authorityLabelInfo,authorityInfo,destinationLabel,destination,
+                lineLabel,line, blockLabel,block,ticketsLabel,tickets, numberCarsLabel,
                 numberCars);
 
 //************************************TRAIN INFO BOX CODE END*********************************************************//
@@ -190,6 +202,28 @@ public class Main extends Application {
 
 
 
+        HBox rootTrainSetBox = new HBox();
+        rootTrainSetBox.setPadding(new Insets(10,10,5,5));
+        rootTrainSetBox.setSpacing(5);
+
+
+        //THIS NEEDS TO ONLY POP UP WHEN NEW TRAIN SELECTED
+        Label lineIDLabelSet = new Label("Line ID:");
+        ChoiceBox lineIDSet = new ChoiceBox();
+        lineIDSet.setOnShowing(e->{
+            if(Network.server_Object != null){
+                lineIDSet.getItems().clear();
+                lineIDSet.getItems().addAll(Network.server_Object.get_Line_List().get(0).get_Line());
+                lineIDSet.getItems().addAll(Network.server_Object.get_Line_List().get(1).get_Line());
+
+            }else{
+                show_No_ServerObject();
+            }
+
+
+        });
+
+
         Label trainSetBoxLabel = new Label("TRAIN SETTINGS:");
         trainSetBoxLabel.setFont(Font.font("Arial",18));
         Label trainIDLabelSet = new Label("Train ID:");
@@ -197,60 +231,70 @@ public class Main extends Application {
         ChoiceBox trainIDSet = new ChoiceBox();
 
         trainIDSet.setOnShowing(e->{
-            fill_Train_ChoiceBox(trainIDSet);
+            if(Network.server_Object != null) {
+                fill_Train_ChoiceBox(trainIDSet);
+                trainIDSet.getItems().addAll( "TR"+ Network.server_Object.get_Train_List().size());
+            }else{
+                show_No_ServerObject();
+            }
         });
 
 
 
-        Label stopLabel = new Label("Next Stop: ");
+
+
+        Label stopLabel = new Label("Next Stop:");
         ChoiceBox stops = new ChoiceBox();
+
 
         stops.setOnShowing(e->{
             if(trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
                 stops.getItems().clear();
-                stops.getItems().addAll(Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_Infrastructure_List());
+
+               //wrong -> stops.getItems().addAll(Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_c());
+                stops.getItems().addAll(Network.server_Object.get_Line_List().get(0).get_Infrastructure_List());
             }
         });
 
-        Label timeLabel = new Label("Arrival Time: ");
-        TextField timeArrival = new TextField(LocalTime.now().toString());
+        Label timeLabel = new Label("Arrival Time:");
+        TextField timeArrival = new TextField("HH:mm");
         timeArrival.setMaxWidth(100);
         Button setButton = new Button("DISPATCH");// set button needs to calculate speed and authority based on current block and next block
 
 
-        HBox rootTrainSetBox = new HBox(trainSetBoxLabel,trainIDLabelSet,trainIDSet,stopLabel,stops,timeLabel,timeArrival, setButton);
-        rootTrainSetBox.setPadding(new Insets(10,10,10,10));
-        rootTrainSetBox.setSpacing(10);
 
+        rootTrainSetBox.getChildren().addAll(trainSetBoxLabel,trainIDLabelSet,trainIDSet,lineIDLabelSet,lineIDSet,stopLabel,stops,timeLabel,timeArrival, setButton);
 
-
+        //TODO THINGS NEEDED FOR NEW TRAIN: Current line, inline block-infrastructure-time lists
+        //idea all trains have same infrastructure and block lists so get from an existing and copy over
         setButton.setOnAction(e-> {
-            if (trainIDSet.getSelectionModel().getSelectedIndex() != -1 ) {
-                if (Network.server_Object != null) {
-                    if (!Network.server_Object.get_Automatic()) {
+               if (trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
+                   if (Network.server_Object != null) {
+                       if (!Network.server_Object.get_Automatic()) {
+                           int trainNumberFromName = trainIDSet.getSelectionModel().getSelectedIndex();
 
+                           if(trainNumberFromName == Network.server_Object.get_Train_List().size()){
+                                Train manualTrain = new Train(trainIDSet.getSelectionModel().getSelectedItem().toString());
+                                Network.server_Object.create_Train(manualTrain);
+                                manualTrain.set_Infrastructure_Block_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_Block_List());
+                                manualTrain.set_Infrastructure_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_List());
 
-                        System.out.println("TRAIN BEING DISPATCHED " + Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_Name());
-                        int trainNumberFromName = trainIDSet.getSelectionModel().getSelectedIndex();
-                        //System.out.println("Train Number: " + trainNumberFromName);
-                        Network.server_Object.get_Train_List().get(trainNumberFromName).add_Time(LocalTime.parse(timeArrival.getText()));
-                        try {
-                            Network.server_Object.dispatch(trainNumberFromName, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
-                        } catch (RemoteException remoteException) {
-                            remoteException.printStackTrace();
-                        }
+                           }
 
-                    } else {
-                        Alert noServerObjectAlert = new Alert(Alert.AlertType.ERROR);
-                        noServerObjectAlert.setHeaderText("NOT IN MANUAL MODE");
-                        noServerObjectAlert.setContentText("Please set to manual mode before manual dispatching a train.\n Click 'Switch Mode' Button on the bottom right.");
-                        noServerObjectAlert.showAndWait();
-                    }
+                           Network.server_Object.get_Train_List().get(trainNumberFromName).add_Time(LocalTime.parse(timeArrival.getText()));
 
-                } else {
-                    show_No_ServerObject();
-                }
-            }
+                           try {
+                               Network.server_Object.dispatch(trainNumberFromName);//, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
+                           } catch (RemoteException | InterruptedException remoteException) {
+                               remoteException.printStackTrace();
+                           }
+                       } else {
+                          show_Sorry_Automatic_Mode();
+                       }
+                   } else {
+                       show_No_ServerObject();
+                   }
+               }
         });
 
 
@@ -284,13 +328,14 @@ public class Main extends Application {
 
         Button displayTrackInfo = new Button("SHOW INFO");
 
-        Label blockLengthLabel = new Label("Block Length (M):");
+        Label blockLengthLabel = new Label("Block Length (FT):");
         TextField blockLength = new TextField();
         set_Text_Settings(blockLength);
 
         Label blockGradeLabel = new Label("Block Grade %:");
         TextField blockGrade = new TextField();
         set_Text_Settings(blockGrade);
+
 
         Label speedLimitLabel = new Label("Speed Limit (MPH):");
         TextField speedLimit = new TextField();
@@ -300,9 +345,15 @@ public class Main extends Application {
         TextField infrastructure = new TextField();
         set_Text_Settings(infrastructure);
 
+        Label stationSideLabel = new Label("Station Side:");
+        TextField stationSide = new TextField();
+        set_Text_Settings(stationSide);
+
+
         Label elevationLabel = new Label("Elevation (FT):");
         TextField elevation = new TextField();
         set_Text_Settings(elevation);
+
 
         Label cumulativeElevationLabel = new Label("Cumulative Elevation (FT):");
         TextField cumulativeElevation = new TextField();
@@ -316,14 +367,22 @@ public class Main extends Application {
         TextField blockCondition = new TextField();
         set_Text_Settings(blockCondition);
 
+        Label lightsLabel = new Label("Lights");
+        TextField lights = new TextField();
+        set_Text_Settings(lights);
 
-        rootTrackInfoBox.setPadding(new Insets(10,10,10,10));
-        rootTrackInfoBox.setSpacing(10);
+        Label crossBarLabel = new Label("Cross Bar");
+        TextField crossBar = new TextField();
+        set_Text_Settings(crossBar);
+
+
+        rootTrackInfoBox.setPadding(new Insets(5,10,2,10));
+        rootTrackInfoBox.setSpacing(2);
         rootTrackInfoBox.getChildren().addAll(trackInfoBoxLabel,trackLineLabelInfo,trackLineInfo,trackSectionLabelInfo,
                 trackSectionInfo, trackBlockLabelInfo,trackBlockInfo,displayTrackInfo,blockLengthLabel,blockLength,
-                blockGradeLabel,blockGrade, speedLimitLabel,speedLimit,infrastructureLabel,infrastructure,
+                blockGradeLabel,blockGrade, speedLimitLabel,speedLimit,infrastructureLabel,infrastructure,stationSideLabel,stationSide,
                 elevationLabel,elevation,cumulativeElevationLabel,cumulativeElevation,blockOccupancyLabel,
-                blockOccupancy,blockConditionLabel,blockCondition);
+                blockOccupancy,blockConditionLabel,blockCondition,lightsLabel,lights,crossBarLabel,crossBar);
 
         displayTrackInfo.setOnAction(e->{
             blockLength.setText("N/A");
@@ -336,7 +395,7 @@ public class Main extends Application {
             blockCondition.setText("N/A");
             if(trackLineInfo.getSelectionModel().getSelectedIndex() > -1 && trackBlockInfo.getSelectionModel().getSelectedIndex() > -1 && trackSectionInfo.getSelectionModel().getSelectedIndex() >-1) {
                 Line selectedLine = Network.server_Object.get_Line_List().get(trackLineInfo.getSelectionModel().getSelectedIndex());
-                List<String> selectedBlock = selectedLine.get_Block_Information_List(Integer.parseInt(trackBlockInfo.getSelectionModel().getSelectedItem().toString())-1);
+                List<String> selectedBlock = selectedLine.get_Block_Information_List(Integer.parseInt(trackBlockInfo.getSelectionModel().getSelectedItem().toString()));
                 blockLength.setText(selectedBlock.get(0));
                 blockGrade.setText(selectedBlock.get(1));
                 speedLimit.setText(selectedBlock.get(2));
@@ -345,7 +404,9 @@ public class Main extends Application {
                 cumulativeElevation.setText(selectedBlock.get(5));
                 blockOccupancy.setText(selectedBlock.get(6));
                 blockCondition.setText(selectedBlock.get(7));
-
+                lights.setText(selectedBlock.get(8));
+                crossBar.setText(selectedBlock.get(9));
+                stationSide.setText(selectedBlock.get(10));
 
             }else{
                 Alert noServerObjectAlert = new Alert(Alert.AlertType.WARNING);
@@ -402,44 +463,49 @@ public class Main extends Application {
 
 
         openTrackButton.setOnAction(e->{
+            if(Network.server_Object != null) {
+                if (!Network.server_Object.get_Automatic()) {
+                    if (trackBlockEndSet.getSelectionModel().getSelectedIndex() != -1 && trackBlockStartSet.getSelectionModel().getSelectedIndex() != -1) {
 
-            if(trackBlockEndSet.getSelectionModel().getSelectedIndex() != -1 && trackBlockStartSet.getSelectionModel().getSelectedIndex() != -1) {
-                if(Network.server_Object != null) {
-                    if(Network.tcsw_Interface != null){
-                        int startBlock = Integer.parseInt(trackBlockStartSet.getSelectionModel().getSelectedItem().toString());
-                        int endBlock = Integer.parseInt(trackBlockEndSet.getSelectionModel().getSelectedItem().toString());
+                            if (Network.tcsw_Interface != null) {
+                                int startBlock = Integer.parseInt(trackBlockStartSet.getSelectionModel().getSelectedItem().toString());
+                                int endBlock = Integer.parseInt(trackBlockEndSet.getSelectionModel().getSelectedItem().toString());
 
-                        for (int i = startBlock; i < endBlock + 1; i++) {
-                            String trackLine = trackLineSet.getSelectionModel().getSelectedItem().toString();
-                            try {
-                                Network.server_Object.open_Block(trackLine, i);
-                            } catch (RemoteException remoteException) {
-                                remoteException.printStackTrace();
+                                for (int i = startBlock; i < endBlock + 1; i++) {
+                                    String trackLine = trackLineSet.getSelectionModel().getSelectedItem().toString();
+                                    try {
+                                        Network.server_Object.open_Block(trackLine, i);
+                                    } catch (RemoteException remoteException) {
+                                        remoteException.printStackTrace();
+                                    }
+
+                                    try {
+
+                                        Network.tcsw_Interface.open_Block(trackLine, i);
+
+                                    } catch (RemoteException | FileNotFoundException remoteException) {
+                                        remoteException.printStackTrace();
+                                    }
+
+
+                                }
+                            } else {
+                                show_No_TCS_Connection();
                             }
 
-                            try {
-
-                                Network.tcsw_Interface.open_Block(trackLine, i);
-
-                            } catch (RemoteException | FileNotFoundException remoteException) {
-                                remoteException.printStackTrace();
-                            }
-
-
-
-                        }
-                    }else{
-                        show_No_TCS_Connection();
                     }
-                }else{
-                    show_No_ServerObject();
+                } else {
+                    show_Sorry_Automatic_Mode();
                 }
+            }else{
+                show_No_ServerObject();
             }
         });
 
         closeTrackButton.setOnAction(e->{
-            if(trackBlockEndSet.getSelectionModel().getSelectedIndex() != -1 && trackBlockStartSet.getSelectionModel().getSelectedIndex() != -1) {
-                if(Network.server_Object != null) {
+            if(!Network.server_Object.get_Automatic()) {
+                if(trackBlockEndSet.getSelectionModel().getSelectedIndex() != -1 && trackBlockStartSet.getSelectionModel().getSelectedIndex() != -1) {
+
                     if(Network.tcsw_Interface != null){
                         int startBlock = Integer.parseInt(trackBlockStartSet.getSelectionModel().getSelectedItem().toString());
                         int endBlock = Integer.parseInt(trackBlockEndSet.getSelectionModel().getSelectedItem().toString());
@@ -464,9 +530,9 @@ public class Main extends Application {
                     }else{
                         show_No_TCS_Connection();
                     }
-                }else{
-                    show_No_ServerObject();
                 }
+            }else{
+                show_Sorry_Automatic_Mode();
             }
         });
 
@@ -488,7 +554,7 @@ public class Main extends Application {
         Menu scheduleMenu = new Menu("_Schedule");
         MenuItem scheduleEdit = new MenuItem("_Edit Schedule");
         MenuItem scheduleView = new MenuItem("_View Schedule");
-        MenuItem trainNew = new MenuItem("_Add Train");
+       // MenuItem trainNew = new MenuItem("_Add Train");
         MenuItem scheduleImport = new MenuItem("_Import Schedule");
         scheduleMenu.getItems().addAll(scheduleImport);
 
@@ -512,17 +578,20 @@ public class Main extends Application {
         MenuItem simStart       = new MenuItem("_Start Simulation Time");
         MenuItem simSetMult1 = new MenuItem("Multiplier Set to 1");
         MenuItem simSetMult10 = new MenuItem("Multiplier Set to 10");
-        MenuItem simSetMult25 = new MenuItem( "Multiplier Set to 25");
-        MenuItem simSetMult50 = new MenuItem("Multiplier Set to 50");
-        MenuItem simSetMult100 = new MenuItem("Multiplier Set to 100");
+        MenuItem simSetMult20 = new MenuItem( "Multiplier Set to 20");
+        MenuItem simSetMult50 = new MenuItem( "Multiplier Set to 50");
         MenuItem simPause = new MenuItem("_Pause Simulation Time");
         MenuItem simResume = new MenuItem("_Resume Simulation Time");
         MenuItem simReset = new MenuItem("Reset Simulation Time");
-        timeMenu.getItems().addAll(simStart,simSetMult1,simSetMult10,simSetMult25,simSetMult50,simSetMult100, simPause, simResume,simReset);
+        timeMenu.getItems().addAll( simStart, simSetMult1, simSetMult10, simSetMult20, simSetMult50, simPause, simResume,simReset);
+
+        Menu helpMenu = new Menu("_Help");
+        MenuItem contactInformation = new MenuItem("_Info");
+        helpMenu.getItems().addAll(contactInformation);
 
 
         rootMenuBarLeft.setMaxHeight(5);
-        rootMenuBarLeft.getMenus().addAll(file,scheduleMenu, trackMenu,networkMenu,timeMenu);
+        rootMenuBarLeft.getMenus().addAll(file,scheduleMenu, trackMenu,networkMenu,timeMenu,helpMenu);
 
 
 
@@ -552,8 +621,6 @@ public class Main extends Application {
                 Stage test = new Stage();
                 test.setTitle("OVERRIDER");
                 test.show();
-
-
                 Button createTrainOverride = new Button("Create Train");
                 Button sendSpeedAuthority = new Button("Send Speed and Authority");
 
@@ -564,9 +631,6 @@ public class Main extends Application {
                 TextField trainIdField = new TextField("Enter Train ID '#'");
                 TextField speedField = new TextField("Enter Speed");
                 TextField authorityField = new TextField("Enter Authority");
-
-
-
                 VBox rootV = new VBox();
                 rootV.setSpacing(10);
 
@@ -575,19 +639,17 @@ public class Main extends Application {
 
                 Scene scene1 = new Scene(rootV, 700, 450);
                 test.setScene(scene1);
-
                 sendSpeedAuthority.setOnAction(e->{
                     int trainNum =Integer.parseInt( trainIdField.getText());
                     double speed = Double.parseDouble(speedField.getText());
                     int authority = Integer.parseInt(authorityField.getText());
-
+                    Network.server_Object.get_Train_List().get(trainNum).set_Authority(authority);
                     try {
                         Network.tcsw_Interface.send_Speed_Authority(trainNum,speed,authority);
-                    } catch (RemoteException remoteException) {
+                    } catch (RemoteException | InterruptedException remoteException) {
                         remoteException.printStackTrace();
                     }
                 });
-
                 createTrainOverride.setOnAction(e->{
                     int cars =Integer.parseInt( carsField.getText());
                     String line =lineField.getText();
@@ -599,7 +661,6 @@ public class Main extends Application {
                         remoteException.printStackTrace();
                     }
                 });
-
 
             }
         });
@@ -645,6 +706,7 @@ public class Main extends Application {
         });
 
         simStart.setOnAction(e->{
+
             if(Network.Simulation_Interface != null) {
                 try {
                     Network.Simulation_Interface.start_Simulation_Time(1);
@@ -656,6 +718,26 @@ public class Main extends Application {
             }else{
                 show_No_Sim_Connection();
             }
+            /*
+
+            Task task = new Task<Void>() {
+                @Override public Void call() throws InterruptedException {
+
+                    for(double i = 0; i <4000; i++) {
+
+                        try {
+
+                            Network.server_Object.update_Time(i);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        Thread.sleep(500);
+                    }
+                    return null;
+                }
+            };
+            new Thread(task).start(); */
+
         });
 
         simSetMult1.setOnAction(e->{
@@ -672,21 +754,24 @@ public class Main extends Application {
 
         simSetMult10.setOnAction(e->{
             if(Network.Simulation_Interface != null){
+
                 try {
                     Network.Simulation_Interface.update_Multiplier(10);
                 } catch (RemoteException remoteException) {
                     remoteException.printStackTrace();
                 }
+
+
             }else{
                 show_No_Sim_Connection();
             }
 
         });
 
-        simSetMult25.setOnAction(e->{
+        simSetMult20.setOnAction(e->{
             if(Network.Simulation_Interface != null){
                 try {
-                    Network.Simulation_Interface.update_Multiplier(25);
+                    Network.Simulation_Interface.update_Multiplier(20);
                 } catch (RemoteException remoteException) {
                     remoteException.printStackTrace();
                 }
@@ -699,18 +784,6 @@ public class Main extends Application {
             if(Network.Simulation_Interface != null){
                 try {
                     Network.Simulation_Interface.update_Multiplier(50);
-                } catch (RemoteException remoteException) {
-                    remoteException.printStackTrace();
-                }
-            }else{
-                show_No_Sim_Connection();
-            }
-        });
-
-        simSetMult100.setOnAction(e->{
-            if(Network.Simulation_Interface != null){
-                try {
-                    Network.Simulation_Interface.update_Multiplier(100);
                 } catch (RemoteException remoteException) {
                     remoteException.printStackTrace();
                 }
@@ -784,7 +857,7 @@ public class Main extends Application {
             if(Network.server_Object != null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Choose Schedule File");
-                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\IdeaProjects\\TEST_02\\src\\resources"));
+                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\"));
                 File selectedFile = fileChooser.showOpenDialog(CTCStage);
 
                 Network.server_Object.set_Schedule_Path(selectedFile.getAbsolutePath());
@@ -798,7 +871,7 @@ public class Main extends Application {
                     fileNotFoundException.printStackTrace();
                 }
 
-                scheduleMenu.getItems().addAll(scheduleEdit,scheduleView,trainNew);
+                scheduleMenu.getItems().addAll(scheduleEdit,scheduleView);//,trainNew);
 
 
             }else{
@@ -810,7 +883,7 @@ public class Main extends Application {
             if(Network.server_Object != null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Choose Track File");
-                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\IdeaProjects\\TEST_02\\src\\resources"));
+                fileChooser.setInitialDirectory(new File("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\"));
                 // fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files", "*.txt"))
                 File selectedFile = fileChooser.showOpenDialog(CTCStage);
 
@@ -928,7 +1001,27 @@ public class Main extends Application {
             }
         });
 
+        contactInformation.setOnAction(new EventHandler<ActionEvent>(){
 
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+
+                Stage help = new Stage();
+
+                help.setTitle("Help Menu");
+
+                Label info = new Label("Zachary Turner\n\nzgt4@pitt.edu\n\n(724) 996 - 1300");
+
+                HBox box = new HBox(info);
+
+                box.setPadding(new Insets(50,10,10,60));
+                Scene sceneHelp = new Scene(box, 250, 230);
+
+                help.setScene(sceneHelp);
+                help.show();
+            }
+        });
 //////////////////////////////////SCHEDULE VIEW//////////////////////////////////////////
 
 
@@ -1003,102 +1096,109 @@ public class Main extends Application {
 
         scheduleEdit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent actionEvent) {
-                Stage scheduleStageEdit = new Stage();
-                scheduleStageEdit.setTitle("Schedule Editor");
+            public void handle(ActionEvent event) {
 
-                HBox rootScheduleEdit = new HBox();
+                if(!Network.server_Object.get_Automatic()) {
+                    Stage scheduleStageEdit = new Stage();
+                    scheduleStageEdit.setTitle("Schedule Editor");
 
-                VBox verticalLeft = new VBox();
-                verticalLeft.setSpacing(15);
-                VBox verticalCenter = new VBox();
-                VBox verticalRight = new VBox();
+                    HBox rootScheduleEdit = new HBox();
 
-                Label trainIDLabelScheduleEdit = new Label("Train ID:");
-                ChoiceBox trainIDScheduleEdit = new ChoiceBox();
-                trainIDScheduleEdit.setOnShowing(e->{
-                    fill_Train_ChoiceBox(trainIDScheduleEdit);
-                });
+                    VBox verticalLeft = new VBox();
+                    verticalLeft.setSpacing(15);
+                    VBox verticalCenter = new VBox();
+                    VBox verticalRight = new VBox();
 
-                Label infrastructureLabelScheduleEdit = new Label("Infrastructure List:");
-                TextArea infrastructureScheduleEdit = new TextArea();
-                infrastructureScheduleEdit.setEditable(false);
-                infrastructureScheduleEdit.setStyle("-fx-background-color: transparent;");
-                infrastructureScheduleEdit.setMaxWidth(300);
-                infrastructureScheduleEdit.setMinHeight(1000);
+                    Label trainIDLabelScheduleEdit = new Label("Train ID:");
+                    ChoiceBox trainIDScheduleEdit = new ChoiceBox();
+                    trainIDScheduleEdit.setOnShowing(e -> {
+                        fill_Train_ChoiceBox(trainIDScheduleEdit);
+                    });
 
-
-                Label  timeLabelScheduleEdit = new Label("Time List:");
-                TextArea timeScheduleEdit = new TextArea();
-
-                timeScheduleEdit.setStyle("-fx-background-color: transparent;");
-                timeScheduleEdit.setMaxWidth(100);
-                timeScheduleEdit.setMinHeight(1000);
-
-                Button applyScheduleEdit = new Button("APPLY CHANGES");
-                Label saveScheduleEdit = new Label("Unsaved");
-                Label saveScheduleEditNote = new Label("Note: These changes do not write into schedule.txt");
-                saveScheduleEditNote.setWrapText(true);
-
-                verticalCenter.getChildren().addAll(infrastructureLabelScheduleEdit, infrastructureScheduleEdit);
-                verticalLeft.getChildren().addAll(trainIDLabelScheduleEdit, trainIDScheduleEdit, applyScheduleEdit,saveScheduleEdit,saveScheduleEditNote);
-                verticalRight.getChildren().addAll(timeLabelScheduleEdit,timeScheduleEdit);
+                    Label infrastructureLabelScheduleEdit = new Label("Infrastructure List:");
+                    TextArea infrastructureScheduleEdit = new TextArea();
+                    infrastructureScheduleEdit.setEditable(false);
+                    infrastructureScheduleEdit.setStyle("-fx-background-color: transparent;");
+                    infrastructureScheduleEdit.setMaxWidth(300);
+                    infrastructureScheduleEdit.setMinHeight(1000);
 
 
+                    Label timeLabelScheduleEdit = new Label("Time List:");
+                    TextArea timeScheduleEdit = new TextArea();
 
-                trainIDScheduleEdit.setOnAction(e->{
-                    if(trainIDScheduleEdit.getSelectionModel().getSelectedIndex() != -1) {
-                        Integer trainSelectedIndex = trainIDScheduleEdit.getSelectionModel().getSelectedIndex();
-                        //System.out.println(trainSelectedIndex);
-                        Train trainSelected = Network.server_Object.get_Train_List().get(trainSelectedIndex);
-                        // System.out.println(trainSelected.getInfrastructureList());
-                        Integer size = trainSelected.get_Infrastructure_List().size();
-                        for (int i = 0; i < size; i++) {
-                            if (i > 0) {
-                                infrastructureScheduleEdit.setText(infrastructureScheduleEdit.getText() + "\n" +
-                                        trainSelected.get_Infrastructure_List().get(i));
-                                timeScheduleEdit.setText(timeScheduleEdit.getText() + "\n" +
-                                        trainSelected.get_Time_List().get(i));
-                            } else {
-                                infrastructureScheduleEdit.setText(trainSelected.get_Infrastructure_List().get(i));
-                                timeScheduleEdit.setText(trainSelected.get_Time_List().get(i).toString());
+                    timeScheduleEdit.setStyle("-fx-background-color: transparent;");
+                    timeScheduleEdit.setMaxWidth(100);
+                    timeScheduleEdit.setMinHeight(1000);
+
+                    Button applyScheduleEdit = new Button("APPLY CHANGES");
+                    Label saveScheduleEdit = new Label("Unsaved");
+                    Label saveScheduleEditNote = new Label("Note: These changes do not write into schedule.txt");
+                    saveScheduleEditNote.setWrapText(true);
+
+                    verticalCenter.getChildren().addAll(infrastructureLabelScheduleEdit, infrastructureScheduleEdit);
+                    verticalLeft.getChildren().addAll(trainIDLabelScheduleEdit, trainIDScheduleEdit, applyScheduleEdit, saveScheduleEdit, saveScheduleEditNote);
+                    verticalRight.getChildren().addAll(timeLabelScheduleEdit, timeScheduleEdit);
+
+
+                    trainIDScheduleEdit.setOnAction(e -> {
+                        if (trainIDScheduleEdit.getSelectionModel().getSelectedIndex() != -1) {
+                            Integer trainSelectedIndex = trainIDScheduleEdit.getSelectionModel().getSelectedIndex();
+                            //System.out.println(trainSelectedIndex);
+                            Train trainSelected = Network.server_Object.get_Train_List().get(trainSelectedIndex);
+                            // System.out.println(trainSelected.getInfrastructureList());
+                            Integer size = trainSelected.get_Infrastructure_List().size();
+                            for (int i = 0; i < size; i++) {
+                                if (i > 0) {
+                                    infrastructureScheduleEdit.setText(infrastructureScheduleEdit.getText() + "\n" +
+                                            trainSelected.get_Infrastructure_List().get(i));
+                                    timeScheduleEdit.setText(timeScheduleEdit.getText() + "\n" +
+                                            trainSelected.get_Time_List().get(i));
+                                } else {
+                                    infrastructureScheduleEdit.setText(trainSelected.get_Infrastructure_List().get(i));
+                                    timeScheduleEdit.setText(trainSelected.get_Time_List().get(i).toString());
+                                }
                             }
                         }
-                    }
-                    saveScheduleEdit.setText("Unsaved");
-                });
+                        saveScheduleEdit.setText("Unsaved");
+                    });
 
-                timeScheduleEdit.setOnMouseClicked(e->{
-                    saveScheduleEdit.setText("Unsaved");
-                });
+                    timeScheduleEdit.setOnMouseClicked(e -> {
+                        saveScheduleEdit.setText("Unsaved");
+                    });
 
-                applyScheduleEdit.setOnAction(e->{
+                    applyScheduleEdit.setOnAction(e -> {
 
-                    if(trainIDScheduleEdit.getSelectionModel().getSelectedIndex() != -1) {
-                        Integer trainSelectedIndex = trainIDScheduleEdit.getSelectionModel().getSelectedIndex();
+                        if (trainIDScheduleEdit.getSelectionModel().getSelectedIndex() != -1) {
+                            Integer trainSelectedIndex = trainIDScheduleEdit.getSelectionModel().getSelectedIndex();
 
 
-                        saveScheduleEdit.setText("Saving...");
-                        String timeStringTemp = timeScheduleEdit.getText();
-                        String[] timeStringArray = timeStringTemp.split("\n");
-                        Network.server_Object.get_Train_List().get(trainSelectedIndex).clear_Time_List();
-                        for (String s : timeStringArray) {
-                            Network.server_Object.get_Train_List().get(trainSelectedIndex).add_Time(LocalTime.parse(s));
+                            saveScheduleEdit.setText("Saving...");
+                            String timeStringTemp = timeScheduleEdit.getText();
+                            String[] timeStringArray = timeStringTemp.split("\n");
+                            Network.server_Object.get_Train_List().get(trainSelectedIndex).clear_Time_List();
+                            for (String s : timeStringArray) {
+                                Network.server_Object.get_Train_List().get(trainSelectedIndex).add_Time(LocalTime.parse(s));
 
+                            }
+                            //System.out.println(Network.server_Object.get_Train_List().get(trainSelectedIndex).get_Time_List());
+                            saveScheduleEdit.setText("Saved");
                         }
-                        //System.out.println(Network.server_Object.get_Train_List().get(trainSelectedIndex).get_Time_List());
-                        saveScheduleEdit.setText("Saved");
+
+                    });
+
+                    rootScheduleEdit.getChildren().addAll(verticalLeft, verticalCenter, verticalRight);
+                    Scene scene1 = new Scene(rootScheduleEdit, 600, 700);
+                    scheduleStageEdit.setScene(scene1);
+                    scheduleStageEdit.show();
+
+                    }else{
+                        show_Sorry_Automatic_Mode();
                     }
 
-                });
 
-                rootScheduleEdit.getChildren().addAll(verticalLeft,verticalCenter,verticalRight);
-                Scene scene1 = new Scene(rootScheduleEdit, 600, 700);
-                scheduleStageEdit.setScene(scene1);
-                scheduleStageEdit.show();
-            }
-
+                }
         });
+
 
 
 
@@ -1304,7 +1404,11 @@ public class Main extends Application {
 
         modeToggle.setOnAction(e->{
             if(Network.server_Object != null) {
-                Network.server_Object.toggle_Automatic();
+                try {
+                    Network.server_Object.toggle_Automatic();
+                } catch (RemoteException remoteException) {
+                    remoteException.printStackTrace();
+                }
                 if (Network.server_Object.get_Automatic()) {
 
                     modeToggle.setStyle("-fx-background-color: yellow;");
@@ -1323,7 +1427,8 @@ public class Main extends Application {
         });
 
         Label simulationTimeLabel = new Label("SIM TIME (s): ");
-        TextField simulationTime = new TextField("00");
+        simulationTime.setEditable(false);
+
 
 
 
@@ -1361,13 +1466,6 @@ public class Main extends Application {
                 "- The mode can be changed by pressing the big colorful button at the bottom right."
         );
         WELCOME.showAndWait();
-
-
-        scene1.setOnMouseMoved(mouseEvent -> {
-
-            simulationTime.setText(String.valueOf(Network.server_Object.get_Sim_Time()));
-        });
-
     }
 
 
