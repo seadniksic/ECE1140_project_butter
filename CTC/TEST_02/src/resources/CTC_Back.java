@@ -152,10 +152,9 @@ public class CTC_Back implements CTC_Interface {
 
         long time = scheduletime;
 
-        //System.out.println("TIME: " + time);
-        
-        double r = (distance * 6.0) / (time * 100.0);
+        System.out.println("TIME: " + time);
 
+        double r = (distance * 6.0) / (time * 100.0);
 
         //TODO check against speed limits
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
@@ -196,45 +195,21 @@ public class CTC_Back implements CTC_Interface {
             System.out.println(trainList.get(trainIndex).get_Current_Block());
             trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
-       // String holdCurrentInfr = trainList.get(trainIndex).get_Current_Infrastructure();
 
-        //TODO check if this does work now that blocklist is added: process should still work just add block list to process
-        Integer holdCurrentIndex = trainList.get(trainIndex).get_Current_Index();
+        Double distance = determine_Distance(trainIndex);
+        System.out.println("Distance: " + distance);
 
-        List<Integer> blockListHold = trainList.get(trainIndex).get_Infrastructure_Block_List();
-        List<String> infrListHold = trainList.get(trainIndex).get_Infrastructure_List();
-        List<LocalTime> timeListHold = trainList.get(trainIndex).get_Time_List();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime first = LocalTime.parse("00:00",formatter);
 
-        //System.out.println(infrListHold);
-        //System.out.println(timeListHold);
+        long time = MINUTES.between(first, arrivalTime);;
 
-        //System.out.println(trainList.get(trainIndex).get_Time_List());
-        //System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
+        System.out.println("TIME: " + time);
 
-       // System.out.println(holdCurrentIndex);
-       // System.out.println(infrListHold.size());
-       // System.out.println(timeListHold.size());
+        double r = (distance * 6.0) / (time * 100.0);
 
 
-        //clear an hold part of list
-        blockListHold.subList(holdCurrentIndex+1,blockListHold.size()).clear();
-        infrListHold.subList(holdCurrentIndex+1,infrListHold.size()).clear();
-        timeListHold.subList(holdCurrentIndex+1,timeListHold.size()).clear();
-
-        //reset the lists
-        trainList.get(trainIndex).set_Infrastructure_Block_List(blockListHold);
-        trainList.get(trainIndex).set_Infrastructure_List(infrListHold);
-        trainList.get(trainIndex).set_Time_List(timeListHold);
-
-        //add next infrastructure and time
-        //TODO THIS? -> trainList.get(trainIndex).add_Block();
-        trainList.get(trainIndex).add_Infrastructure(nextStop);
-        trainList.get(trainIndex).add_Time(arrivalTime);
-
-        //System.out.println(trainList.get(trainIndex).get_Time_List());
-        //System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
-
-        calculate_Suggested_Speed(trainIndex);
+        trainList.get(trainIndex).set_Suggest_Speed((double)r);
         calculate_Authority(trainIndex);
 
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
@@ -336,13 +311,9 @@ public class CTC_Back implements CTC_Interface {
             lineList.get(lIndex).add_Block(h[1].toCharArray()[0],Integer.parseInt(h[2]),Double.parseDouble(h[3]),
                     Double.parseDouble(h[4]),Integer.parseInt(h[5]),h[6],h[7],Double.parseDouble(h[8]),
                     Double.parseDouble(h[9]));
-
-
-
             previousLine = currentLine;
 
         }
-
             lineList.get(0).create_Graph();
 
     }
@@ -481,8 +452,6 @@ public class CTC_Back implements CTC_Interface {
         //have train be on block
         trainList.get(trainNum).set_Current_Block(block);
 
-//        trainList.get(trainNum).moved_Block();
-//
         int lineIndex = 0;
         for(int i = 0; i < lineList.size(); i++){
             if(lineList.get(i).get_Line().equals(trainList.get(trainNum).get_Current_Line())){
@@ -494,6 +463,7 @@ public class CTC_Back implements CTC_Interface {
 
         if(block > 1) {
             lineList.get(lineIndex).toggle_Block_Occupancy(block - 2);
+            //this leaves 2 block spacer for trains
         }
 
         //occupy next block
@@ -512,6 +482,9 @@ public class CTC_Back implements CTC_Interface {
 
         if(condition && !occupancy) {
             trainList.get(trainNum).train_Moved();
+        }else{
+            trainList.get(trainNum).set_Authority(0);
+            //trainList.get(trainNum).set_Current_Index();
         }
 
 

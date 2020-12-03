@@ -122,12 +122,19 @@ public class Test_CTCBack {
         tester.import_Track_File();
 
 
-        tester.calculate_Authority(0);
+        //tester.calculate_Authority(0);
 
+        tester.dispatch(0);
+
+        tester.train_Moved(0,0);
         for(int i = 62; i <= 65; i++)
         tester.train_Moved(0,i);
 
+        Thread.sleep(300);
 
+
+
+        tester.dispatch(0,"DORMONT",tester.get_Train_List().get(0).get_Time_List().get(1));
 
 
     }

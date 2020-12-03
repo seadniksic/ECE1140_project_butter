@@ -71,6 +71,13 @@ public class Line {
         return blocksList.get(blockNum - 1).get_Infrastructure();
     }
 
+    public List<Integer> get_Speed_Limit_List(){
+        List<Integer> speedLimits = new ArrayList<>();
+
+
+        return speedLimits;
+    }
+
     public List<String> get_Infrastructure_List() {
         infrastructure.clear();
         for (Block bl : blocksList) {
@@ -309,8 +316,8 @@ public class Line {
         return open;
     }
 
-
     public boolean condition(int start, int stop){
+        if(start != 0){
         boolean open = true;
 
         if(stop < start){
@@ -324,11 +331,12 @@ public class Line {
                 break;
             }
         }
-        return open;
-
+        return open;}
+        return true;
     }
 
     public boolean occupancy(int start, int stop){
+        if(start != 0){
         boolean occupied = false;
 
         if(stop < start){
@@ -344,7 +352,8 @@ public class Line {
             }
         }
 
-        return occupied;
+        return occupied;}
+        return false;
     }
 
     public void create_Graph(){

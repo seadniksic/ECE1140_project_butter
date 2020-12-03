@@ -163,7 +163,7 @@ public class Main extends Application {
         set_Text_Settings(block);
 
 
-        Label ticketsLabel = new Label("Tickets per hour:");
+        Label ticketsLabel = new Label("Tickets Sold:");
         TextField tickets = new TextField();
         set_Text_Settings(tickets);
 
@@ -200,7 +200,6 @@ public class Main extends Application {
 
 //************************************TRAIN SET BOX CODE START********************************************************//
 
-        //TODO IMPORTANT !!!!!! make this handle new train. down to 300
 
 
         HBox rootTrainSetBox = new HBox();
@@ -247,7 +246,7 @@ public class Main extends Application {
         Label stopLabel = new Label("Next Stop:");
         ChoiceBox stops = new ChoiceBox();
 
-        //TODO this updates wrong when dispatching after arriving. because i'm reseting the array lists when manual dispatching.
+
         stops.setOnShowing(e->{
             if(trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
                 stops.getItems().clear();
@@ -272,8 +271,6 @@ public class Main extends Application {
                if (trainIDSet.getSelectionModel().getSelectedIndex() != -1) {
                    if (Network.server_Object != null) {
                        if (!Network.server_Object.get_Automatic()) {
-
-                           System.out.println("TRAIN BEING DISPATCHED " + Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_Name());
                            int trainNumberFromName = trainIDSet.getSelectionModel().getSelectedIndex();
 
                            if(trainNumberFromName == Network.server_Object.get_Train_List().size()){
@@ -282,13 +279,12 @@ public class Main extends Application {
                                 manualTrain.set_Infrastructure_Block_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_Block_List());
                                 manualTrain.set_Infrastructure_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_List());
 
-
                            }
 
                            Network.server_Object.get_Train_List().get(trainNumberFromName).add_Time(LocalTime.parse(timeArrival.getText()));
 
                            try {
-                               Network.server_Object.dispatch(trainNumberFromName, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
+                               Network.server_Object.dispatch(trainNumberFromName);//, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
                            } catch (RemoteException | InterruptedException remoteException) {
                                remoteException.printStackTrace();
                            }
@@ -357,7 +353,6 @@ public class Main extends Application {
         Label elevationLabel = new Label("Elevation (FT):");
         TextField elevation = new TextField();
         set_Text_Settings(elevation);
-
 
 
         Label cumulativeElevationLabel = new Label("Cumulative Elevation (FT):");
@@ -644,7 +639,7 @@ public class Main extends Application {
                     int trainNum =Integer.parseInt( trainIdField.getText());
                     double speed = Double.parseDouble(speedField.getText());
                     int authority = Integer.parseInt(authorityField.getText());
-
+                    Network.server_Object.get_Train_List().get(trainNum).set_Authority(authority);
                     try {
                         Network.tcsw_Interface.send_Speed_Authority(trainNum,speed,authority);
                     } catch (RemoteException | InterruptedException remoteException) {

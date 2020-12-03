@@ -172,15 +172,17 @@ public class Train {
 
     public long get_Tickets_Per_Hour() {
         long ticketsPerHour = 0;
-
+        /*
         long simTime = 1;
         if(Network.server_Object != null);
         simTime =Network.server_Object.get_Sim_Time();
 
         //convert seconds to hours
-        simTime *= 0.000277778;
+        //simTime *= 0.000277778;
         if(simTime > 0)
-        ticketsPerHour = numberOfTickets / simTime;
+
+         */
+        ticketsPerHour = numberOfTickets / 1;
         return ticketsPerHour;
     }
 
@@ -284,7 +286,8 @@ public class Train {
         currentIndex ++;
     }
 
-    public void set_Current_Index(int i){ currentIndex = i;
+    public void set_Current_Index(int i){
+        currentIndex = i;
         System.out.println("INF: " + get_Current_Infrastructure() + " -> " + get_Next_Infrastructure());}
 
     public void clear_Infrastructure_List(){
