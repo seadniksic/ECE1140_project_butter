@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="583.0" prefWidth="886.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainPackage.HomeController">
+  <children>
+    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" onMouseEntered="#checkOccUpdate" onMouseExited="#checkOccUpdate" onMouseMoved="#checkOccUpdate" onScroll="#checkOccUpdate" prefHeight="487.0" prefWidth="737.0" VBox.vgrow="ALWAYS">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="135.0" layoutX="137.0" layoutY="237.0" stroke="#acacaf" strokeType="INSIDE" strokeWidth="5.0" width="220.0" />
+            <Rectangle fx:id="lightFrame1" arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="303.0" layoutX="697.0" layoutY="30.0" stroke="#acacaf" strokeType="INSIDE" strokeWidth="5.0" width="153.0" />
+            <Rectangle fx:id="lightFrame" arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="303.0" layoutX="376.0" layoutY="29.0" stroke="#acacaf" strokeType="INSIDE" strokeWidth="5.0" width="153.0" />
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="197.0" layoutX="10.0" layoutY="31.0" stroke="#acacaf" strokeType="INSIDE" strokeWidth="5.0" width="347.0" />
+            <Button fx:id="switchButton" layoutX="200.0" layoutY="383.0" mnemonicParsing="false" onAction="#button1Press" text="Manual Switch" />
+            <Text layoutX="12.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Track Controller Characteristics" />
+            <Text layoutX="23.0" layoutY="55.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Line:" />
+            <Text fx:id="line_text" layoutX="57.0" layoutY="55.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text layoutX="387.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Track Status:" />
+            <Text layoutX="714.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Fault History" />
+            <Text layoutX="174.0" layoutY="278.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Switch Status:">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Text>
+            <Text fx:id="NC_label" layoutX="159.0" layoutY="310.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input and NC Connected">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Text>
+            <Text fx:id="NO_label" layoutX="158.0" layoutY="341.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input and NO Connected">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Text>
+            <Button layoutX="225.0" layoutY="487.0" mnemonicParsing="false" onAction="#moduleConnect" prefHeight="26.0" prefWidth="86.0" text="Button 2 Test" />
+            <ListView fx:id="listview_home" layoutX="168.0" layoutY="45.0" prefHeight="170.0" prefWidth="175.0" />
+            <ListView fx:id="occupancy_list" layoutX="380.0" layoutY="34.0" prefHeight="294.0" prefWidth="145.0">
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor></ListView>
+            <Text layoutX="23.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input Start Bock:" />
+            <Text layoutX="23.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Input End Bock:" />
+            <Text fx:id="in_start_text" layoutX="129.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text fx:id="in_end_text" layoutX="128.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text layoutX="23.0" layoutY="123.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NC Start Bock::" />
+            <Text layoutX="23.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NC End Bock:" />
+            <Text layoutX="24.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NO End Bock:" />
+            <Text layoutX="22.0" layoutY="183.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NO Start Bock:" />
+            <Text fx:id="NC_start_text" layoutX="128.0" layoutY="123.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text fx:id="NO_end_text" layoutX="129.0" layoutY="200.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text fx:id="NC_end_text" layoutX="128.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Text fx:id="NO_start_text" layoutX="128.0" layoutY="183.0" strokeType="OUTSIDE" strokeWidth="0.0" text="line" />
+            <Button fx:id="reprogramButton" layoutX="30.0" layoutY="271.0" mnemonicParsing="false" onAction="#reprogram_press" text="Reprogram" />
+            <Button fx:id="reprogramButton1" layoutX="225.0" layoutY="518.0" mnemonicParsing="false" onAction="#testOccupancyPress" text="Button 3 Test" />
+            <ListView fx:id="fault_list" layoutX="701.0" layoutY="34.0" prefHeight="294.0" prefWidth="145.0">
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor>
+            </ListView>
+            <Rectangle fx:id="lightFrame11" arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="303.0" layoutX="537.0" layoutY="30.0" stroke="#acacaf" strokeType="INSIDE" strokeWidth="5.0" width="153.0" />
+            <Text layoutX="537.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Light Status:" />
+            <ListView fx:id="light_list" layoutX="541.0" layoutY="34.0" prefHeight="294.0" prefWidth="145.0">
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor>
+            </ListView>
+            <TextField fx:id="occ_test" layoutX="48.0" layoutY="457.0" prefHeight="26.0" prefWidth="65.0" />
+            <TextField fx:id="fal_test" layoutX="47.0" layoutY="518.0" prefHeight="26.0" prefWidth="65.0" />
+            <Button fx:id="occ_test_button" layoutX="157.0" layoutY="457.0" mnemonicParsing="false" onAction="#toggle_occ" text="Set" />
+            <Button fx:id="fal_test_button" layoutX="157.0" layoutY="518.0" mnemonicParsing="false" onAction="#toggle_fal" text="Set" />
+            <Text layoutX="31.0" layoutY="453.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Toggle Occupancy" />
+            <Text layoutX="47.0" layoutY="514.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Toggle Fault" />
+            <CheckBox fx:id="occ_setting" layoutX="129.0" layoutY="461.0" mnemonicParsing="false" />
+            <CheckBox fx:id="fal_setting" layoutX="129.0" layoutY="522.0" mnemonicParsing="false" />
+            <CheckBox fx:id="manual_setting" layoutX="27.0" layoutY="243.0" mnemonicParsing="false" onMouseClicked="#button1Enable" prefHeight="18.0" prefWidth="8.0" />
+            <Text layoutX="48.0" layoutY="257.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manual Mode" />
+         </children>
+    </AnchorPane>
+  </children>
+</VBox>
