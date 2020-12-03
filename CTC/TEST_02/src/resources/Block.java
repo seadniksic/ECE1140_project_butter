@@ -12,8 +12,8 @@ public class Block {
     private  double cumulativeElevation;
     private boolean occupancy;//true is occupied & false is not occupied
     private boolean condition;//true is open & false is closed
-    private boolean lights;//true is green & false is red
-    private boolean crossbar;//true is down & false is up
+    private boolean lights ;//true is green & false is red
+    private boolean crossbar ;//true is down & false is up
 
     public Block(){
         section = ' ';
@@ -28,7 +28,7 @@ public class Block {
         condition = true;
     }
 
-    //TODO make stationSide on gui, make gui realize lights on or off and crossbars
+    //TODO make stationSide on gui,
     public Block(char sec, int num, double len, double gra, int speed, String inf, String sSide, double ele,double cumEle){
         section = sec;
         number = num;
@@ -41,7 +41,8 @@ public class Block {
         stationSide = sSide;
         occupancy = false;
         condition = true;
-        lights = false;
+        lights = true;
+        crossbar = false;
     }
 
 

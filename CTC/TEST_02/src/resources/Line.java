@@ -1,5 +1,6 @@
 package resources;
 
+import networking.Network;
 import resources.Block;
 
 import java.util.ArrayList;
@@ -17,75 +18,72 @@ public class Line {
     ArrayList<ArrayList<Integer>> adj;
     int v;
 
-    public Line(){
+    public Line() {
         line = "";
         status = true;
         blocksList.clear();
         infrastructure.clear();
     }
 
-    public Line(String l){
+    public Line(String l) {
         line = l;
         status = true;
         blocksList.clear();
         infrastructure.clear();
     }
 
-    public Line(String l, boolean s){
+    public Line(String l, boolean s) {
         line = l;
         status = s;
         blocksList.clear();
         infrastructure.clear();
     }
 
-    public void add_Block(Character section,Integer number, Double length, Double grade, Integer speedLimit,
-                          String infrastructure, String stationSide, Double elevation, Double cumulativeElevation){
-        Block b = new Block(section, number, length,  grade, speedLimit, infrastructure, stationSide, elevation, cumulativeElevation);
+    public void add_Block(Character section, Integer number, Double length, Double grade, Integer speedLimit,
+                          String infrastructure, String stationSide, Double elevation, Double cumulativeElevation) {
+        Block b = new Block(section, number, length, grade, speedLimit, infrastructure, stationSide, elevation, cumulativeElevation);
         blocksList.add(b);
     }
 
-    public void set_Line(String l){
-        line= l;
+    public void set_Line(String l) {
+        line = l;
     }
 
-    public String get_Line(){
+    public String get_Line() {
         return line;
     }
 
+    public void toggle_Block_Occupancy(int index) {
 
-    public void toggle_Block_Occupancy(int index){
-
-        if(blocksList.get(index).get_Occupancy() == true){
+        if (blocksList.get(index).get_Occupancy() == true) {
             blocksList.get(index).set_Occupancy(false);
-        }else{
+        } else {
             blocksList.get(index).set_Occupancy(true);
         }
 
     }
 
-
-    //TODO front end should be calling this
-    public boolean get_Block_Occupancy(Integer blockNum){
-        return blocksList.get(blockNum-1).get_Occupancy();
+    public boolean get_Block_Occupancy(Integer blockNum) {
+        return blocksList.get(blockNum - 1).get_Occupancy();
     }
 
-    public String get_Block_Infrastructure(Integer blockNum){
-        return blocksList.get(blockNum-1).get_Infrastructure();
+    public String get_Block_Infrastructure(Integer blockNum) {
+        return blocksList.get(blockNum - 1).get_Infrastructure();
     }
 
-    public List<String> get_Infrastructure_List(){
+    public List<String> get_Infrastructure_List() {
         infrastructure.clear();
-        for(Block bl : blocksList){
-            if(!bl.get_Infrastructure().equals("")){
+        for (Block bl : blocksList) {
+            if (!bl.get_Infrastructure().equals("")) {
                 infrastructure.add(bl.get_Infrastructure());
             }
         }
         return infrastructure;
     }
 
-    public List<Character> get_Section_List(){
+    public List<Character> get_Section_List() {
         List<Character> blocksSec = new ArrayList<>();
-        if(blocksList.size() > 0) {
+        if (blocksList.size() > 0) {
             Character currentChar = blocksList.get(0).get_Section();
 
             blocksSec.add(currentChar);
@@ -100,31 +98,31 @@ public class Line {
         return blocksSec;
     }
 
-    public List<Integer> get_Blocks_In_Section_List(Integer currSec){
+    public List<Integer> get_Blocks_In_Section_List(Integer currSec) {
         List<Integer> blocksInSec = new ArrayList<>();
-        for(Block b: blocksList){
-            if((b.get_Section() - 1)  == (currSec + 64)){//use subtraction to force integer
+        for (Block b : blocksList) {
+            if ((b.get_Section() - 1) == (currSec + 64)) {//use subtraction to force integer
                 blocksInSec.add(b.get_Number());
             }
         }
         return blocksInSec;
     }
 
-    public List<Integer> get_Blocks_Numbers_List(){
+    public List<Integer> get_Blocks_Numbers_List() {
         List<Integer> blocksnum = new ArrayList<>();
 
-        for(int i = 0; i < blocksList.size(); i++){
+        for (int i = 0; i < blocksList.size(); i++) {
             blocksnum.add(blocksList.get(i).get_Number());
         }
         return blocksnum;
     }
 
-    public List<Integer> get_Blocks_Are_Switch_List(){
+    public List<Integer> get_Blocks_Are_Switch_List() {
         List<Integer> switches = new ArrayList<>();
 
-        for(int i = 0; i < blocksList.size(); i++){
-            if(blocksList.get(i).get_Infrastructure().contains("SWITCH") || blocksList.get(i).get_Infrastructure().contains("Switch")){
-                switches.add(i+1);
+        for (int i = 0; i < blocksList.size(); i++) {
+            if (blocksList.get(i).get_Infrastructure().contains("SWITCH") || blocksList.get(i).get_Infrastructure().contains("Switch")) {
+                switches.add(i + 1);
             }
 
         }
@@ -132,113 +130,183 @@ public class Line {
         return switches;
     }
 
-    public Double get_Distance_Between(String start, String stop){
-        double distance =0;
-        int startBlock = 0,stopBlock=1;
-        //find block after start infrastructure and block of stop
-        for(Block b: blocksList){
-            if(b.get_Infrastructure().toLowerCase().contains(start.toLowerCase())){
-                startBlock = b.get_Number() + 1;
-            }
-            if(b.get_Infrastructure().toLowerCase().contains((stop.toLowerCase()))){
-                stopBlock = b.get_Number();
-                System.out.println("STOPBLOCK = " + stopBlock);
-                break;
-            }
+    public Double get_Distance_Between(int start, int stop) {
+        //this function is for sug speed
+        double distance = 0;
+//        int startBlock = 0,stopBlock=1;
+//        //find block after start infrastructure and block of stop
+//        for(Block b: blocksList){
+//            if(b.get_Infrastructure().toLowerCase().contains(start.toLowerCase())){
+//                startBlock = b.get_Number() + 1;
+//            }
+//            if(b.get_Infrastructure().toLowerCase().contains((stop.toLowerCase()))){
+//                stopBlock = b.get_Number();
+//                System.out.println("STOPBLOCK = " + stopBlock);
+//                break;
+//            }
+//
+//        }
 
-        }
-        LinkedList<Integer> path = routeGraph.get_Path(adj,startBlock,stopBlock,151);
+//        start = start.replaceAll("\\s", "");
+//        stop = stop.replaceAll("\\s","");
+//        for(Block b: blocksList){
+//            String currInf = b.get_Infrastructure();
+//            currInf = currInf.replaceAll("\\s","");
+//
+//            if(currInf.toLowerCase().contains(start.toLowerCase())){
+//                startBlock = b.get_Number() + 1;
+//                System.out.println("STARTBLOCK = " + startBlock);
+//            }
+//            if(currInf.toLowerCase().contains((stop.toLowerCase()))){
+//                stopBlock = b.get_Number();
+//                System.out.println("STOPBLOCK = " + stopBlock);
+//
+//            }
+//
+//        }
+//
+
+        LinkedList<Integer> path = routeGraph.get_Path(adj, start, stop, 151);
 
         for (int i = path.size() - 1; i >= 0; i--) {
             System.out.print(path.get(i) + " ");
-            distance+= blocksList.get(i).get_Length();
+            distance += blocksList.get(i).get_Length();
         }
 
         return distance;
     }
 
-    public Integer get_Number_Of_Blocks_Between(String start, String stop){
-        Integer numOfBlocks =0;
-        int startBlock = 0,stopBlock=1;
+    public Integer get_Number_Of_Blocks_Between(int start, int stop) {
+        //this fucntion is for authority above is similar
         //find block after start infrastructure and block of stop
-        for(Block b: blocksList){
-            if(b.get_Infrastructure().toLowerCase().contains(start.toLowerCase())){
-                startBlock = b.get_Number() + 1;
-            }
-            if(b.get_Infrastructure().toLowerCase().contains((stop.toLowerCase()))){
-                stopBlock = b.get_Number();
-                System.out.println("STOPBLOCK = " + stopBlock);
-                break;
-            }
 
-        }
-        LinkedList<Integer> path = routeGraph.get_Path(adj,startBlock,stopBlock,151);
+        System.out.println("START :" + start + " -> END : " + stop);
+
+        LinkedList<Integer> path = routeGraph.get_Path(adj, start, stop, 151);
+
+        //make sure path is open
+
+
         return path.size();
     }
 
-    public List<String> get_Block_Information_List(Integer b){
+    public List<String> get_Block_Information_List(Integer b) {
         List<String> information = new ArrayList<>();
-        information.add(blocksList.get(b).get_Length().toString());
-        information.add(blocksList.get(b).get_Grade().toString());
-        information.add(blocksList.get(b).get_Speed_Limit().toString());
-        information.add(blocksList.get(b).get_Infrastructure());
-        information.add(blocksList.get(b).get_Elevation().toString());
-        information.add(blocksList.get(b).get_Cumulative_Elevation().toString());
-        if(blocksList.get(b).get_Occupancy()){
+        information.add(blocksList.get(b - 1).get_Length().toString());
+        information.add(blocksList.get(b - 1).get_Grade().toString());
+        information.add(blocksList.get(b - 1).get_Speed_Limit().toString());
+        information.add(blocksList.get(b - 1).get_Infrastructure());
+        information.add(blocksList.get(b - 1).get_Elevation().toString());
+        information.add(blocksList.get(b - 1).get_Cumulative_Elevation().toString());
+        if (blocksList.get(b - 1).get_Occupancy()) {
             information.add("Occupied");
-        }else{
+        } else {
             information.add("Empty");
         }
-        if(blocksList.get(b).get_Condition()){
+        if (blocksList.get(b - 1).get_Condition()) {
             information.add("Open");
-        }else{
+        } else {
             information.add("Closed");
         }
+        if (blocksList.get(b - 1).get_Infrastructure().toLowerCase().contains("switch")) {
+            if (blocksList.get(b - 1).get_Lights()) {
+                information.add("Green");
+            } else {
+                information.add("Red");
+            }
+        } else {
+            information.add("no lights");
+        }
+        if (blocksList.get(b - 1).get_Infrastructure().toLowerCase().contains("cross")) {
+            if (blocksList.get(b - 1).get_Crossbar()) {
+                information.add("Down");
+            } else {
+                information.add("Up");
+            }
+        } else {
+            information.add("no X bar");
+        }
+
+        information.add(blocksList.get(b - 1).get_stationSide());
 
         return information;
     }
 
-    private Double get_Distance_Between_Blocks(Integer start, Integer end){
+    private Double get_Distance_Between_Blocks(Integer start, Integer end) {
         Double distance = 0.0;
-        while(start != end) {
+        while (start != end) {
             distance += blocksList.get(start).get_Length();
 
             start++;
         }
 
 
-
         return distance;
     }
 
-    public boolean get_Block_Condition(int b){
-       return blocksList.get(b-1).get_Condition();
+    public boolean get_Block_Condition(int b) {
+        return blocksList.get(b - 1).get_Condition();
     }
 
-    public void close_Line(){
-        for(Block b: blocksList){
-               b.set_Condition(false);
+    public void close_Line() {
+        for (Block b : blocksList) {
+            b.set_Condition(false);
         }
     }
 
-    public void open_Line(){
-        for(Block b: blocksList){
+    public void open_Line() {
+        for (Block b : blocksList) {
             b.set_Condition(true);
         }
     }
 
-    public void close_Block(int b){
-        blocksList.get(b-1).set_Condition(false);
+    public void close_Block(int b) {
+        blocksList.get(b - 1).set_Condition(false);
     }
 
-    public void open_Block(int b){
-
-        blocksList.get(b-1).set_Condition(true);
+    public void open_Block(int b) {
+        blocksList.get(b - 1).set_Condition(true);
     }
 
-    public void get_Path(int startBlock, int stopBlock){
-        routeGraph.get_Path(adj,startBlock,stopBlock,151);
+    public void get_Path(int startBlock, int stopBlock) {
+        routeGraph.get_Path(adj, startBlock, stopBlock, 151);
     }
+
+    //TODO use maybe for checking modes
+    public boolean condition(){
+        boolean open = true;
+            for(Block b: blocksList){
+                if(!b.get_Condition()){
+                    open = false;
+                    break;
+                }
+            }
+        return open;
+    }
+
+
+    public boolean condition(int start, int stop){
+        boolean open = true;
+
+        if(stop < start){
+            int hold = start;
+            start = stop;
+            stop = hold;
+        }
+        for(int i = start; i < stop; i++){
+            if(!blocksList.get(i-1).get_Condition()){
+                open = false;
+                break;
+            }
+        }
+        return open;
+
+    }
+
+//    public boolean occupancy(){
+//
+//
+//    }
 
     public void create_Graph(){
 
@@ -268,7 +336,7 @@ public class Line {
                 routeGraph.addEdge(adj, cb.get_Number(), nb.get_Number());
             }
         }
-        //TODO change this or file so that 57->0 and 0->63
+
 
         routeGraph.addEdge(adj,150,29);
 

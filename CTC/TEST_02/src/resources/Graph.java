@@ -69,15 +69,15 @@ public class Graph {
             path.add(pred[crawl]);
             crawl = pred[crawl];
         }
-
+        System.out.println("Path is ::");
+        for (int i = path.size() - 1; i >= 0; i--) {
+            System.out.print(path.get(i) + " ");
+        }
         // Print distance
 //        System.out.println("Shortest path length is: " + dist[dest]);
         return path;
         // Print path
-//        System.out.println("Path is ::");
-//        for (int i = path.size() - 1; i >= 0; i--) {
-//            System.out.print(path.get(i) + " ");
-//        }
+
     }
 
     // a modified version of BFS that stores predecessor

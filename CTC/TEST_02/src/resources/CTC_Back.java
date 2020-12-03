@@ -86,14 +86,8 @@ public class CTC_Back implements CTC_Interface {
 
     public long get_Sim_Time(){return simTime;}
 
-   // public void create_Track(Line trac){
-      //  lineList.add(trac);
-   // }
-
     public void create_Train(Train t){
         trainList.add(t);
-
-        //System.out.println("CREATED TRAIN: " + t.get_Name());
     }
 
     public void create_Line(Line l){
@@ -125,30 +119,17 @@ public class CTC_Back implements CTC_Interface {
         }
 
 
-        //TODO check occupancy and open or close of blocks infront of it
+        int startBlock = trainList.get(trainIndex).get_Current_Infrastructure_Block()+1;
+        int stopBlock = trainList.get(trainIndex).get_Next_Infrastructure_Block();
 
-//        boolean clear = true;
-//        //check if authority is clear 4 blocks ahead.
-//        for(int i = trainList.get(trainIndex).get_Current_Block()+1; i < trainList.get(trainIndex).get_Current_Block()+5; i++){
-//            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
-//                clear = false;
-//            }
-//            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
-//                clear = false;
-//            }
-//        }
-
-       // if(clear) {//move if track is clear
-
-
-            int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(trainList.get(trainIndex).get_Current_Infrastructure(),trainList.get(trainIndex).get_Next_Infrastructure());
-            if(trainList.get(trainIndex).get_Authority() == 0){
-                if(trainList.get(trainIndex).get_Current_Infrastructure().toLowerCase().contains("switch from yard")) {
-                    trainList.get(trainIndex).set_Authority(numberOfBlocks -1);
-                }else{
-                    trainList.get(trainIndex).set_Authority(numberOfBlocks);
-                }
-            }
+        int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(startBlock,stopBlock);
+        if(trainList.get(trainIndex).get_Authority() == 0){
+            if(trainList.get(trainIndex).get_Current_Infrastructure().toLowerCase().contains("switch from yard")) {
+                trainList.get(trainIndex).set_Authority(numberOfBlocks + 2);
+            }else{
+                trainList.get(trainIndex).set_Authority(numberOfBlocks);
+           }
+        }
 
 
 
@@ -215,33 +196,46 @@ public class CTC_Back implements CTC_Interface {
             trainList.get(trainIndex).set_Sent_Create_Command(true);
         }
        // String holdCurrentInfr = trainList.get(trainIndex).get_Current_Infrastructure();
+
+        //TODO check if this does work now that blocklist is added: process should still work just add block list to process
         Integer holdCurrentIndex = trainList.get(trainIndex).get_Current_Index();
+
+        List<Integer> blockListHold = trainList.get(trainIndex).get_Infrastructure_Block_List();
         List<String> infrListHold = trainList.get(trainIndex).get_Infrastructure_List();
         List<LocalTime> timeListHold = trainList.get(trainIndex).get_Time_List();
 
-        System.out.println(infrListHold);
-        System.out.println(timeListHold);
+        //System.out.println(infrListHold);
+        //System.out.println(timeListHold);
 
-        System.out.println(trainList.get(trainIndex).get_Time_List());
-        System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
+        //System.out.println(trainList.get(trainIndex).get_Time_List());
+        //System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
 
-        System.out.println(holdCurrentIndex);
-        System.out.println(infrListHold.size());
-        System.out.println(timeListHold.size());
+       // System.out.println(holdCurrentIndex);
+       // System.out.println(infrListHold.size());
+       // System.out.println(timeListHold.size());
+
+
+        //clear an hold part of list
+        blockListHold.subList(holdCurrentIndex+1,blockListHold.size()).clear();
         infrListHold.subList(holdCurrentIndex+1,infrListHold.size()).clear();
         timeListHold.subList(holdCurrentIndex+1,timeListHold.size()).clear();
 
+        //reset the lists
+        trainList.get(trainIndex).set_Infrastructure_Block_List(blockListHold);
         trainList.get(trainIndex).set_Infrastructure_List(infrListHold);
         trainList.get(trainIndex).set_Time_List(timeListHold);
 
+        //add next infrastructure and time
+        //TODO THIS? -> trainList.get(trainIndex).add_Block();
         trainList.get(trainIndex).add_Infrastructure(nextStop);
         trainList.get(trainIndex).add_Time(arrivalTime);
 
-        System.out.println(trainList.get(trainIndex).get_Time_List());
-        System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
+        //System.out.println(trainList.get(trainIndex).get_Time_List());
+        //System.out.println(trainList.get(trainIndex).get_Infrastructure_List());
 
         calculate_Suggested_Speed(trainIndex);
         calculate_Authority(trainIndex);
+
         System.out.println("suggested speed :" + trainList.get(trainIndex).get_Suggest_Speed());
         System.out.println("authority send: " + trainList.get(trainIndex).get_Authority());
 
@@ -289,8 +283,9 @@ public class CTC_Back implements CTC_Interface {
                     if (h[i].contains(":")) {
                         trainList.get(i - 3).set_Current_Line(h[0]);
                         //System.out.println(h[0]);
-                        //TODO TALK TO ADNAN WHAT YARD BLOCK NUMBER IS CURRENTLY SET TO 1, 0 in my code will return -1 as block 1 is index 0, unless i add a yard block for index 0
-                        trainList.get(i - 3).set_Current_Block(0);
+
+                        //trainList.get(i - 3).set_Current_Block(0);
+                        trainList.get(i-3).add_Block(Integer.parseInt(h[1]));
                         trainList.get(i-3).add_Infrastructure(h[2]);
                        // System.out.println(h[2]);
                         trainList.get(i-3).add_Time(LocalTime.parse(timeString.concat(h[i])));
@@ -366,10 +361,10 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-        System.out.println("Determin_Distance HIT");
-        System.out.println("lineIndex" + lineIndex);
-        return lineList.get(lineIndex).get_Distance_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
-            trainList.get(trainIndex).get_Next_Infrastructure());
+        System.out.println("Determin_Distance HIT ");
+       // System.out.println("lineIndex" + lineIndex);
+        return lineList.get(lineIndex).get_Distance_Between(trainList.get(trainIndex).get_Current_Infrastructure_Block(),
+            trainList.get(trainIndex).get_Next_Infrastructure_Block());
 
 
     }
@@ -481,7 +476,8 @@ public class CTC_Back implements CTC_Interface {
         }
     }
 
-    public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException {
+    public void train_Moved(int trainNum, int block) throws RemoteException, InterruptedException
+    {
         System.out.println("==============================================================================");
         System.out.println("TRAIN " + trainNum + " Moved to Block: " + block);
         //have train be on block
@@ -523,14 +519,13 @@ public class CTC_Back implements CTC_Interface {
         //}
 
 
-        //TODO NEEDS TO NOT DISPATCH IF IN MANUAL AND AT STATION
-        //TODO DOES THIS WORK?
+
         if(trainList.get(trainNum).get_Authority() == 0 && automatic ){
             trainList.get(trainNum).arrived();
 
             Task task = new Task<Void>() {
                 @Override public Void call() throws InterruptedException, RemoteException {
-                    long hold = simTime + 31; //~31 seconds wait
+                    long hold = simTime + 20; //~10 seconds wait
                     while(simTime < hold ){
                         Thread.sleep(1);
                     }//do nothing
@@ -550,6 +545,10 @@ public class CTC_Back implements CTC_Interface {
     public void add_Ticket_CTC(int trainNum) throws RemoteException{
         System.out.println("Ticket added to: " +trainNum);
         trainList.get(trainNum).add_Ticket();
+    }
+
+    public void add_Tickets(int trainNum, int numTickets) throws RemoteException{
+        trainList.get(trainNum).add_Ticket(numTickets);
     }
 
     public void update_Time(double time) throws RemoteException{
@@ -633,6 +632,8 @@ public class CTC_Back implements CTC_Interface {
 
     }
 
+
+    //TODO somehow know if a train isn't moving-> exit automatic mode-> resend speed and authority
 }
 
 

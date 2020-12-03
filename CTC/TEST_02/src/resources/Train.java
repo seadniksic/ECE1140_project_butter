@@ -5,10 +5,9 @@ import java.rmi.RemoteException;
 import java.time.LocalTime;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 import networking.Network;
-import resources.CTC_Back;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ public class Train {
     private Double suggestSpeed;
     private Double avgSpeed;
     private Integer authority;
+    private List<Integer> infrastructureBlockList = new ArrayList<>();
     private List<String> infrastructureList = new ArrayList<>();
     private List<LocalTime> timeList = new ArrayList<>();
     private int currentIndex;
@@ -42,7 +42,7 @@ public class Train {
         numberOfTickets = 0;
         currentIndex = 0;
         sentCreateCommand = false;
-        currentBlock = 62;
+        currentBlock = 0;
 
         set_Number_Of_Cars();
     }
@@ -96,6 +96,7 @@ public class Train {
 
     }
 
+
     public boolean get_Sent_Create_Command(){return sentCreateCommand;}
 
     public void set_Sent_Create_Command(boolean f){ sentCreateCommand = f;}
@@ -135,7 +136,7 @@ public class Train {
         System.out.println("WHY IS THIS END? ->> " + end);
        // System.out.println(infrastructureList);
        // System.out.println(timeList);
-        for(int i = 0; i < infrastructureList.size(); i ++){
+        for(int i = currentIndex; i < infrastructureList.size(); i ++){
             if(infrastructureList.get(i).contains(start)){
                 first = timeList.get(i);
             }else if(infrastructureList.get(i).contains(end)){
@@ -146,8 +147,16 @@ public class Train {
         }
         timeInMinutes = MINUTES.between(first, second);
 
-        return timeInMinutes;//TODO DO THIS SOMEWHERE ELSE MINUS ONE ACCOUNTS FOR SPENDING 1 MINUTE AT EACH STATION
+        return timeInMinutes;
     }
+
+    public int get_Current_Infrastructure_Block(){ return infrastructureBlockList.get(currentIndex);}
+
+    public int get_Next_Infrastructure_Block() {
+        return  infrastructureBlockList.get(currentIndex + 1);
+    }
+
+    public List<Integer> get_Infrastructure_Block_List(){ return infrastructureBlockList; }
 
     public String get_Current_Infrastructure() { return infrastructureList.get(currentIndex);}
 
@@ -194,11 +203,17 @@ public class Train {
 
     public void set_Current_Block(Integer b){ currentBlock = b;}
 
-    // public void setCurrentPosition(String currentPos){ currentBlock = currentPos; }
+
+    public void set_Infrastructure_Block_List(List<Integer> block){
+        infrastructureBlockList = block;
+    }
 
     public void set_Infrastructure_List(List<String> inf){ infrastructureList = inf; }
 
     public void set_Time_List(List<LocalTime> times){ timeList = times; }
+
+    public void add_Block(int b){
+        infrastructureBlockList.add(b);}
 
     public void add_Infrastructure(String s){
         infrastructureList.add(s);
@@ -225,10 +240,15 @@ public class Train {
             // Swap min (smallest num) to current position on array
             LocalTime minTime = timeList.get(pos);
             String minInfrastructure = infrastructureList.get(pos);
+            int minBlock = infrastructureBlockList.get(pos);
+
             timeList.set(pos, timeList.get(i));
             infrastructureList.set(pos,infrastructureList.get(i));
+            infrastructureBlockList.set(pos, infrastructureBlockList.get(i));
+
             timeList.set(i, minTime);
             infrastructureList.set(i,minInfrastructure);
+            infrastructureBlockList.set(i,minBlock);
         }
 
 
@@ -252,6 +272,8 @@ public class Train {
         currentIndex ++;
     }
 
+    public void set_Current_Index(int i){ currentIndex = i;
+        System.out.println("INF: " + get_Current_Infrastructure() + " -> " + get_Next_Infrastructure());}
 
     public void clear_Infrastructure_List(){
         infrastructureList.clear();

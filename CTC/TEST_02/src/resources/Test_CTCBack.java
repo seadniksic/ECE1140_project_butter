@@ -119,9 +119,10 @@ public class Test_CTCBack {
         tester.import_Train_Schedule();
         tester.import_Track_File();
 
+
         tester.calculate_Authority(0);
 
-        System.out.println("Authority for first dispatch of train 0 = " + tester.get_Train_List().get(0).get_Authority());
+
 
     }
 
@@ -149,12 +150,25 @@ public class Test_CTCBack {
         System.out.println("Number of Lines = " +tester.get_Line_List().size());
 
 
+
         System.out.println(" ");
         System.out.println("__________________________");
-        tester.get_Line_List().get(0).get_Path(89, 96);//this is wrong if you go 88 to 96 poplar to shannon
+        System.out.println("Poplar to shannon");
+        tester.get_Train_List().get(0).set_Current_Index(4);
+        tester.calculate_Authority(0);
+        //tester.get_Line_List().get(0).get_Path(89, 96);//this is wrong if you go 88 to 96 poplar to shannon
 
 
+        System.out.println(" ");
+        System.out.println("__________________________");
+        System.out.println("shannon to dormont");
+        tester.get_Train_List().get(0).set_Current_Index(5);
+        tester.calculate_Authority(0);
         //tester.get_Line_List().get(0).get_Path(97, 105);//this works Castle shannon to dormont
+
+
+
+
         //tester.get_Line_List().get(0).get_Path(106, 114);//this works  dormont to glen
         //tester.get_Line_List().get(0).get_Path(142, 22);//this works central to whited
 
