@@ -136,7 +136,7 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         sp.setVvalue(1);
         sp.setContent(this_VBox);
 
-        return new Scene(sp, 800, 800);
+        return new Scene(sp, 1000, 800);
     }
     // Mapping Buttons
     private void map_Line_Button(Button param_Button, int param_Line_Index){

@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 
 public class Block_GUI {
@@ -197,6 +198,7 @@ public class Block_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 parent_Block.is_Station = is_Station_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+
                 summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
@@ -207,6 +209,7 @@ public class Block_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 parent_Block.broken_Rail = broken_Rail_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                //call_Set_Broken_Rail(line);
                 summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
@@ -544,4 +547,31 @@ public class Block_GUI {
         return output;
     }
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
+    private void call_Set_Broken_Rail(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Broken_Rail(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void call_Set_TCF(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Track_Circuit_Failure(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void call_Set_Power_Fail(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Power_Fail(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

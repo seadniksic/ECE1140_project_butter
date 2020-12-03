@@ -10,6 +10,7 @@ public class Block {
     Boolean is_Builder;
 
     // Core information
+    int line_Index;
     String section;
     int blockNumber;
     double length;
