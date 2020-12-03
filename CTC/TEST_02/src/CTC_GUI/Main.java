@@ -1435,10 +1435,10 @@ public class Main extends Application {
 
 
 
-//
-//        ImageView img1 = new ImageView(new
-//                Image(getClass().getResourceAsStream("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\trackLayout.JPG")));
-//        Group middleRoot = new Group(img1);
+//        ImageView imageView = new ImageView();
+//        imageView.setImage(new Image("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\trackLayout.JPG"));
+
+
 
 
         VBox bottomRightButton = new VBox();
@@ -1455,8 +1455,8 @@ public class Main extends Application {
         rootBorderPane.setBottom(bottomRoot);
         rootBorderPane.setRight(getRightTray(rootTrainInfoBox,rootTrackInfoBox));
 
-
-//        rootBorderPane.setCenter(middleRoot);
+//
+//        rootBorderPane.setCenter(imageView);
 
 
         Scene scene1 = new Scene(rootBorderPane, 1410, 900);
