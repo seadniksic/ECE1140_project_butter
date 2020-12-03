@@ -15,6 +15,7 @@ import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class Train_Model {
     static double car_Length = 32.2; // meters
@@ -88,9 +89,28 @@ public class Train_Model {
 
     public void set_Grade(double number) { this.grade = number; }
 
-    public void send_Beacon_Information (String next_Stop, boolean door_Side) {  // 0 - left, 1 - right
-//        Network.tc_Interface.send_Beacon_Information(next_Stop, door_Side);
+    public void send_Beacon_Information (String next_Stop, boolean door_Side) throws RemoteException {  // 0 - left, 1 - right
+        Network.tc_Interface.send_Beacon_Information(id, next_Stop, door_Side);
+        int temp_passengers = passengers;
         this.next_Stop = next_Stop;
+
+        class Disembark extends Thread {
+            public void run() {
+                while (velocity != 0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                passengers -= new Random().nextInt(temp_passengers);
+            }
+
+        }
+        Disembark disembark = new Disembark();
+        disembark.start();
+
     }
 
     public void set_Announcements(boolean announcements) { this.announcements = announcements; }
@@ -118,7 +138,21 @@ public class Train_Model {
     public void set_Emergency_Brake_Status(boolean state) throws RemoteException, FileNotFoundException {
         this.emergency_Brake_Status = state;
         if (!state) {
-            GUI.e_brake_image = new ImageView(new Image(new FileInputStream(GUI.asset_Location + "lever_off.png")));
+            Platform.runLater( () -> {
+                try {
+                    GUI.e_brake_image.setImage(new Image(new FileInputStream(GUI.asset_Location + "lever_off.png")));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else if (state) {
+            Platform.runLater( () -> {
+                try {
+                    GUI.e_brake_image.setImage(new Image(new FileInputStream(GUI.asset_Location + "lever_on.png")));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
     }
@@ -144,6 +178,8 @@ public class Train_Model {
     public int get_Num_Cars() { return this.num_Cars; }
 
     public int get_Passengers() { return this.passengers; }
+
+    public int get_Crew() { return this.crew; }
 
     public boolean get_Int_Lights() {
         return this.int_Lights;
@@ -291,6 +327,7 @@ public class Train_Model {
 
         time = Network.server_Object.get_Current_Time();
         Network.tm_Interface.outer_Update_Occupancy(id, new_Distance - distance);
+        Network.tc_Interface.send_Distance(id, distance);
         distance = new_Distance;
         velocity = current_Velocity < 0 ? 0: current_Velocity;
 

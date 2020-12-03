@@ -515,7 +515,7 @@ public class Block_GUI {
     }
     private void set_Up_Color_Map(){
         color_Map = new HashMap<String,String>();
-        String folder = "E:\\Fat Documents\\Pitt\\Junior Year\\1140 - Systems and Project Engineering\\Project Repository\\ECE1140_project_butter\\Track Model Module\\src\\sample\\";
+        String folder = "C:\\Users\\sayba\\Documents\\University\\Fall 2020 T5\\ECE 1140\\ECE1140_project_butter\\Track Model Module\\src\\sample\\";
         color_Map.put("Blue", folder + "Blue.png");
         color_Map.put("Green", folder + "Green.png");
         color_Map.put("Mustard", folder + "Mustard.png");

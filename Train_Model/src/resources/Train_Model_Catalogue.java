@@ -49,7 +49,7 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
         trains.get(train_Num).send_Speed_Authority(speed, authority, grade);
     }
 
-    public void send_Beacon_Information (int train_Num, String next_Stop, boolean door_Side) {
+    public void send_Beacon_Information (int train_Num, String next_Stop, boolean door_Side) throws RemoteException {
         trains.get(train_Num).send_Beacon_Information(next_Stop, door_Side);
     }
 
@@ -61,7 +61,6 @@ public class Train_Model_Catalogue implements Train_Model_Interface {
     public double update_Speed(int train_Num, double power) throws RemoteException {  //
         return trains.get(train_Num).update_Speed(power);
     }
-
 
     public void set_Int_Lights(int train_Num, boolean state) {
         trains.get(train_Num).set_Int_Lights(state);

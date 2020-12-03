@@ -132,16 +132,21 @@ public class GUI extends Application {
 
             ObservableList<Property> temp4 = FXCollections.observableArrayList(
                     new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
+                    new Property("Crew", train.get_Crew(), train.get_Crew() == 1 ? "person" : "people"),
                     new Property("Engine Power Limit", 120, "kilowatts"),
                     new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
                     new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
                     new Property("Cars", train.get_Num_Cars(), "cars")
-
             );
-            FXCollections.copy(main_data, temp);
-            FXCollections.copy(advanced_data, temp2);
-            FXCollections.copy(non_vital_data, temp3);
-            FXCollections.copy(attributes_data, temp4);
+
+            try {
+                FXCollections.copy(main_data, temp);
+                FXCollections.copy(advanced_data, temp2);
+                FXCollections.copy(non_vital_data, temp3);
+                FXCollections.copy(attributes_data, temp4);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             System.out.println("---------Update Ran-----------");
         }
     }
@@ -196,7 +201,7 @@ public class GUI extends Application {
         ListView<String> list = new ListView<String>();
         list.setPlaceholder(new Label("No Trains To Display"));
         list.setItems(Train_Model_Catalogue.name_List);
-        list.setPadding(new Insets(15,0,0,0));
+//        list.setPadding(new Insets(15,0,0,0));
 
         Menu menu = new Menu("Connect To Modules");
         MenuItem menuItem1 = new MenuItem("Track Model");
@@ -314,6 +319,7 @@ public class GUI extends Application {
 
         attributes_data = FXCollections.observableArrayList(
                 new Property("Passengers", train.get_Passengers(), train.get_Passengers() == 1 ? "person" : "people"),
+                new Property("Crew", train.get_Crew(), train.get_Crew() == 1 ? "person" : "people"),
                 new Property("Engine Power Limit", 120, "kilowatts"),
                 new Property("Length", train.get_Num_Cars() * Train_Model.car_Length, "meters"),
                 new Property("Mass", train.get_Num_Cars() * Train_Model.car_Mass, "kg"),
@@ -393,7 +399,7 @@ public class GUI extends Application {
         advanced_info.setTranslateY(20);
 
         Button logs = new Button("Failure Logs");
-        logs.setTranslateX(950);
+        logs.setTranslateX(1100);
         logs.setTranslateY(10);
         logs.setScaleX(1.3);
         logs.setScaleY(1.3);
@@ -402,7 +408,7 @@ public class GUI extends Application {
 
             VBox structure = new VBox();
             HBox temp1 = new HBox();
-            Text key1 = new Text("Time        |");
+            Text key1 = new Text("Time              |");
             Text value1 = new Text("     Failure Type");
             key1.setFont(new Font("Candara", 25));
             value1.setFont(new Font("Candara", 25));
@@ -415,7 +421,7 @@ public class GUI extends Application {
                 int hours = (int) time / 3600;
                 int minutes = ( (int) time ) % 60;
                 int seconds = (int) time - hours * 3600 - minutes * 60;
-                Text key = new Text(hours + " : " + minutes + " : " + seconds + "    |     ");
+                Text key = new Text(hours + " : " + minutes +   "  |   ");
                 Text value = new Text( (String) mapElement.getValue());
                 key.setFont(new Font("Candara", 25));
                 value.setFont(new Font("Candara", 25));
