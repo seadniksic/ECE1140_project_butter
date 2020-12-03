@@ -585,9 +585,13 @@ public class Main extends Application {
         MenuItem simReset = new MenuItem("Reset Simulation Time");
         timeMenu.getItems().addAll( simStart, simSetMult1, simSetMult10, simSetMult20, simSetMult50, simPause, simResume,simReset);
 
+        Menu helpMenu = new Menu("_Help");
+        MenuItem contactInformation = new MenuItem("_Info");
+        helpMenu.getItems().addAll(contactInformation);
+
 
         rootMenuBarLeft.setMaxHeight(5);
-        rootMenuBarLeft.getMenus().addAll(file,scheduleMenu, trackMenu,networkMenu,timeMenu);
+        rootMenuBarLeft.getMenus().addAll(file,scheduleMenu, trackMenu,networkMenu,timeMenu,helpMenu);
 
 
 
@@ -997,7 +1001,27 @@ public class Main extends Application {
             }
         });
 
+        contactInformation.setOnAction(new EventHandler<ActionEvent>(){
 
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+
+                Stage help = new Stage();
+
+                help.setTitle("Help Menu");
+
+                Label info = new Label("Zachary Turner\n\nzgt4@pitt.edu\n\n(724) 996 - 1300");
+
+                HBox box = new HBox(info);
+
+                box.setPadding(new Insets(50,10,10,60));
+                Scene sceneHelp = new Scene(box, 250, 230);
+
+                help.setScene(sceneHelp);
+                help.show();
+            }
+        });
 //////////////////////////////////SCHEDULE VIEW//////////////////////////////////////////
 
 
