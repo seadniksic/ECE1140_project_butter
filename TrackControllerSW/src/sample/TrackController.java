@@ -2,9 +2,8 @@ package sample;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
 import java.util.*;
-
-import static sample.Network.tm_Interface;
 
 public class TrackController {
     int controllerNum;
@@ -12,13 +11,11 @@ public class TrackController {
     ArrayList blocks; //holds block numbers
     boolean[] blockStates; //holds each block occupancy
     int[] switchPos; //holds where switch is
-    //int switchPos; //holds where switch is
-    boolean[] switchState;
-    //static boolean switchState; //holds switch position
+    boolean[] switchState; //holds each switch block state
     int xBarPos; //holds where crossbar is if exists
     boolean xBarState; //holds crossbar state
     ArrayList lightPos; //holds light positions (every switch related block, station)
-    String [] trafficLights; //holds light states
+    boolean [] trafficLights; //holds light states
 
     //holds faults per block
     String [] isBrokenRail;
@@ -27,6 +24,8 @@ public class TrackController {
     //holds faults per block
 
     boolean [] isOpen; //holds which blocks are open
+
+    //PLC related variables
     File plc;
     PLCConfig plcConfig;
 
@@ -40,9 +39,9 @@ public class TrackController {
         switchPos = new int[3];
         switchState = new boolean[3];
         lightPos = new ArrayList();
-        trafficLights = new String[10];
+        trafficLights = new boolean[10];
         xBarState = false;
-        plc = new File("New Text Document.txt");
+        plc = new File(get_Track_Line() + get_Controller_Num() + ".txt");
         plcConfig = new PLCConfig();
     }
 
@@ -56,9 +55,9 @@ public class TrackController {
         switchPos = new int[3];
         switchState = new boolean[3];
         lightPos = new ArrayList();
-        trafficLights = new String[Blocks.size()];
+        trafficLights = new boolean[Blocks.size()];
         xBarState = false;
-        plc = new File("New Text Document.txt");
+        plc = new File("green" + get_Controller_Num() + ".txt");
         plcConfig = new PLCConfig();
 
         blocks = (ArrayList) Blocks.clone();
@@ -70,7 +69,7 @@ public class TrackController {
             isTrackCircuitFail[i] = "No TCF";
             isPowerFail[i] = "No PF";
             isOpen[i] = true;
-            trafficLights[i] = "Green";
+            trafficLights[i] = true;
         }
     }
 
@@ -82,29 +81,29 @@ public class TrackController {
             line = scan.nextLine();
 
             switch (line) {
-                case "SWITCH": //DEFAULT PATH
+                case "SWITCH": //
                     int i = 0;
                     line = scan.nextLine();
                     do {
-                        //System.out.println(line + " " + i);
                         switchPos[i] = Integer.parseInt(line.substring(0,3));
                         lightPos.add(switchPos[i]);
                         switch (i) {
                             case 0:
                             case 1:
-                                switchState[i] = true;
+                                switchState[i] = false;
                                 break;
                             case 2:
-                                switchState[i] = false;
+                                switchState[i] = true;
                                 break;
                             default: break;
                         }
                         i++;
                         line = scan.nextLine();
                     } while (!line.equalsIgnoreCase("END"));
+
                     break;
 
-                case "STATION": //SWITCH PATH
+                case "STATION": //
                     line = scan.nextLine();
                     do {
                         lightPos.add(Integer.parseInt(line.substring(0,3)));
@@ -113,10 +112,9 @@ public class TrackController {
                     break;
 
 
-                case "CROSSING": //SWITCH PATH
+                case "CROSSING": //
                     line = scan.nextLine();
                     xBarPos = Integer.parseInt(line.substring(0,3));
-                    //lightPos.add(xBarPos);
                     xBarState = false;
                     break;
 
@@ -129,9 +127,13 @@ public class TrackController {
         System.out.println(lightPos);
         for (int i = 0; i < blocks.size(); i++) {
             if (lightPos.contains(blocks.get(i))) {
-                trafficLights[i] = "Green Light";
+                trafficLights[i] = true;
             } else {
-                trafficLights[i] = "";
+                trafficLights[i] = false;
+            }
+
+            if ((int)blocks.get(i) == switchPos[2]) {
+                trafficLights[i] = false;
             }
         }
     }
@@ -145,39 +147,54 @@ public class TrackController {
     }
 
     //change internal block state when train moves, run PLC
-    public void set_Block_State(int blockNum) throws FileNotFoundException {
+    public void set_Block_State(int blockNum) throws FileNotFoundException, RemoteException {
+        reset_Blocks();
+
+        if (blockNum != 0)
         blockStates[blocks.indexOf(blockNum)] = true;
 
-        if (blockNum == (int) blocks.get(0))
+        /*if (blocks.indexOf(blockNum) == 0) {
             blockStates[blocks.indexOf(blockNum+1)] = false;
-
-        if (blockNum == blocks.indexOf(blocks.size() - 1))
+        } else if (blocks.indexOf(blockNum) == blocks.size()-1) {
             blockStates[blocks.indexOf(blockNum-1)] = false;
-
-        if (blockNum > (int) blocks.get(0) && blockNum < blocks.indexOf(blocks.size() - 1)){
+        } else {
             blockStates[blocks.indexOf(blockNum-1)] = false;
             blockStates[blocks.indexOf(blockNum+1)] = false;
-        }
+        }*/
 
         run_PLC();
     }
 
     //plc calls to change internal switch
-    public void set_Switch_State(boolean newSwitch) {
+    public void set_Switch_State(boolean newSwitch) throws RemoteException {
         switchState[0] = newSwitch;
-    }
+        try {
+            Network.tm_Interface.set_Switch_At_Block(0, switchPos[0], newSwitch);
+        } catch (NullPointerException | RemoteException e) {
 
-    //plc calls to change internal lights
-    public void set_Light_State(int blockNum, boolean newLight) {
-        if (newLight) {
-            trafficLights[blocks.indexOf(blockNum)] = "Green Light";
-        } else {
-            trafficLights[blocks.indexOf(blockNum)] = "Red Light";
         }
     }
 
-    public void set_XBar_State(boolean newBar) {
+    //plc calls to change internal lights
+    public void set_Light_State(int blockNum, boolean newLight) throws RemoteException {
+        if (blockNum != 0)
+        trafficLights[blocks.indexOf(blockNum)] = newLight;
+        try {
+            Network.c_Interface.change_Lights(get_Track_Line(), blockNum, newLight);
+        } catch (NullPointerException | RemoteException e) {
+
+        }
+
+    }
+
+    public void set_XBar_State(boolean newBar) throws RemoteException {
         xBarState = newBar;
+        try {
+            Network.c_Interface.change_CrossBar(get_Track_Line(), xBarPos, newBar);
+        }catch (NullPointerException | RemoteException e) {
+
+        }
+
     }
 
     public void set_Block_Open(int blockNum) {
@@ -197,80 +214,77 @@ public class TrackController {
     public void set_Broken_Rail(int blockNum, boolean newState) {
         if (newState) {
             isBrokenRail[blocks.indexOf(blockNum)] = "Broken Rail";
+            isOpen[blocks.indexOf(blockNum)] = false;
         } else {
             isBrokenRail[blocks.indexOf(blockNum)] = "No BR";
+            isOpen[blocks.indexOf(blockNum)] = true;
         }
     }
 
     public void set_Track_Fail(int blockNum, boolean newState) {
         if (newState) {
             isTrackCircuitFail[blocks.indexOf(blockNum)] = "Track Circuit Fail";
+            isOpen[blocks.indexOf(blockNum)] = false;
         } else {
             isTrackCircuitFail[blocks.indexOf(blockNum)] = "No TCF";
+            isOpen[blocks.indexOf(blockNum)] = true;
         }
     }
 
     public void set_Power_Fail(int blockNum, boolean newState) {
         if (newState) {
             isPowerFail[blocks.indexOf(blockNum)] = "Power Fail";
+            isOpen[blocks.indexOf(blockNum)] = false;
         } else {
             isPowerFail[blocks.indexOf(blockNum)] = "No PF";
+            isOpen[blocks.indexOf(blockNum)] = true;
         }
     }
 
-    public void run_PLC () throws FileNotFoundException {
-        plcConfig.run_PLC_Program(switchPos, blockStates, xBarPos);
+    public void run_PLC () throws FileNotFoundException, RemoteException {
+        plcConfig.run_PLC_Program(switchPos, blockStates, switchState[0], xBarPos);
     }
 
     //FOR UI USE ONLY
-    public int get_Block_Amount() {
-        return blocks.size();
-    }
+    public int get_Controller_Num() { return controllerNum; }
 
-    public int get_Block_ID(int blockIndex) {
-        return (int) blocks.get(blockIndex);
-    }
+    public String get_Track_Line() { return trackLine; }
 
-    public boolean get_Block_State(int blockIndex) {
-        return blockStates[blockIndex];
-    }
+    public int get_Block_Amount() { return blocks.size(); }
 
-    public boolean get_Block_Status(int blockIndex) {
-        return isOpen[blockIndex];
-    }
+    public int get_Block_ID(int blockIndex) { return (int) blocks.get(blockIndex); }
 
-    public int get_Switch_ID() {
-        //return 0;
-        return switchPos[0];
-    }
+    public boolean get_Block_State(int blockIndex) { return blockStates[blockIndex]; }
 
-    public boolean get_Switch_State() {
-        //return true;
-        return switchState[0];
-    }
+    public boolean get_Block_Status(int blockIndex) { return isOpen[blockIndex]; }
+
+    public int get_Switch_ID() { return switchPos[0]; }
+
+    public int get_Switch_Beta() { return switchPos[1]; }
+
+    public int get_Switch_Gamma() { return switchPos[2]; }
+
+    public boolean get_Switch_State() { return switchState[0]; }
+
     public String get_Light_State(int blockIndex) {
-        return trafficLights[blockIndex];
+        if (trafficLights[blockIndex] && lightPos.contains(blocks.get(blockIndex))) {
+            return "Green Light";
+        } else if (!trafficLights[blockIndex] && lightPos.contains(blocks.get(blockIndex))) {
+            return "Red Light";
+        } else {
+            return "";
+        }
     }
 
-    public int get_XBar_ID() {
-        return xBarPos;
-    }
+    public int get_XBar_ID() { return xBarPos; }
 
-    public boolean get_XBar_State() {
-        return xBarState;
-    }
+    public boolean get_XBar_State() { return xBarState; }
 
-    public String get_Broken_Rail(int blockIndex) {
-        return isBrokenRail[blockIndex];
-    }
+    public String get_Broken_Rail(int blockIndex) { return isBrokenRail[blockIndex]; }
 
-    public String get_Track_Fail(int blockIndex) {
-        return isTrackCircuitFail[blockIndex];
-    }
+    public String get_Track_Fail(int blockIndex) { return isTrackCircuitFail[blockIndex]; }
 
-    public String get_Power_Fail(int blockIndex) {
-        return isPowerFail[blockIndex];
-    }
+    public String get_Power_Fail(int blockIndex) { return isPowerFail[blockIndex]; }
 
     public String get_File() {
         if (plc.exists()) {

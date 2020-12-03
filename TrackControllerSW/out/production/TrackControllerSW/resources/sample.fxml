@@ -42,6 +42,7 @@
         <items>
           <MenuItem mnemonicParsing="false" onAction="#set_Line_Green" text="Green" />
           <MenuItem mnemonicParsing="false" onAction="#set_Line_Red" text="Red" />
+            <MenuItem mnemonicParsing="false" onAction="#set_Line_Other" text="Other" />
         </items>
       </MenuButton>
       <Label fx:id="line_label" layoutX="308.0" layoutY="216.0" text="LINE">
@@ -50,7 +51,7 @@
          </font>
       </Label>
       <Separator layoutX="2.0" layoutY="256.0" prefHeight="17.0" prefWidth="719.0" />
-      <GridPane fx:id="redControllers" layoutX="279.0" layoutY="338.0">
+      <GridPane fx:id="redControllers" layoutX="222.0" layoutY="297.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -71,8 +72,29 @@
             <Button mnemonicParsing="false" onAction="#openController13" text="7" GridPane.columnIndex="2" />
          </children>
       </GridPane>
-      <Button layoutX="633.0" layoutY="439.0" mnemonicParsing="false" onAction="#run_Network" text="Connect" />
-      <Button layoutX="633.0" layoutY="401.0" mnemonicParsing="false" onAction="#start_Server" text="Start Server" />
+      <Button layoutX="579.0" layoutY="459.0" mnemonicParsing="false" onAction="#run_Network2" text="Connect Track Model" />
+      <Button layoutX="609.0" layoutY="427.0" mnemonicParsing="false" onAction="#run_Network1" text="Connect CTC" />
       <Button layoutX="594.0" layoutY="14.0" mnemonicParsing="false" onAction="#demo_Data" text="BEGIN TEST MODE" />
+      <GridPane fx:id="otherControllers" layoutX="232.0" layoutY="297.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints maxHeight="39.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="25.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="41.0" minHeight="5.0" prefHeight="41.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Button mnemonicParsing="false" onAction="#open_Controller14" text="1" GridPane.valignment="CENTER" />
+            <Button mnemonicParsing="false" onAction="#open_Controller15" text="2" GridPane.columnIndex="1" />
+            <Button mnemonicParsing="false" onAction="#open_Controller16" text="3" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#open_Controller17" text="4" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#open_Controller19" text="6" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#open_Controller18" text="5" GridPane.rowIndex="2" />
+         </children>
+      </GridPane>
+      <Button mnemonicParsing="false" text="Button" />
+      <Button layoutX="538.0" layoutY="398.0" mnemonicParsing="false" onAction="#run_Network3" text="Connect Track Controller HW" />
    </children>
 </Pane>

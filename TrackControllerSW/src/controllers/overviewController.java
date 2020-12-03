@@ -70,7 +70,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 0);
             PLCConfig.con = Network.serverObject.get_Controller("green", 0);
-            //System.out.println(Network.serverObject.get_Controller("green", 0);0).get_Track_Line());
+            //con.set_PLC_Program("green1.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage1.setScene(scene);
@@ -88,6 +88,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 1);
             PLCConfig.con = Network.serverObject.get_Controller("green", 1);
+            //con.set_PLC_Program("green2.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage2.setScene(scene);
@@ -105,6 +106,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 2);
             PLCConfig.con = Network.serverObject.get_Controller("green", 1);
+            //con.set_PLC_Program("green3.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage3.setScene(scene);
@@ -122,6 +124,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 3);
             PLCConfig.con = Network.serverObject.get_Controller("green", 3);
+            //con.set_PLC_Program("green4.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage4.setScene(scene);
@@ -139,6 +142,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 4);
             PLCConfig.con = Network.serverObject.get_Controller("green", 4);
+            //con.set_PLC_Program("green5.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage5.setScene(scene);
@@ -156,6 +160,7 @@ public class overviewController extends trackControllerUI {
         try {
             trackControllerUI.con = Network.serverObject.get_Controller("green", 5);
             PLCConfig.con = Network.serverObject.get_Controller("green", 5);
+            //con.set_PLC_Program("green6.txt");
             Parent root = FXMLLoader.load(getClass().getResource("../resources/trackController.fxml"));
             Scene scene = new Scene(root);
             stage6.setScene(scene);
@@ -404,4 +409,5 @@ public class overviewController extends trackControllerUI {
         Network.connect_To_Track_Model();
     }
 
+    public void run_Network3(ActionEvent actionEvent) { Network.connect_To_Track_Controller(); }
 }
