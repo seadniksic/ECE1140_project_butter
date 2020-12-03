@@ -118,29 +118,28 @@ public class CTC_Back implements CTC_Interface {
             }
         }
 
-
+        //set start and end blocks
         int startBlock = trainList.get(trainIndex).get_Current_Infrastructure_Block()+1;
         int stopBlock = trainList.get(trainIndex).get_Next_Infrastructure_Block();
 
+
+        //check track condition
+        boolean condition = lineList.get(lineIndex).condition(startBlock,stopBlock);
+
+        //check track occupancy
+        boolean occupancy = lineList.get(lineIndex).occupancy(startBlock,stopBlock);
+
+        //get authority
         int numberOfBlocks = lineList.get(lineIndex).get_Number_Of_Blocks_Between(startBlock,stopBlock);
-        if(trainList.get(trainIndex).get_Authority() == 0){
+
+
+        if(trainList.get(trainIndex).get_Authority() == 0 && condition && !occupancy){
             if(trainList.get(trainIndex).get_Current_Infrastructure().toLowerCase().contains("switch from yard")) {
                 trainList.get(trainIndex).set_Authority(numberOfBlocks + 2);
             }else{
                 trainList.get(trainIndex).set_Authority(numberOfBlocks);
            }
         }
-
-
-
-        //}else{
-          //  trainList.get(trainIndex).set_Authority(1);
-       // }
-
-
-
-
-
     }
 
     public void calculate_Suggested_Speed(Integer trainIndex){
@@ -149,13 +148,15 @@ public class CTC_Back implements CTC_Interface {
         System.out.println("Distance: " + distance);
 
         long scheduletime = trainList.get(trainIndex).get_Time_Between(trainList.get(trainIndex).get_Current_Infrastructure(),
-                trainList.get(trainIndex).get_Next_Infrastructure());//this is in minutes
-        //long simDiffTime = MINUTES.between( get_SimTime_As_LocalTime() ,trainList.get(trainIndex).get_Arrival_Time_Of_Next_INFR());
+                trainList.get(trainIndex).get_Next_Infrastructure());
 
-        long time = scheduletime; //Math.min(scheduletime, simDiffTime);
+        long time = scheduletime;
 
-        System.out.println("TIME: " + time);
-        double r = (distance * 6.0)/(time*100.0);//this is in Km/Hr
+        //System.out.println("TIME: " + time);
+        
+        double r = (distance * 6.0) / (time * 100.0);
+
+
         //TODO check against speed limits
         trainList.get(trainIndex).set_Suggest_Speed((double)r);
     }
@@ -342,11 +343,8 @@ public class CTC_Back implements CTC_Interface {
 
         }
 
+            lineList.get(0).create_Graph();
 
-
-        for(Line line: lineList){
-            line.create_Graph();
-        }
     }
 
     private double determine_Distance(Integer trainIndex){
@@ -501,23 +499,20 @@ public class CTC_Back implements CTC_Interface {
         //occupy next block
         lineList.get(lineIndex).toggle_Block_Occupancy(block);
 
-//        boolean clear = true;
-//        //check if authority is clear 4 blocks ahead.
-//        for(int i = trainList.get(trainNum).get_Current_Block()+1; i < trainList.get(trainNum).get_Current_Block()+5; i++){
-//            if(lineList.get(lineIndex).get_Block_Occupancy(i) == true){
-//                clear = false;
-//            }
-//            if(lineList.get(lineIndex).get_Block_Condition(i) == false){
-//                clear = false;
-//            }
-//        }
+        //set start and end blocks
+        int startBlock = block;
+        int stopBlock = trainList.get(trainNum).get_Next_Infrastructure_Block();
 
-        //if(clear) {//move if track is clear
+
+        //check track condition
+        boolean condition = lineList.get(lineIndex).condition(startBlock,stopBlock);
+
+        //check track occupancy
+        boolean occupancy = lineList.get(lineIndex).occupancy(startBlock,stopBlock);
+
+        if(condition && !occupancy) {
             trainList.get(trainNum).train_Moved();
-      //  }else if(){
-          //  trainList.get(trainNum).set_Authority(1);
-        //}
-
+        }
 
 
         if(trainList.get(trainNum).get_Authority() == 0 && automatic ){
@@ -626,6 +621,7 @@ public class CTC_Back implements CTC_Interface {
     public void change_CrossBar(String line, int block, boolean state){
         for(int i = 0 ; i < lineList.size(); i++) {
             if(line.toLowerCase().equals( lineList.get(i).get_Line().toLowerCase())){
+                System.out.println("BLOCK: " + block + "State: " + state);
                 lineList.get(i).set_Crossbar(block,state);
             }
         }

@@ -107,6 +107,8 @@ public class Train {
 
     public Double get_Suggest_Speed() { return suggestSpeed; }
 
+    public Double get_Suggest_Speed_GUI(){return suggestSpeed *.621371;}
+
     public Double get_Avg_Speed() { return avgSpeed; }
 
     public Integer get_Authority(){ return authority; }
@@ -170,7 +172,15 @@ public class Train {
 
     public long get_Tickets_Per_Hour() {
         long ticketsPerHour = 0;
-        ticketsPerHour = numberOfTickets / 1;
+
+        long simTime = 1;
+        if(Network.server_Object != null);
+        simTime =Network.server_Object.get_Sim_Time();
+
+        //convert seconds to hours
+        simTime *= 0.000277778;
+        if(simTime > 0)
+        ticketsPerHour = numberOfTickets / simTime;
         return ticketsPerHour;
     }
 
@@ -267,7 +277,9 @@ public class Train {
 
 
     public void arrived() throws RemoteException, InterruptedException {
+        if(Network.tcsw_Interface != null)
         Network.tcsw_Interface.send_Speed_Authority(Integer.valueOf(name.substring(2)),suggestSpeed,0);
+
         System.out.println("TRAIN ARRIVED AT :" + get_Next_Infrastructure());
         currentIndex ++;
     }

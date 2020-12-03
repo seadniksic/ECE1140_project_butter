@@ -140,13 +140,10 @@ public class Main extends Application {
             fill_Train_ChoiceBox(trainIDInfo);
         });
 
+
         Label suggestSpeedLabel = new Label("Suggested Speed(MPH):");
         TextField suggestSpeed = new TextField();
         set_Text_Settings(suggestSpeed);
-
-        Label avgSpeedLabel = new Label("Avg Speed(MPH):");
-        TextField avgSpeed = new TextField();
-        set_Text_Settings(avgSpeed);
 
         Label authorityLabelInfo = new Label("Authority:");
         TextField authorityInfo = new TextField();
@@ -165,6 +162,7 @@ public class Main extends Application {
         TextField block = new TextField();
         set_Text_Settings(block);
 
+
         Label ticketsLabel = new Label("Tickets per hour:");
         TextField tickets = new TextField();
         set_Text_Settings(tickets);
@@ -177,8 +175,8 @@ public class Main extends Application {
         trainIDInfo.setOnAction(e->{
             if(trainIDInfo.getSelectionModel().getSelectedIndex() != -1){
                 int selectedTrainIndexInfo = trainIDInfo.getSelectionModel().getSelectedIndex();
-                suggestSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Suggest_Speed().toString());
-                avgSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Avg_Speed().toString());
+                suggestSpeed.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Suggest_Speed_GUI().toString());
+
                 authorityInfo.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Authority().toString());
                 destination.setText(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Next_Infrastructure());
                 tickets.setText(String.valueOf(Network.server_Object.get_Train_List().get(selectedTrainIndexInfo).get_Tickets_Per_Hour()));
@@ -192,7 +190,7 @@ public class Main extends Application {
         rootTrainInfoBox.setSpacing(5);
 
         rootTrainInfoBox.getChildren().addAll(trainInfoBoxLabel,trainIDLabelInfo,trainIDInfo,suggestSpeedLabel,
-                suggestSpeed,avgSpeedLabel, avgSpeed,authorityLabelInfo,authorityInfo,destinationLabel,destination,
+                suggestSpeed,authorityLabelInfo,authorityInfo,destinationLabel,destination,
                 lineLabel,line, blockLabel,block,ticketsLabel,tickets, numberCarsLabel,
                 numberCars);
 
@@ -202,12 +200,29 @@ public class Main extends Application {
 
 //************************************TRAIN SET BOX CODE START********************************************************//
 
-        //TODO make this handle new train. down to 300
+        //TODO IMPORTANT !!!!!! make this handle new train. down to 300
 
 
         HBox rootTrainSetBox = new HBox();
         rootTrainSetBox.setPadding(new Insets(10,10,5,5));
         rootTrainSetBox.setSpacing(5);
+
+
+        //THIS NEEDS TO ONLY POP UP WHEN NEW TRAIN SELECTED
+        Label lineIDLabelSet = new Label("Line ID:");
+        ChoiceBox lineIDSet = new ChoiceBox();
+        lineIDSet.setOnShowing(e->{
+            if(Network.server_Object != null){
+                lineIDSet.getItems().clear();
+                lineIDSet.getItems().addAll(Network.server_Object.get_Line_List().get(0).get_Line());
+                lineIDSet.getItems().addAll(Network.server_Object.get_Line_List().get(1).get_Line());
+
+            }else{
+                show_No_ServerObject();
+            }
+
+
+        });
 
 
         Label trainSetBoxLabel = new Label("TRAIN SETTINGS:");
@@ -219,25 +234,14 @@ public class Main extends Application {
         trainIDSet.setOnShowing(e->{
             if(Network.server_Object != null) {
                 fill_Train_ChoiceBox(trainIDSet);
-                trainIDSet.getItems().addAll("NEW TRAIN TR" + Network.server_Object.get_Train_List().size());
+                trainIDSet.getItems().addAll( "TR"+ Network.server_Object.get_Train_List().size());
             }else{
                 show_No_ServerObject();
             }
         });
 
 
-        //THIS NEEDS TO ONLY POP UP WHEN NEW TRAIN SELECTED
-        Label lineIDLabelSet = new Label("Line ID:");
-        ChoiceBox lineIDSet = new ChoiceBox();
-        lineIDSet.setOnShowing(e->{
-            if(Network.server_Object != null){
-                //TODO fill choice lines
-            }else{
-                show_No_ServerObject();
-            }
 
-
-        });
 
 
         Label stopLabel = new Label("Next Stop:");
@@ -249,7 +253,7 @@ public class Main extends Application {
                 stops.getItems().clear();
 
                //wrong -> stops.getItems().addAll(Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_c());
-                //stops.getItems().addAll(Network.server_Object.)
+                stops.getItems().addAll(Network.server_Object.get_Line_List().get(0).get_Infrastructure_List());
             }
         });
 
@@ -260,7 +264,7 @@ public class Main extends Application {
 
 
 
-        rootTrainSetBox.getChildren().addAll(trainSetBoxLabel,trainIDLabelSet,trainIDSet,stopLabel,stops,timeLabel,timeArrival, setButton);
+        rootTrainSetBox.getChildren().addAll(trainSetBoxLabel,trainIDLabelSet,trainIDSet,lineIDLabelSet,lineIDSet,stopLabel,stops,timeLabel,timeArrival, setButton);
 
         //TODO THINGS NEEDED FOR NEW TRAIN: Current line, inline block-infrastructure-time lists
         //idea all trains have same infrastructure and block lists so get from an existing and copy over
@@ -271,8 +275,18 @@ public class Main extends Application {
 
                            System.out.println("TRAIN BEING DISPATCHED " + Network.server_Object.get_Train_List().get(trainIDSet.getSelectionModel().getSelectedIndex()).get_Name());
                            int trainNumberFromName = trainIDSet.getSelectionModel().getSelectedIndex();
-                           //System.out.println("Train Number: " + trainNumberFromName);
+
+                           if(trainNumberFromName == Network.server_Object.get_Train_List().size()){
+                                Train manualTrain = new Train(trainIDSet.getSelectionModel().getSelectedItem().toString());
+                                Network.server_Object.create_Train(manualTrain);
+                                manualTrain.set_Infrastructure_Block_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_Block_List());
+                                manualTrain.set_Infrastructure_List(Network.server_Object.get_Train_List().get(0).get_Infrastructure_List());
+
+
+                           }
+
                            Network.server_Object.get_Train_List().get(trainNumberFromName).add_Time(LocalTime.parse(timeArrival.getText()));
+
                            try {
                                Network.server_Object.dispatch(trainNumberFromName, stops.getSelectionModel().getSelectedItem().toString(), LocalTime.parse(timeArrival.getText()));
                            } catch (RemoteException | InterruptedException remoteException) {
@@ -318,13 +332,14 @@ public class Main extends Application {
 
         Button displayTrackInfo = new Button("SHOW INFO");
 
-        Label blockLengthLabel = new Label("Block Length (M):");
+        Label blockLengthLabel = new Label("Block Length (FT):");
         TextField blockLength = new TextField();
         set_Text_Settings(blockLength);
 
         Label blockGradeLabel = new Label("Block Grade %:");
         TextField blockGrade = new TextField();
         set_Text_Settings(blockGrade);
+
 
         Label speedLimitLabel = new Label("Speed Limit (MPH):");
         TextField speedLimit = new TextField();
@@ -342,6 +357,8 @@ public class Main extends Application {
         Label elevationLabel = new Label("Elevation (FT):");
         TextField elevation = new TextField();
         set_Text_Settings(elevation);
+
+
 
         Label cumulativeElevationLabel = new Label("Cumulative Elevation (FT):");
         TextField cumulativeElevation = new TextField();

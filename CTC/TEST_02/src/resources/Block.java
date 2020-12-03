@@ -28,7 +28,7 @@ public class Block {
         condition = true;
     }
 
-    //TODO make stationSide on gui,
+
     public Block(char sec, int num, double len, double gra, int speed, String inf, String sSide, double ele,double cumEle){
         section = sec;
         number = num;

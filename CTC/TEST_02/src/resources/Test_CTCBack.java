@@ -111,8 +111,10 @@ public class Test_CTCBack {
     }
 
 
+
+
     @Test
-    void test_Determine_Authority() throws FileNotFoundException {
+    void test_Determine_Authority() throws FileNotFoundException, RemoteException, InterruptedException {
         tester.set_Track_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\track_thursday");
         tester.set_Schedule_Path("C:\\Users\\Zachary\\Documents\\GitHub\\ECE1140_project_butter\\CTC\\TEST_02\\src\\resources\\schedule_thursday");
 
@@ -121,6 +123,10 @@ public class Test_CTCBack {
 
 
         tester.calculate_Authority(0);
+
+        for(int i = 62; i <= 65; i++)
+        tester.train_Moved(0,i);
+
 
 
 

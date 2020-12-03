@@ -192,12 +192,35 @@ public class Line {
 
     public List<String> get_Block_Information_List(Integer b) {
         List<String> information = new ArrayList<>();
-        information.add(blocksList.get(b - 1).get_Length().toString());
+
+        Double length = blocksList.get(b - 1).get_Length();
+        //convert meters to feet
+        length *= 3.28084;
+        information.add(length.toString());
+
+
         information.add(blocksList.get(b - 1).get_Grade().toString());
-        information.add(blocksList.get(b - 1).get_Speed_Limit().toString());
+
+        Double speedLimit = (double) blocksList.get(b - 1).get_Speed_Limit();
+        //convert km/hr to mph
+        speedLimit *= 0.621371;
+        information.add(speedLimit.toString());
+
+
         information.add(blocksList.get(b - 1).get_Infrastructure());
-        information.add(blocksList.get(b - 1).get_Elevation().toString());
-        information.add(blocksList.get(b - 1).get_Cumulative_Elevation().toString());
+
+        Double elevation = blocksList.get(b - 1).get_Elevation();
+        //convert meters to feet
+        elevation *= 3.28084;
+        information.add(elevation.toString());
+
+
+        Double cumulativeElevation = blocksList.get(b - 1).get_Cumulative_Elevation();
+        //convert meters to feet
+        cumulativeElevation *= 3.28084;
+        information.add(cumulativeElevation.toString());
+
+
         if (blocksList.get(b - 1).get_Occupancy()) {
             information.add("Occupied");
         } else {
@@ -208,7 +231,9 @@ public class Line {
         } else {
             information.add("Closed");
         }
-        if (blocksList.get(b - 1).get_Infrastructure().toLowerCase().contains("switch")) {
+        if (blocksList.get(b - 1).get_Infrastructure().toLowerCase().contains("switch") ||
+                blocksList.get(b - 1).get_Infrastructure().toLowerCase().contains("station")) {
+
             if (blocksList.get(b - 1).get_Lights()) {
                 information.add("Green");
             } else {
@@ -272,7 +297,7 @@ public class Line {
         routeGraph.get_Path(adj, startBlock, stopBlock, 151);
     }
 
-    //TODO use maybe for checking modes
+    //TODO use maybe for checking mode switching
     public boolean condition(){
         boolean open = true;
             for(Block b: blocksList){
@@ -303,10 +328,24 @@ public class Line {
 
     }
 
-//    public boolean occupancy(){
-//
-//
-//    }
+    public boolean occupancy(int start, int stop){
+        boolean occupied = false;
+
+        if(stop < start){
+            int hold = start;
+            start = stop;
+            stop = hold;
+        }
+
+        for(int i = start; i < stop; i++){
+            if(!blocksList.get(i-1).get_Condition()){
+                occupied = false;
+                break;
+            }
+        }
+
+        return occupied;
+    }
 
     public void create_Graph(){
 
