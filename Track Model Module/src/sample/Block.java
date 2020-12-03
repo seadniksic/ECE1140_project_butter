@@ -10,6 +10,7 @@ public class Block {
     Boolean is_Builder;
 
     // Core information
+    int line_Index;
     String section;
     int blockNumber;
     double length;
@@ -34,11 +35,14 @@ public class Block {
     String station_Name;
     String prev_Station_Name;
     String next_Station_Name;
+    int ticket_Sales;
 
     // Failure Modes
     Boolean broken_Rail;
     Boolean track_Circuit_Failure;
     Boolean power_Failure;
+
+    Boolean track_Heater;
 
 
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
@@ -74,11 +78,15 @@ public class Block {
         station_Name = "";
         prev_Station_Name = "";
         next_Station_Name = "";
+        int ticket_Sales;
 
         // Failure Modes
         broken_Rail = false;
         track_Circuit_Failure = false;
         power_Failure = false;
+
+        track_Heater = false;
+
     }
     // ------------------------------------------------------------- Private/Helper Functions ---------------------------------------------------------------
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------

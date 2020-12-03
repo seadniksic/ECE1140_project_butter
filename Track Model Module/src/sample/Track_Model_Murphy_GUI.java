@@ -20,18 +20,23 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Track_Model_Murphy_GUI implements Track_Model_Interface {
     // ---------------------------------------------------------------- Variables ---------------------------------------------------------------------------
     public Stage murphy_Stage;
     Label description_label;
+    Label environmental_Temp_Label;
     static boolean simulate_Was_Clicked = false;
     private Service<Void> backgroundThread;
     static Track_Model_Builder_Data this_TMBD;
     GridPane global_GridPane;
     Button seads_Simulate_Button;
     int working_Line_Index;
+
+    static double environmental_Temp;
+
     // ---------------------------------------------------- Constructors, Getters and Setters ---------------------------------------------------------------
     public Track_Model_Murphy_GUI(){
         murphy_Stage = new Stage();
@@ -89,6 +94,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             description_label = new Label("Viewing Line: " + (this_TMBD.this_Track.get_Line_At_Index(working_Line_Index).index + 1));
         }
 
+        environmental_Temp_Label = new Label("Environmental Temp: " + environmental_Temp + " F");
+
         // Update ObservableList
         ObservableList<Button> temp = FXCollections.observableArrayList();
 
@@ -99,6 +106,9 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         for(int i = 0; i < line_Block_Arr.length; i++){
             for(int j = 0; j < line_Block_Arr[i].length; j++){
                 global_GridPane.add(line_Block_Arr[i][j].this_Block_GUI.this_Button, i, j);
+                if(environmental_Temp < 32.20){
+                    line_Block_Arr[i][j].track_Heater = true;
+                }
                // temp.add(line_Block_Arr[i][j].this_Block_GUI.this_Button);
             }
         }
@@ -116,17 +126,25 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         map_Simulate_Button();
 
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP, seads_Simulate_Button);
+        this_VBox.getChildren().addAll(start_MenuBar, description_label, return_To_Track_Button, canvas_GP, seads_Simulate_Button, environmental_Temp_Label);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
-        return new Scene(this_VBox, 800, 800);
+        ScrollPane sp = new ScrollPane();
+        sp.setHvalue(1);
+        sp.setVmin(0.5);
+        sp.setVvalue(1);
+        sp.setContent(this_VBox);
+
+        return new Scene(sp, 1000, 800);
     }
     // Mapping Buttons
     private void map_Line_Button(Button param_Button, int param_Line_Index){
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                Random temperature_Random = new Random();
+                environmental_Temp = Math.floor((temperature_Random.nextInt(80) + 20) * 100) / 100;
                 swap_To_Line_Scene(param_Line_Index);
                 simulate_Was_Clicked = false;
             }
@@ -249,7 +267,10 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                             block1.set_Occupancy(true);
 
                                             call_Network_Train_Moved(block1);
-                                            //call_Beacon_Function_If_Station(block1.is_Station, param_Occupancy_Index, );
+                                            call_Beacon_Function_If_Station(block1.is_Station, param_Occupancy_Index, block1.next_Station_Name, false);
+                                            // TODO: NUMBER OF CARS
+                                            call_Ticket_Sales(block1.is_Station, 3, param_Occupancy_Index);
+
 
                                             this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                             // Destroy the train if the new occupancy is a yard
@@ -326,6 +347,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
                                             block1.set_Occupancy(true);
 
                                             call_Network_Train_Moved(block1);
+                                            call_Beacon_Function_If_Station(block1.is_Station, param_Occupancy_Index, block1.next_Station_Name, false);
+                                            call_Ticket_Sales(block1.is_Station, 3, param_Occupancy_Index);
 
                                             this_TMBD.this_Track.line_ArrayList.get(working_Line_Index).occupancies.set(param_Occupancy_Index, block1.blockNumber);
                                             // Destroy the train if the new occupancy is a yard
@@ -558,6 +581,32 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
             }
         }
     }
+    private void call_Ticket_Sales(Boolean param_Is_Station, int param_Num_Cars, int param_Train_Num){
+        if(param_Is_Station){
+
+            int num_Tickets = 0;
+            Random num_Tickets_Rand = new Random();
+            num_Tickets = num_Tickets_Rand.nextInt(30) + 1;
+            num_Tickets = num_Tickets * param_Num_Cars;
+
+            if(Network.tm_Interface != null){
+                try {
+                    Network.tm_Interface.add_Passengers(param_Train_Num, num_Tickets);
+
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(Network.tcs_Interface != null){
+                try {
+                    Network.tcs_Interface.add_Ticket(param_Train_Num, num_Tickets);
+
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
 
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
@@ -679,6 +728,8 @@ public class Track_Model_Murphy_GUI implements Track_Model_Interface {
         for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(param_Line_Index).block_Arr) {
             for (Block block : blocks) {
                 if(block.blockNumber == param_Block_Number){
+                    System.out.println();
+                    System.out.println("Switching block: " + block.blockNumber + " to " + param_Is_Switched);
                     block.is_Switched = param_Is_Switched;
                 }
             }

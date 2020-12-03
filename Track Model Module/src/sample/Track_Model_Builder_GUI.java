@@ -111,7 +111,11 @@ public class Track_Model_Builder_GUI {
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
-        return new Scene(this_VBox, 500, 500);
+        ScrollPane sp = new ScrollPane();
+        sp.setContent(this_VBox);
+
+
+        return new Scene(sp, 500, 500);
     }
     private Scene return_set_Canvas_Scene(int param_Line_Index, GridPane param_GridPane){
         MenuBar start_MenuBar = new MenuBar();

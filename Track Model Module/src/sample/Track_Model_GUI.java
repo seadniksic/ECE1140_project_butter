@@ -54,7 +54,7 @@ public class Track_Model_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 try {
-                    Network.connect_To_Modules();
+                    Network.connect_To_Modules1();
                     if(Network.connected_Module_1){
                         System.out.println("Connected to Tony");
                     }
@@ -71,7 +71,7 @@ public class Track_Model_GUI {
             public void handle(ActionEvent actionEvent) {
                 while (!Network.connected_Module_2) {
                     try {
-                        Network.connect_To_Modules();
+                        Network.connect_To_Modules2();
                         if(Network.connected_Module_2){
                             System.out.println("Connected to Sead");
                         }

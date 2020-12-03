@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 
 public class Block_GUI {
@@ -45,6 +46,7 @@ public class Block_GUI {
     TextField station_Name_TF;
     TextField prev_Station_Name_TF;
     TextField next_Station_Name_TF;
+    TextField track_Heater_TF;
 
 
     Label error_Label;
@@ -196,6 +198,7 @@ public class Block_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 parent_Block.is_Station = is_Station_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+
                 summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
@@ -206,6 +209,7 @@ public class Block_GUI {
             @Override
             public void handle(ActionEvent actionEvent) {
                 parent_Block.broken_Rail = broken_Rail_CheckBox.isSelected(); //TODO: Selecting the checkbox acts as a save, but should have no impact since the user will notice the blue + blknum
+                //call_Set_Broken_Rail(line);
                 summon_Block_Editor(true, parent_Block.is_Builder);
             }
         };
@@ -374,8 +378,12 @@ public class Block_GUI {
         fail_HBox.setAlignment(Pos.TOP_CENTER);
         fail_HBox.setSpacing(20);
 
+        String track_Heater_Status = parent_Block.track_Heater ? "On" : "Off";
+        Label track_Heater_Label = new Label("Track Heater Status: " + track_Heater_Status);
+
+
         VBox this_VBox = new VBox();
-        this_VBox.getChildren().addAll(description_label,return_section_HBox(), return_block_Num_HBox(), fail_HBox);
+        this_VBox.getChildren().addAll(description_label,return_section_HBox(), return_block_Num_HBox(), fail_HBox, track_Heater_Label);
         this_VBox.setAlignment(Pos.TOP_CENTER);
         this_VBox.setSpacing(20);
 
@@ -474,9 +482,6 @@ public class Block_GUI {
 
         return next_Station_Name_HBox;
     }
-
-
-
     private HBox return_Set_Previous_HBox(){
         Label set_Previous_Label = new Label("Previous Block: ");
         set_Previous_TF = new TextField(String.valueOf(parent_Block.previous_Block_Number));
@@ -542,4 +547,31 @@ public class Block_GUI {
         return output;
     }
     // ------------------------------------------------------------ Miscellaneous ---------------------------------------------------------------------------
+    private void call_Set_Broken_Rail(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Broken_Rail(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void call_Set_TCF(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Track_Circuit_Failure(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void call_Set_Power_Fail(int param_Line_Index, int param_Block_Num, boolean param_State){
+        if(Network.tcs_Interface != null){
+            try {
+                Network.tcs_Interface.set_Power_Fail(param_Line_Index, param_Block_Num, param_State);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
