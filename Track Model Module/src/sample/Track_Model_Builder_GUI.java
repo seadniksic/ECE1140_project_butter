@@ -263,7 +263,7 @@ public class Track_Model_Builder_GUI {
                 for (Block[] blocks : line_Arr_List.get(i).block_Arr){
                     for (Block block : blocks) {
                         if(block.blockNumber != -1){
-                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.next_Block_Number_2 + ", " + block.previous_Block_Number + ", " + block.is_Yard + ", " + block.is_Switch + ", " + block.is_Alpha + ", " + block.is_Beta + ", " + block.is_Gamma + ", " + block.is_Station + ", " + block.station_Name + "\n";
+                            output += "B: " + block.x_Coord + "x" + block.y_Coord + ", " + block.section + ", " + block.blockNumber + ", " + block.length + ", " + block.grade + ", " + block.next_Block_Number + ", " + block.next_Block_Number_2 + ", " + block.previous_Block_Number + ", " + block.is_Yard + ", " + block.is_Switch + ", " + block.is_Alpha + ", " + block.is_Beta + ", " + block.is_Gamma + ", " + block.is_Station + ", " + block.station_Name + ", " + block.prev_Station_Name + ", " + block.next_Station_Name + "\n";
                         }
                     }
                 }
@@ -361,6 +361,9 @@ public class Track_Model_Builder_GUI {
 
                     Boolean extracted_is_Station = Boolean.parseBoolean(block_Line_Elements.get(13));
                     String extracted_Station_Name = block_Line_Elements.get(14);
+                    String extracted_Prev_Station_Name = block_Line_Elements.get(15);
+                    String extracted_Next_Station_Name = block_Line_Elements.get(16);
+
 
                     for (Block[] blocks : this_TMBD.this_Track.line_ArrayList.get(current_Line_index).block_Arr) {
                         for (Block block : blocks) {
@@ -381,6 +384,8 @@ public class Track_Model_Builder_GUI {
 
                                 block.is_Station = extracted_is_Station;
                                 block.station_Name = extracted_Station_Name;
+                                block.prev_Station_Name = extracted_Prev_Station_Name;
+                                block.next_Station_Name = extracted_Next_Station_Name;
                                 if(block.blockNumber != -1){//TODO: May need to revise this
                                     block.this_Block_GUI.changeColor(Block_GUI.color_Map.get("Green"));
                                     if(block.is_Yard){

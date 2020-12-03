@@ -32,6 +32,8 @@ public class Block {
     // Station only
     Boolean is_Station;
     String station_Name;
+    String prev_Station_Name;
+    String next_Station_Name;
 
     // Failure Modes
     Boolean broken_Rail;
@@ -70,6 +72,8 @@ public class Block {
         // Station only
         is_Station = false;
         station_Name = "";
+        prev_Station_Name = "";
+        next_Station_Name = "";
 
         // Failure Modes
         broken_Rail = false;
