@@ -36,7 +36,7 @@ public class Main extends Application {
 
     public static void update_GUI_Time(){
         if(Network.server_Object != null)
-        simulationTime.setText(Network.server_Object.get_SimTime_As_LocalTime().toString());
+        simulationTime.setText(String.valueOf( Network.server_Object.get_Sim_Time()));
 
     }
 
